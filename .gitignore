@@ -1,0 +1,15 @@
+# Project Settings
+.settings
+.cproject
+.project
+
+# Logs
+*.log
+
+# Binaries
+*.o
+*.dll
+*.exe
+
+# picture sources
+*.xcf

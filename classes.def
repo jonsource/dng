@@ -1,0 +1,170 @@
+class Fighter
+courage       0/3
+strength      10/1
+agility       0/3
+dexterity	  0/3
+constitution  8/2
+intelligence  0/3
+wisdom        0/3
+charisma      0/3
+HP			  10/5
+MP			  0/0
+SP			  10/3
+endclass
+
+class Warrior
+courage       8/2
+strength      10/1
+agility       0/3
+dexterity	  0/3
+constitution  10/1
+intelligence  0/3
+wisdom        0/3
+charisma      0/3
+HP			  10/5
+MP			  0/0
+SP			  10/3
+endclass
+
+class Knight
+courage       11/1
+strength      10/1
+agility       8/3
+dexterity	  8/3
+constitution  9/2
+intelligence  8/3
+wisdom        8/2
+charisma      8/2
+HP			  10/5
+MP			  0/0
+SP			  10/3
+endclass
+
+class Paladin 
+gender male
+courage       12/1
+strength      11/1
+agility       9/2
+dexterity     8/3
+constitution  10/2
+intelligence  9/3
+wisdom        9/2
+charisma      11/1
+HP			  10/3
+MP			  10/2
+SP			  10/3
+endclass
+
+class Archer
+courage       0/3
+strength      9/2
+agility       11/1
+dexterity	  0/3
+constitution  8/2
+intelligence  8/2
+wisdom        0/3
+charisma      0/3
+HP			  10/5
+MP			  0/0
+SP			  10/3
+endclass
+
+class Ranger
+courage       9/3
+strength      9/2
+agility       10/1
+dexterity     9/2
+constitution  11/1
+intelligence  8/2
+wisdom        9/2
+charisma      8/2
+HP			  7/3
+MP			  5/1
+SP			  8/3
+endclass
+
+class Barbarian
+courage       9/2
+strength      11/1
+agility       9/2
+dexterity     0/2
+constitution  11/1
+intelligence  0/3
+wisdom        0/3
+charisma      0/3
+HP			  7/3
+MP			  5/1
+SP			  8/3
+endclass
+
+class Falconer 
+courage       8/3
+strength      9/2
+agility       12/1
+dexterity     9/2
+constitution  10/1
+intelligence  9/2
+wisdom        9/2
+charisma      8/2
+HP			  7/3
+MP			  5/1
+SP			  8/3
+endclass
+
+class Mercenary
+courage       8/2
+strength      10/1
+agility       8/2
+dexterity	  0/3
+constitution  11/1
+intelligence  8/2
+wisdom        0/3
+charisma      0/3
+HP			  10/5
+MP			  0/0
+SP			  10/3
+endclass
+
+class Witch 
+gender female
+courage       8/2
+strength      0/3
+agility       8/2
+dexterity     0/3
+constitution  11/1
+intelligence  0/3
+wisdom        0/3
+charisma      11/1
+HP			  6/3
+MP			  0/0
+SP			  8/3
+endclass
+
+class Mage 
+courage       8/2
+strength      0/3
+agility       0/3
+dexterity     8/2
+constitution  0/3
+intelligence  12/1
+wisdom        8/2
+charisma      0/3
+HP			  5/2
+MP			  10/5
+SP			  5/2
+endclass
+
+class Thief 
+courage       0/3
+strength      0/3
+agility       8/2
+dexterity     10/2
+constitution  0/3
+intelligence  0/3
+wisdom        0/3
+charisma      0/3
+HP			  5/2
+MP			  10/5
+SP			  5/2
+endclass
+
