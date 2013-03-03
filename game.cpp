@@ -12,11 +12,12 @@ extern int status;
 extern ClassTemplates *Classes;
 extern FILE *dbg;
 Character *Player;
-int gy=2,gx=3,gh=0;
+int gz=2,gx=3,gh=0;
 extern int FOV;
 extern double STB;
 int DEBUG_LVL_MAIN = 10;
 int DEBUG_LVL = DEBUG_LVL_MAIN;
+int TRANSPARENT = 0;
 
 void game_load()
 { FILE *log;
@@ -28,7 +29,7 @@ void game_load()
   load_map("map1.map");
   debug("%d done game_load\n");
   FOV=40;
-  STB=-0.3;
+  STB=-0.35;
 }
 
 void debug(string s, int lvl)
@@ -101,30 +102,31 @@ debug("begin game_draw\n");
   textprintf_ex(game_bmp, font, 30, 150, makecol(255, 255, 255), -1, str.c_str());
   delete pass;
   
-  draw_view(gx,gy,gh);
+  draw_view(gx,gz,gh);
 //  release_bitmap(bmp);       
 }  
 
 
 void keypress(int i)
-{  int x=0,y=0;
+{  int x=0,z=0;
    if(status == CREATE)
    { if(i == KEY_P) status = PLAY;
      if(i == KEY_M) { mode = mode+1; mode = mode%6; }
      if(i == KEY_V) { delete(Player); Player=new Character(1); }
-     if(i == KEY_W) y=1;
-     if(i == KEY_S) y=-1;
+     if(i == KEY_W) z=1;
+     if(i == KEY_S) z=-1;
      if(i == KEY_A) x=1;
      if(i == KEY_D) x=-1;
      if(i == KEY_H) FOV+=1;
      if(i == KEY_J) FOV-=1;
      if(i == KEY_I) STB+=0.1;
      if(i == KEY_K) STB-=0.1;
+     if(i == KEY_T) {if(TRANSPARENT) TRANSPARENT =0; else TRANSPARENT=1;}
      switch(gh)
-     { case HEAD_NORTH: gy-=x; gx+=y; break;
-       case HEAD_EAST: gy+=y; gx+=x; break;
-       case HEAD_SOUTH: gy+=x; gx-=y; break;
-       case HEAD_WEST: gy-=y; gx-=x; break;
+     { case HEAD_NORTH: gz-=x; gx+=z; break;
+       case HEAD_EAST: gz+=z; gx+=x; break;
+       case HEAD_SOUTH: gz+=x; gx-=z; break;
+       case HEAD_WEST: gz-=z; gx-=x; break;
      }
      if(i == KEY_E) {gh--; if(gh<0) gh=3; }
      if(i == KEY_Q) {gh++; if(gh>3) gh=0; }

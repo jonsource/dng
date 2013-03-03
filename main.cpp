@@ -89,6 +89,7 @@ fflush(dbg);
     quit=1;
     return;
   }
+  set_alpha_blender();
   first=create_bitmap(SCREEN_W, SCREEN_H);
   second=create_bitmap(SCREEN_W, SCREEN_H);
   game_bmp = first;
@@ -177,6 +178,7 @@ int main(int argc, char *argv[])
       if(key[KEY_X]) keypress(KEY_X);
       if(key[KEY_V]) keypress(KEY_V);
       if(key[KEY_N]) keypress(KEY_N);
+      if(key[KEY_T]) keypress(KEY_T);
       if(key[KEY_SPACE]) keypress(KEY_SPACE);
     }
     if(key[KEY_ESC]) quit=1;

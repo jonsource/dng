@@ -2,17 +2,6 @@
 #include <string.h>
 #include <math.h>
 
-#define GRID_SIZE 2
-#define M_PI 3.14159
-
-#define TILE_FLOOR 1
-#define TILE_FRONT 2
-#define TILE_SIDE 3
-#define TILE_STATIC 4
-#define TILE_CEILING 5
-#define TILE_STATIC_NS 6
-#define TILE_STATIC_EW 7
-
 BITMAP * sky1[4];
 BITMAP * api;
 RGB pal[256];
@@ -20,8 +9,8 @@ int FOV;
 double STB;
 extern BITMAP *game_bmp;
 extern int fps, tot_frames, tmsec, mode;
+extern int TRANSPARENT;
 FILE *dbg;
-
 
 extern int **map;
 extern unsigned short int MAP_SIZE;
@@ -40,20 +29,27 @@ int check_coords(int x, int y)
 TEXTURE * load_texture(string s)
 {   PALETTE pal;
     TEXTURE *text;
-    string fn,cfn;
+    string fn,cfn,ext;
+    char buf[30];
+    int pos;
     
     text = new (TEXTURE);
     fn.assign("data/images/");
-    fn.append(s);
+
+    pos = s.rfind(".");
+    fn.append(s.substr(0,pos));
+    ext = s.substr(pos+1);
+
     cfn.assign(fn);
-    cfn.append("_close.bmp");
-    text->close = load_bmp(cfn.c_str(), pal);
-    if(!text->close) { debug("Missing texture"); debug(s.c_str()); debug("close\n"); }
+    cfn.append("_close."+ext);
+    text->close = load_bitmap(cfn.c_str(), pal);
+    if(!text->close) { debug("Missing texture"); debug(cfn.c_str()); }
+    else { sprintf(buf,"Texture depth %d\n",bitmap_color_depth(text->close)); debug(buf); }
     cfn.assign(fn);
-    cfn.append("_medium.bmp");
-    text->medium = load_bmp(cfn.c_str(), pal);
+    cfn.append("_medium."+ext);
+    text->medium = load_bitmap(cfn.c_str(), pal);
     if(!text->medium)
-    { 	debug("Missing texture"); debug(s.c_str()); debug("medium");
+    { 	debug("Missing texture"); debug(cfn.c_str());
     	if(text->close)
     	{ debug("resizing close texture\n");
     	  text->medium = create_bitmap(128,128);
@@ -62,10 +58,10 @@ TEXTURE * load_texture(string s)
     	else debug("\n");
     }
     cfn.assign(fn);
-    cfn.append("_far.bmp");
-    text->far = load_bmp(cfn.c_str(), pal);
+    cfn.append("_far."+ext);
+    text->far = load_bitmap(cfn.c_str(), pal);
     if(!text->far)
-    { 	debug("Missing texture"); debug(s.c_str()); debug("far");
+    { 	debug("Missing texture"); debug(cfn.c_str());
 		if(text->medium)
     	{ debug("resizing medium texture\n");
     	  text->far = create_bitmap(64,64);
@@ -79,9 +75,9 @@ TEXTURE * load_texture(string s)
 TEXTURED_ELEMENT * load_textured_element()
 {	TEXTURED_ELEMENT * txtel = new(TEXTURED_ELEMENT);
 	txtel->animator = NULL;
-	txtel->w=1;
-	txtel->h=1;
-	txtel->x=0;
+	txtel->w=1.5;
+	txtel->h=0.5;
+	txtel->x=0.5;
 	txtel->z=0.5;
 	txtel->y=0;
 	txtel->texture = static1;
@@ -94,15 +90,15 @@ int load_graphics()
     string s;
     PALETTE pal;
     
-    floor1 = load_texture("floor/floor1");
-    floor2 = load_texture("floor/floor2");
-    floor3 = load_texture("floor/floor3");
-    floor4 = load_texture("floor/floor4");
-    wall1 = load_texture("wall/wall1");
-    wall2 = load_texture("wall/wall2");
-	static1 = load_texture("static/tree");
-	static2 = load_texture("static/door");
-	static3 = load_texture("static/explosion");
+    floor1 = load_texture("floor/floor1.bmp");
+    floor2 = load_texture("floor/floor2.bmp");
+    floor3 = load_texture("floor/floor3.bmp");
+    floor4 = load_texture("floor/floor4.bmp");
+    wall1 = load_texture("wall/wall1.bmp");
+    wall2 = load_texture("wall/wall2.bmp");
+	static1 = load_texture("static/mist1.tga");
+	static2 = load_texture("static/door.bmp");
+	static3 = load_texture("static/explosion.bmp");
 
 	element1 = load_textured_element();
     
@@ -151,10 +147,13 @@ void update_camera(CAMERA * cam)
      case HEAD_SOUTH : cam->xfront = -1; cam->zfront = 0; break;
      
    }
+   cam->dolly_xpos=cam->xpos+0.5;
+   cam->dolly_ypos=cam->ypos+0.5;
+   cam->dolly_zpos=cam->zpos+0.5;
    if(cam->xfront==0) cam->xpos+=0.5;
    	  else cam->xpos+=(cam->xfront>0)?cam->stepback:1-cam->stepback;
-   if(cam->zfront==0) cam->ypos+=0.5;  //ano zfront a ypos tu maj byt takhle
-      else cam->ypos+=(cam->zfront>0)?cam->stepback:1-cam->stepback;
+   if(cam->zfront==0) cam->zpos+=0.5;  //ano zfront a ypos tu maj byt takhle
+      else cam->zpos+=(cam->zfront>0)?cam->stepback:1-cam->stepback;
    cam->yfront=0;
 
    /* rotate the up vector around the in-front vector by the roll angle */
@@ -164,344 +163,11 @@ void update_camera(CAMERA * cam)
 
    /* build the camera matrix */
    get_camera_matrix_f(&cam->camera,
-		       cam->xpos, cam->zpos, cam->ypos,        /* camera position */
+		       cam->xpos, cam->ypos, cam->zpos,        /* camera position */
 		       cam->xfront, cam->yfront, cam->zfront,  /* in-front vector */
 		       cam->xup, cam->yup, cam->zup,           /* up vector */
 		       cam->fov,                               /* field of view */
 		       cam->aspect);                           /* aspect ratio */
-}
-
-void make_floor_tile(V3D_f **v,int x, int z, int w, int h)
-{  v[0]->x = x;
-   v[0]->y = 0;
-   v[0]->z = z;
-   v[0]->u = 0;
-   v[0]->v = 0;
-
-   v[1]->x = x + 1;
-   v[1]->y = 0;
-   v[1]->z = z;
-   v[1]->u = w;
-   v[1]->v = 0;
-
-   v[2]->x = x + 1;
-   v[2]->y = 0;
-   v[2]->z = z + 1;
-   v[2]->u = w;
-   v[2]->v = h;
-
-   v[3]->x = x;
-   v[3]->y = 0;
-   v[3]->z = z + 1;
-   v[3]->u = 0;
-   v[3]->v = h;
-}
-
-void make_ceiling_tile(V3D_f **v,int x, int z, int w, int h)
-{  v[0]->x = x;
-   v[0]->y = 1;
-   v[0]->z = z;
-   v[0]->u = 0;
-   v[0]->v = 0;
-
-   v[1]->x = x + 1;
-   v[1]->y = 1;
-   v[1]->z = z;
-   v[1]->u = w;
-   v[1]->v = 0;
-
-   v[2]->x = x + 1;
-   v[2]->y = 1;
-   v[2]->z = z + 1;
-   v[2]->u = w;
-   v[2]->v = h;
-
-   v[3]->x = x;
-   v[3]->y = 1;
-   v[3]->z = z + 1;
-   v[3]->u = 0;
-   v[3]->v = h;
-}
-
-void make_static_tile(V3D_f **v,int x, int z, int w, int h, CAMERA * cam)
-{  
-   if(cam->xfront<0.5 && cam->xfront>-0.5)
-   { v[0]->x = x+0;
-     v[0]->y = 0;
-     v[0]->z = z+0.5;
-     v[0]->u = w;
-     v[0]->v = h;
-
-   v[1]->x = x + 1;
-   v[1]->y = 0;
-   v[1]->z = z + 0.5;
-   v[1]->u = 0;
-   v[1]->v = h;
-
-   v[2]->x = x + 1;
-   v[2]->y = 2;
-   v[2]->z = z + 0.5;
-   v[2]->u = 0;
-   v[2]->v = 0;
-
-   v[3]->x = x + 0;
-   v[3]->y = 2;
-   v[3]->z = z + 0.5;
-   v[3]->u = w;
-   v[3]->v = 0;
-   }
-   else
-   { v[0]->x = x+0.5;
-   v[0]->y = 0;
-   v[0]->z = z+0;
-   v[0]->u = w;
-   v[0]->v = h;
-
-   v[1]->x = x + 0.5;
-   v[1]->y = 0;
-   v[1]->z = z + 1;
-   v[1]->u = 0;
-   v[1]->v = h;
-
-   v[2]->x = x + 0.5;
-   v[2]->y = 2;
-   v[2]->z = z + 1;
-   v[2]->u = 0;
-   v[2]->v = 0;
-
-   v[3]->x = x + 0.5;
-   v[3]->y = 2;
-   v[3]->z = z + 0;
-   v[3]->u = w;
-   v[3]->v = 0;
-   }
-
-}
-
-void make_static_ns_tile(V3D_f **v,int x, int z, int w, int h)
-{
-   v[0]->x = x+0;
-   v[0]->y = 0;
-   v[0]->z = z+0.5;
-   v[0]->u = w;
-   v[0]->v = h;
-
-   v[1]->x = x + 1;
-   v[1]->y = 0;
-   v[1]->z = z + 0.5;
-   v[1]->u = 0;
-   v[1]->v = h;
-
-   v[2]->x = x + 1;
-   v[2]->y = 1;
-   v[2]->z = z + 0.5;
-   v[2]->u = 0;
-   v[2]->v = 0;
-
-   v[3]->x = x + 0;
-   v[3]->y = 1;
-   v[3]->z = z + 0.5;
-   v[3]->u = w;
-   v[3]->v = 0;
-}
-
-void make_static_ew_tile(V3D_f **v,int x, int z, int w, int h)
-{ v[0]->x = x+0.5;
- v[0]->y = 0;
- v[0]->z = z+0;
- v[0]->u = w;
- v[0]->v = h;
-
- v[1]->x = x + 0.5;
- v[1]->y = 0;
- v[1]->z = z + 1;
- v[1]->u = 0;
- v[1]->v = h;
-
- v[2]->x = x + 0.5;
- v[2]->y = 1;
- v[2]->z = z + 1;
- v[2]->u = 0;
- v[2]->v = 0;
-
- v[3]->x = x + 0.5;
- v[3]->y = 1;
- v[3]->z = z + 0;
- v[3]->u = w;
- v[3]->v = 0;
-}
-
-void make_front_tile(V3D_f **v,int x, int z, int w, int h, CAMERA * cam)
-{  int dif;
-   if(cam->xfront<0.5 && cam->xfront>-0.5)  //xfront je nula
-   { if(cam->zfront<0.0) dif=1; else dif = 0;
-     v[0]->x = x+0;
-     v[0]->y = 0;
-     v[0]->z = z+dif;
-     v[0]->u = w;
-     v[0]->v = h;
-
-     v[1]->x = x + 1;
-     v[1]->y = 0;
-     v[1]->z = z+dif;
-     v[1]->u = 0;
-     v[1]->v = h;
-
-     v[2]->x = x + 1;
-     v[2]->y = 1;
-     v[2]->z = z+dif;
-     v[2]->u = 0;
-     v[2]->v = 0;
-
-     v[3]->x = x + 0;
-     v[3]->y = 1;
-     v[3]->z = z+dif;
-     v[3]->u = w;
-     v[3]->v = 0;
-   }
-   else
-   { if(cam->xfront<0.0) dif=1; else dif = 0;
-       
-   v[0]->x = x+dif;
-   v[0]->y = 0;
-   v[0]->z = z+0;
-   v[0]->u = w;
-   v[0]->v = h;
-
-   v[1]->x = x+dif;
-   v[1]->y = 0;
-   v[1]->z = z + 1;
-   v[1]->u = 0;
-   v[1]->v = h;
-
-   v[2]->x = x+dif;
-   v[2]->y = 1;
-   v[2]->z = z + 1;
-   v[2]->u = 0;
-   v[2]->v = 0;
-
-   v[3]->x = x+dif;
-   v[3]->y = 1;
-   v[3]->z = z + 0;
-   v[3]->u = w;
-   v[3]->v = 0;
-   }
-
-}
-
-void make_side_tile(V3D_f **v,int x, int z, int w, int h, CAMERA * cam)
-{  int dif=0;
-   if(cam->zfront<0.5 && cam->zfront>-0.5)  //zfront je nula
-   { if(cam->ypos > z) dif=1; else dif=0;
-     v[0]->x = x+0;
-     v[0]->y = 0;
-     v[0]->z = z+dif;
-     v[0]->u = w;
-     v[0]->v = h;
-
-     v[1]->x = x + 1;
-     v[1]->y = 0;
-     v[1]->z = z+dif;
-     v[1]->u = 0;
-     v[1]->v = h;
-
-     v[2]->x = x + 1;
-     v[2]->y = 1;
-     v[2]->z = z+dif;
-     v[2]->u = 0;
-     v[2]->v = 0;
-
-     v[3]->x = x + 0;
-     v[3]->y = 1;
-     v[3]->z = z+dif;
-     v[3]->u = w;
-     v[3]->v = 0;
-   }
-   else
-   { 
-    if(cam->xpos > x) dif=1; else dif=0;   
-   v[0]->x = x+dif;
-   v[0]->y = 0;
-   v[0]->z = z+0;
-   v[0]->u = w;
-   v[0]->v = h;
-
-   v[1]->x = x+dif;
-   v[1]->y = 0;
-   v[1]->z = z + 1;
-   v[1]->u = 0;
-   v[1]->v = h;
-
-   v[2]->x = x+dif;
-   v[2]->y = 1;
-   v[2]->z = z + 1;
-   v[2]->u = 0;
-   v[2]->v = 0;
-
-   v[3]->x = x+dif;
-   v[3]->y = 1;
-   v[3]->z = z + 0;
-   v[3]->u = w;
-   v[3]->v = 0;
-   }
-
-}
-
-void make_static_element(V3D_f **v,TEXTURED_ELEMENT * element,int x, int z, CAMERA * cam, int far)
-{  BITMAP * text = far_texture(element->texture,far);
-   int w = text->w;
-   int h = text->h;
-   if(cam->xfront<0.5 && cam->xfront>-0.5)
-   { v[0]->x = x+element->x-element->w/2;
-     v[0]->y = 0+element->y;
-     v[0]->z = z+element->z-element->h/2;
-     v[0]->u = w;
-     v[0]->v = h;
-
-   v[1]->x = x + element->x+element->w/2;
-   v[1]->y = 0 + element->y;
-   v[1]->z = z + element->z;
-   v[1]->u = 0;
-   v[1]->v = h;
-
-   v[2]->x = x + element->x+element->w/2;
-   v[2]->y = element->y+element->h;
-   v[2]->z = z + element->z;
-   v[2]->u = 0;
-   v[2]->v = 0;
-
-   v[3]->x = x + element->x-element->w/2;
-   v[3]->y = element->y+element->h;
-   v[3]->z = z + element->z;
-   v[3]->u = w;
-   v[3]->v = 0;
-   }
-   else
-   { v[0]->x = x + element->x;
-   v[0]->y = 0 + element->y;
-   v[0]->z = z + element->z+element->w/2;
-   v[0]->u = w;
-   v[0]->v = h;
-
-   v[1]->x = x + element->x;
-   v[1]->y = 0 + element->y;
-   v[1]->z = z + element->z-element->w/2;
-   v[1]->u = 0;
-   v[1]->v = h;
-
-   v[2]->x = x + element->x;
-   v[2]->y = element->y+element->h;
-   v[2]->z = z + element->z-element->w/2;
-   v[2]->u = 0;
-   v[2]->v = 0;
-
-   v[3]->x = x + element->x;
-   v[3]->y = element->y+element->h;
-   v[3]->z = z + element->z+element->w/2;
-   v[3]->u = w;
-   v[3]->v = 0;
-   }
-
 }
 
 void render_tile(int type, BITMAP *bmp, BITMAP * text, int w, int h, CAMERA * cam, int x, int z)
@@ -510,15 +176,17 @@ void render_tile(int type, BITMAP *bmp, BITMAP * text, int w, int h, CAMERA * ca
    int flags[4], out[8];
    int c, vc;
 
+   // inicializace pointeru
    for (c=0; c<4; c++)
       v[c] = &_v[c];
 
+   // inicializace pointeru
    for (c=0; c<8; c++) {
       vout[c] = &_vout[c];
       vtmp[c] = &_vtmp[c];
    }
    
-   make_static_tile(v,x,z,w,h,cam);
+   //make_static_tile(v,x,z,w,h,cam);
 
    switch(type)
    { case TILE_FLOOR: make_floor_tile(v,x,z,w,h);
@@ -571,8 +239,8 @@ void render_tile(int type, BITMAP *bmp, BITMAP * text, int w, int h, CAMERA * ca
       return;
 
    if (flags[0] | flags[1] | flags[2] | flags[3]) {
-      /* clip if any vertices are off the edge of the screen */
-      vc = clip3d_f(POLYTYPE_PTEX_MASK, 0.1, 0.1, 4, (AL_CONST V3D_f **)v,
+       /*clip if any vertices are off the edge of the screen */
+      vc = clip3d_f(POLYTYPE_PTEX_MASK, 0.45, 0, 4, (AL_CONST V3D_f **)v,
 		    vout, vtmp, out);
 
       if (vc <= 0)
@@ -605,7 +273,7 @@ void render_element(TEXTURED_ELEMENT * element, BITMAP *bmp, int x, int z, CAMER
    int flags[4], out[8];
    int c, vc;
 
-   float dist = ((x-cam->xpos)*(x-cam->xpos))+((z-cam->ypos)*(z-cam->ypos));
+   float dist = ((x-cam->xpos)*(x-cam->xpos))+((z-cam->zpos)*(z-cam->zpos));
 
    for (c=0; c<4; c++)
       v[c] = &_v[c];
@@ -646,7 +314,7 @@ void render_element(TEXTURED_ELEMENT * element, BITMAP *bmp, int x, int z, CAMER
 
    if (flags[0] | flags[1] | flags[2] | flags[3]) {
       /* clip if any vertices are off the edge of the screen */
-      vc = clip3d_f(POLYTYPE_PTEX_MASK, 0.1, 0.1, 4, (AL_CONST V3D_f **)v,
+      vc = clip3d_f(POLYTYPE_PTEX_MASK, 0.45, 0, 4, (AL_CONST V3D_f **)v,
 		    vout, vtmp, out);
 
       if (vc <= 0)
@@ -669,7 +337,8 @@ void render_element(TEXTURED_ELEMENT * element, BITMAP *bmp, int x, int z, CAMER
    debug("  in element before polygon3d!\n");
    if(!element->texture->close) debug("  missing texture!\n");
    /* render the polygon */
-   polygon3d_f(bmp, POLYTYPE_PTEX_MASK, far_texture(element->texture,far), vc, vout);
+   polygon3d_f(bmp, TRANSPARENT?POLYTYPE_PTEX_MASK_TRANS:POLYTYPE_PTEX_MASK, far_texture(element->texture,far), vc, vout);
+
    debug("  in element after polygon3d!\n");
 }
 
@@ -693,7 +362,7 @@ BITMAP * far_texture(TEXTURE * txt, int far)
 void draw_tile(BITMAP *bmp, CAMERA * cam, int x, int z)
 { TEXTURE * ct_wall,* ct_static,* ct_floor;
   int wf,hf,far;
-  int dist = ((x-(int)cam->xpos)*(x-(int)cam->xpos))+((z-(int)cam->ypos)*(z-(int)cam->ypos));
+  int dist = ((x-(int)cam->xpos)*(x-(int)cam->xpos))+((z-(int)cam->zpos)*(z-(int)cam->zpos));
 
   if((x+z)%2) ct_wall=wall1;
   else ct_wall = wall2;
@@ -737,8 +406,8 @@ void draw_tile(BITMAP *bmp, CAMERA * cam, int x, int z)
   }
 }
 
-void draw_view(int xpos, int ypos, int heading)
-{  int c,x, y, w, h, dx, dy;
+void draw_view(int xpos, int zpos, int heading)
+{  int c,x, y, w, h, dx, dz;
 //   float xfront, yfront, zfront;
 //   float xup, yup, zup;
    double head=0;   
@@ -749,9 +418,9 @@ void draw_view(int xpos, int ypos, int heading)
 //   float fov = 75;
    cam.fov=FOV;
    cam.stepback=STB;
-   cam.zpos = 0.5;
+   cam.ypos = 0.5;
    cam.xpos=xpos;
-   cam.ypos=ypos;
+   cam.zpos=zpos;
    cam.aspect = 1.33f;
    int viewport_w = 640;
    int viewport_h = 320;
@@ -784,38 +453,38 @@ void draw_view(int xpos, int ypos, int heading)
    update_camera(&cam);
 
    
-  int fx, fy;
+  int fx, fz;
  for(dx=11; dx>=0; dx--)
-     for(dy=dx+1; dy>=0; dy--)
-     { fx=xpos+dx*cam.xfront+dy*cam.zfront;  // ano zfront, y je nahoru
-       fy=ypos+dy*cam.xfront+dx*cam.zfront;
-       if(check_coords(fx,fy))
-         draw_tile(game_bmp, &cam, fx, fy);
-       fx=xpos+dx*cam.xfront-dy*cam.zfront;  // ano zfront, y je nahoru
-       fy=ypos-dy*cam.xfront+dx*cam.zfront;
-       if(check_coords(fx,fy))
-         draw_tile(game_bmp, &cam, fx, fy);
+     for(dz=dx+1; dz>=0; dz--)
+     { fx=xpos+dx*cam.xfront+dz*cam.zfront;  // ano zfront, y je nahoru
+       fz=zpos+dz*cam.xfront+dx*cam.zfront;
+       if(check_coords(fx,fz))
+         draw_tile(game_bmp, &cam, fx, fz);
+       fx=xpos+dx*cam.xfront-dz*cam.zfront;  // ano zfront, y je nahoru
+       fz=zpos-dz*cam.xfront+dx*cam.zfront;
+       if(check_coords(fx,fz))
+         draw_tile(game_bmp, &cam, fx, fz);
      }
 
     /* overlay some text */
    BITMAP *bmp = game_bmp;  
    set_clip_rect(bmp, 0, 0, bmp->w, bmp->h);
    textprintf_ex(bmp, font, 0,  0, makecol(0, 0, 0), -1,
-		 "Viewport width: %d (w/W changes)", viewport_w);
-   textprintf_ex(bmp, font, 0,  32, makecol(0, 0, 0), -1,
-		 "Viewport height: %d (h/H changes)", viewport_h);
+		 "Viewport width: %d  height: %d", viewport_w,viewport_h);
+   //textprintf_ex(bmp, font, 0,  32, makecol(0, 0, 0), -1,
+		 //"Viewport height: %d (h/H changes)", viewport_h);
    textprintf_ex(bmp, font, 0, 40, makecol(0, 0, 0), -1,
-		 "Field of view: %f (h/j changes)", cam.fov);
-   textprintf_ex(bmp, font, 0, 48, makecol(0, 0, 0), -1,
-		 "Aspect ratio: %.2f (a/A changes)", cam.aspect);
+		 "Field of view: %f  Aspect: %.2f", cam.fov,cam.aspect);
+   //textprintf_ex(bmp, font, 0, 48, makecol(0, 0, 0), -1,
+		 //"Aspect ratio: %.2f (a/A changes)", cam.aspect);
    textprintf_ex(bmp, font, 0, 56, makecol(0, 0, 0), -1,
-		 "X position: %.2f (x/X changes)", (float)cam.xpos);
-   textprintf_ex(bmp, font, 0, 64, makecol(0, 0, 0), -1,
-		 "Y position: %.2f (y/Y changes)", (float)cam.ypos);
-   textprintf_ex(bmp, font, 0, 72, makecol(0, 0, 0), -1,
-		 "Z position: %.2f (z/Z changes)", (float)cam.zpos);
+		 "Position X: %.2f  Y: %.2f  Z: %.2f", (float)cam.xpos,(float)cam.ypos,(float)cam.zpos);
+   //textprintf_ex(bmp, font, 0, 64, makecol(0, 0, 0), -1,
+	//	 "Y position: %.2f (y/Y changes)", (float)cam.ypos);
+   //textprintf_ex(bmp, font, 0, 72, makecol(0, 0, 0), -1,
+	//	 "Z position: %.2f (z/Z changes)", (float)cam.zpos);
    textprintf_ex(bmp, font, 0, 80, makecol(0, 0, 0), -1,
-		 "Heading: %d 0 = EAST(left/right changes)", cam.heading);
+		 "Heading: %d  Stepback: %.2f", cam.heading,cam.stepback);
    textprintf_ex(bmp, font, 0, 88, makecol(0, 0, 0), -1,
 		 "Pitch: %.2f deg (pgup/pgdn changes)", cam.pitch);
    textprintf_ex(bmp, font, 0, 96, makecol(0, 0, 0), -1,
