@@ -2,6 +2,17 @@
 #include <string.h>
 #include <math.h>
 
+#define GRID_SIZE 2
+#define M_PI 3.14159
+
+#define TILE_FLOOR 1
+#define TILE_FRONT 2
+#define TILE_SIDE 3
+#define TILE_STATIC 4
+#define TILE_CEILING 5
+#define TILE_STATIC_NS 6
+#define TILE_STATIC_EW 7
+
 BITMAP * sky1[4];
 BITMAP * api;
 RGB pal[256];
@@ -9,55 +20,18 @@ int FOV;
 double STB;
 extern BITMAP *game_bmp;
 extern int fps, tot_frames, tmsec, mode;
-//int fis[] = {0,1,2,3,4,5,1,2,3,4,5};
-//int gis[] = {5,4,3,2,1,0,6,7,8,9,10};
 FILE *dbg;
 
 
 extern int **map;
 extern unsigned short int MAP_SIZE;
 
-/*[MAP_SIZE][MAP_SIZE] = {
-              {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
-              {1,1,1,1,5,1,1,1,1,1,1,1,1,1,1},
-              {3,3,3,3,3,3,3,3,3,3,3,3,3,3,3},
-              {1,1,1,5,1,1,1,1,1,1,1,1,4,4,3},
-              {3,3,3,3,3,3,3,3,3,3,3,4,3,3,3},
-              {1,1,3,3,3,2,1,2,1,1,3,4,3,1,1},
-              {1,3,3,4,4,2,1,2,1,1,3,5,3,1,1},
-              {3,3,4,4,4,2,1,2,1,1,3,4,3,1,1},
-              {3,4,4,4,4,3,3,1,1,1,3,4,3,1,1},
-              {3,4,4,4,4,2,3,2,1,3,3,4,3,3,1},
-              {1,3,3,3,4,3,3,3,3,3,4,4,4,3,1},
-              {1,3,4,4,4,2,4,2,4,5,4,4,4,3,1},
-              {1,3,3,3,4,3,3,3,3,3,4,4,4,3,1},
-              {1,1,1,3,4,3,1,1,1,3,3,4,3,3,1},
-              {1,1,1,3,3,3,1,1,1,1,3,4,3,1,1},
-
-                         
-                             };*/
-
-typedef struct { 
-        float xpos, zpos, ypos;        /* camera position */
-		int xfront, yfront, zfront;  /* in-front vector */
-		float xup, yup, zup;           /* up vector */
-		float fov;                     /* field of view */
-		float pitch, roll;
-		float aspect;                 /* aspect ratio */
-		int heading;				/* camera heading - to count infront vector*/
-		double stepback; 					/* camera stepback */
-		MATRIX_f camera, roller;
-} CAMERA;
-
-typedef struct {
-        BITMAP *close, *medium, *far;
-        } TEXTURE;
-
 TEXTURE * floor1, * floor2, * floor3, * floor4;
 TEXTURE * wall1, * wall2;
-TEXTURE * static1, *static2;
+TEXTURE * static1, *static2, *static3;
+TEXTURED_ELEMENT * element1;
 CAMERA cam;
-                             
+
 int check_coords(int x, int y)
 { if(x<0 || y<0 || x>=MAP_SIZE || y>=MAP_SIZE) return 0;
   else return map[x][y];
@@ -102,6 +76,18 @@ TEXTURE * load_texture(string s)
     return text;
 }
 
+TEXTURED_ELEMENT * load_textured_element()
+{	TEXTURED_ELEMENT * txtel = new(TEXTURED_ELEMENT);
+	txtel->animator = NULL;
+	txtel->w=1;
+	txtel->h=1;
+	txtel->x=0;
+	txtel->z=0.5;
+	txtel->y=0;
+	txtel->texture = static1;
+	txtel->type = TILE_STATIC;
+	return txtel;
+}
 
 int load_graphics()
 {   int i,j,ii,fi,a,b;
@@ -116,25 +102,29 @@ int load_graphics()
     wall2 = load_texture("wall/wall2");
 	static1 = load_texture("static/tree");
 	static2 = load_texture("static/door");
+	static3 = load_texture("static/explosion");
+
+	element1 = load_textured_element();
     
     debug("Done loading tiles!\n");
       
       s="data/images/sky1/skylarge1.bmp";
       sky1[0] = load_bmp(s.c_str(), pal);
-      if(!sky1[0]) debug("Missing skylarge1 texture!\n");
+      if(!sky1[0]) debug("Missing skylarge1 texture!\n",3);
       s="data/images/sky1/sky1.bmp";
       sky1[1] = load_bmp(s.c_str(), pal);
-      if(!sky1[0]) debug("Missing sky1 texture!\n");
+      if(!sky1[0]) debug("Missing sky1 texture!\n",3);
       s="data/images/sky1/sky2.bmp";
       sky1[2] = load_bmp(s.c_str(), pal);
-      if(!sky1[0]) debug("Missing sky2 texture!\n");
+      if(!sky1[0]) debug("Missing sky2 texture!\n",3);
       s="data/images/sky1/sky3.bmp";
       sky1[3] = load_bmp(s.c_str(), pal);
-      if(!sky1[0]) debug("Missing sky3 texture!\n");
+      if(!sky1[0]) debug("Missing sky3 texture!\n",3);
       s="data/images/api/api_mask.bmp";
       api = load_bmp(s.c_str(), pal);
-      if(!api) debug("Missing api_mask texture!\n");
+      if(!api) debug("Missing api_mask texture!\n",3);
 debug("done load graphics\n",10);
+return 1;
 }
 
 void unload_graphics()
@@ -143,19 +133,6 @@ void unload_graphics()
 //  delete [] (void *) fwall1;
   delete [] (void **) wall1;
 }
-
-
-
-#define GRID_SIZE 2
-#define M_PI 3.14159
-
-#define TILE_FLOOR 1
-#define TILE_FRONT 2
-#define TILE_SIDE 3
-#define TILE_STATIC 4
-#define TILE_CEILING 5
-#define TILE_STATIC_NS 6
-#define TILE_STATIC_EW 7
 
 /* updates the camera matrix 
    needs the variables heading, pitch and roll to be set */
@@ -328,6 +305,32 @@ void make_static_ns_tile(V3D_f **v,int x, int z, int w, int h)
    v[3]->v = 0;
 }
 
+void make_static_ew_tile(V3D_f **v,int x, int z, int w, int h)
+{ v[0]->x = x+0.5;
+ v[0]->y = 0;
+ v[0]->z = z+0;
+ v[0]->u = w;
+ v[0]->v = h;
+
+ v[1]->x = x + 0.5;
+ v[1]->y = 0;
+ v[1]->z = z + 1;
+ v[1]->u = 0;
+ v[1]->v = h;
+
+ v[2]->x = x + 0.5;
+ v[2]->y = 1;
+ v[2]->z = z + 1;
+ v[2]->u = 0;
+ v[2]->v = 0;
+
+ v[3]->x = x + 0.5;
+ v[3]->y = 1;
+ v[3]->z = z + 0;
+ v[3]->u = w;
+ v[3]->v = 0;
+}
+
 void make_front_tile(V3D_f **v,int x, int z, int w, int h, CAMERA * cam)
 {  int dif;
    if(cam->xfront<0.5 && cam->xfront>-0.5)  //xfront je nula
@@ -444,6 +447,63 @@ void make_side_tile(V3D_f **v,int x, int z, int w, int h, CAMERA * cam)
 
 }
 
+void make_static_element(V3D_f **v,TEXTURED_ELEMENT * element,int x, int z, CAMERA * cam, int far)
+{  BITMAP * text = far_texture(element->texture,far);
+   int w = text->w;
+   int h = text->h;
+   if(cam->xfront<0.5 && cam->xfront>-0.5)
+   { v[0]->x = x+element->x-element->w/2;
+     v[0]->y = 0+element->y;
+     v[0]->z = z+element->z-element->h/2;
+     v[0]->u = w;
+     v[0]->v = h;
+
+   v[1]->x = x + element->x+element->w/2;
+   v[1]->y = 0 + element->y;
+   v[1]->z = z + element->z;
+   v[1]->u = 0;
+   v[1]->v = h;
+
+   v[2]->x = x + element->x+element->w/2;
+   v[2]->y = element->y+element->h;
+   v[2]->z = z + element->z;
+   v[2]->u = 0;
+   v[2]->v = 0;
+
+   v[3]->x = x + element->x-element->w/2;
+   v[3]->y = element->y+element->h;
+   v[3]->z = z + element->z;
+   v[3]->u = w;
+   v[3]->v = 0;
+   }
+   else
+   { v[0]->x = x + element->x;
+   v[0]->y = 0 + element->y;
+   v[0]->z = z + element->z+element->w/2;
+   v[0]->u = w;
+   v[0]->v = h;
+
+   v[1]->x = x + element->x;
+   v[1]->y = 0 + element->y;
+   v[1]->z = z + element->z-element->w/2;
+   v[1]->u = 0;
+   v[1]->v = h;
+
+   v[2]->x = x + element->x;
+   v[2]->y = element->y+element->h;
+   v[2]->z = z + element->z-element->w/2;
+   v[2]->u = 0;
+   v[2]->v = 0;
+
+   v[3]->x = x + element->x;
+   v[3]->y = element->y+element->h;
+   v[3]->z = z + element->z+element->w/2;
+   v[3]->u = w;
+   v[3]->v = 0;
+   }
+
+}
+
 void render_tile(int type, BITMAP *bmp, BITMAP * text, int w, int h, CAMERA * cam, int x, int z)
 {  V3D_f _v[4], _vout[8], _vtmp[8];
    V3D_f *v[4], *vout[8], *vtmp[8];
@@ -462,22 +522,25 @@ void render_tile(int type, BITMAP *bmp, BITMAP * text, int w, int h, CAMERA * ca
 
    switch(type)
    { case TILE_FLOOR: make_floor_tile(v,x,z,w,h);
-   	   	   	 debug("  floor tile");
+   	   	   	 debug("  floor tile",2);
    	   	   	 break;
      case TILE_STATIC: make_static_tile(v,x,z,w,h,cam);
-     	 	 debug("  static tile");
+     	 	 debug("  static tile",2);
      	 	 break;
      case TILE_FRONT: make_front_tile(v,x,z,w,h,cam);
-     	 	 debug("  front tile");
+     	 	 debug("  front tile",2);
      	 	 break;
      case TILE_SIDE: make_side_tile(v,x,z,w,h,cam);
-     	 	 debug("  side tile");
+     	 	 debug("  side tile",2);
      	 	 break;
      case TILE_STATIC_NS: make_static_ns_tile(v,x,z,w,h);
-          	 	 debug("  side tile");
+          	 	 debug("  static NS tile",2);
           	 	 break;
+     case TILE_STATIC_EW: make_static_ew_tile(v,x,z,w,h);
+               	 	 debug("  static EW tile",2);
+               	 	 break;
      case TILE_CEILING: make_ceiling_tile(v,x,z,w,h);
-     	 	 debug("  ceiling tile");
+     	 	 debug("  ceiling tile",2);
      	 	 break;
    }
         
@@ -536,8 +599,89 @@ void render_tile(int type, BITMAP *bmp, BITMAP * text, int w, int h, CAMERA * ca
    debug("  after polygon3d!\n");
 } 
 
-BITMAP * far_texture(TEXTURE * txt, int dist)
-{	switch(dist)
+void render_element(TEXTURED_ELEMENT * element, BITMAP *bmp, int x, int z, CAMERA * cam,int far)
+{  V3D_f _v[4], _vout[8], _vtmp[8];
+   V3D_f *v[4], *vout[8], *vtmp[8];
+   int flags[4], out[8];
+   int c, vc;
+
+   float dist = ((x-cam->xpos)*(x-cam->xpos))+((z-cam->ypos)*(z-cam->ypos));
+
+   for (c=0; c<4; c++)
+      v[c] = &_v[c];
+
+   for (c=0; c<8; c++) {
+      vout[c] = &_vout[c];
+      vtmp[c] = &_vtmp[c];
+   }
+
+
+   make_static_element(v,element,x,z,cam,far);
+
+   /* apply the camera matrix, translating world space -> view space */
+   for (c=0; c<4; c++) {
+      apply_matrix_f(&cam->camera, v[c]->x, v[c]->y, v[c]->z,
+		     &v[c]->x, &v[c]->y, &v[c]->z);
+
+      flags[c] = 0;
+
+      /* set flags if this vertex is off the edge of the screen */
+      if (v[c]->x < -v[c]->z)
+	 flags[c] |= 1;
+      else if (v[c]->x > v[c]->z)
+	 flags[c] |= 2;
+
+      if (v[c]->y < -v[c]->z)
+	 flags[c] |= 4;
+      else if (v[c]->y > v[c]->z)
+	 flags[c] |= 8;
+
+      if (v[c]->z < 0.1)
+	 flags[c] |= 16;
+   }
+   debug("  before clipping!\n");
+   /* quit if all vertices are off the same edge of the screen */
+   if (flags[0] & flags[1] & flags[2] & flags[3])
+      return;
+
+   if (flags[0] | flags[1] | flags[2] | flags[3]) {
+      /* clip if any vertices are off the edge of the screen */
+      vc = clip3d_f(POLYTYPE_PTEX_MASK, 0.1, 0.1, 4, (AL_CONST V3D_f **)v,
+		    vout, vtmp, out);
+
+      if (vc <= 0)
+	 return;
+   }
+   else {
+      /* no need to bother clipping this one */
+      vout[0] = v[0];
+      vout[1] = v[1];
+      vout[2] = v[2];
+      vout[3] = v[3];
+
+      vc = 4;
+   }
+   debug("  in elment before projection!\n");
+   /* project view space -> screen space */
+   for (c=0; c<vc; c++)
+      persp_project_f(vout[c]->x, vout[c]->y, vout[c]->z,
+		      &vout[c]->x, &vout[c]->y);
+   debug("  in element before polygon3d!\n");
+   if(!element->texture->close) debug("  missing texture!\n");
+   /* render the polygon */
+   polygon3d_f(bmp, POLYTYPE_PTEX_MASK, far_texture(element->texture,far), vc, vout);
+   debug("  in element after polygon3d!\n");
+}
+
+BITMAP * far_texture(TEXTURE * txt, int far)
+{	/*if(txt->animated)
+	{	int frame=(tmsec/txt->anim_speed)%txt->anim_frames;
+		//destroy_bitmap(txt->medium);
+		//txt->medium=create_bitmap(txt->close->w,txt->close->w);
+		blit(txt->close,txt->medium,0,frame*txt->anim_offset,0,0,txt->close->w,txt->close->h);
+		return txt->medium;
+	}*/
+	switch(far)
 	{ case 0: return txt->close;
 	  case 1: return txt->medium;
 	  case 2: return txt->far;
@@ -560,8 +704,12 @@ void draw_tile(BITMAP *bmp, CAMERA * cam, int x, int z)
     case 2: ct_floor=floor3; break;
     case 3: ct_floor=floor4; break;
   }
-  if(map[x][z]==5) ct_static=static2;
-  else ct_static=static1;
+  ct_static = static2;
+  switch(map[x][z])
+  { case 2: ct_static=static1; break;
+    case 5: ct_static=static2; break;
+    case 6: ct_static=static3; break;
+  }
 
   wf=64; hf=64; far=2;
   if(dist<9) { wf=128; hf=128; far=1;}
@@ -570,7 +718,8 @@ void draw_tile(BITMAP *bmp, CAMERA * cam, int x, int z)
   switch(map[x][z])
   { case 1: render_tile(TILE_FLOOR, bmp, far_texture(ct_floor,far), wf, hf, cam, x, z); break;
     case 2: render_tile(TILE_FLOOR, bmp, far_texture(ct_floor,far), wf, hf, cam, x, z);
-            render_tile(TILE_STATIC, bmp, far_texture(ct_static,far), wf, hf, cam, x, z); break;
+            //render_tile(TILE_STATIC, bmp, far_texture(ct_static,far), wf, hf, cam, x, z); break;
+    		render_element(element1,bmp,x,z,cam,far); break;
     case 3: render_tile(TILE_FLOOR, bmp, far_texture(ct_floor,far), wf, hf, cam, x, z);
             render_tile(TILE_SIDE, bmp, far_texture(ct_wall,far), wf, hf, cam, x, z);
             render_tile(TILE_FRONT, bmp, far_texture(ct_wall,far), wf, hf, cam, x, z); break;
@@ -579,8 +728,12 @@ void draw_tile(BITMAP *bmp, CAMERA * cam, int x, int z)
             break;
     case 5: render_tile(TILE_FLOOR, bmp, far_texture(ct_floor,far), wf, hf, cam, x, z);
         	render_tile(TILE_CEILING, bmp, far_texture(ct_wall,far), wf, hf, cam, x, z);
-        	render_tile(TILE_STATIC_NS, bmp, far_texture(ct_static,far), wf, hf, cam, x, z); break;
+        	//render_tile(TILE_STATIC_NS, bmp, far_texture(ct_static,far), wf, hf, cam, x, z); break;
             break;  
+    case 6: render_tile(TILE_FLOOR, bmp, far_texture(ct_floor,far), wf, hf, cam, x, z);
+           	render_tile(TILE_CEILING, bmp, far_texture(ct_wall,far), wf, hf, cam, x, z);
+           	//render_tile(TILE_STATIC, bmp, far_texture(ct_static,far), wf, hf, cam, x, z); break;
+            break;
   }
 }
 

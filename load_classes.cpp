@@ -5,7 +5,6 @@
 #define CL_STATS  3
 #define CL_PARAMS 4
 
-extern BITMAP *bmp;
 ClassTemplates *Classes;
 
 int *ClassTemplates::Check(Character *ch)

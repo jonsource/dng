@@ -11,7 +11,6 @@ extern BITMAP *game_bmp;
 extern int status;
 extern ClassTemplates *Classes;
 extern FILE *dbg;
-extern int** map;
 Character *Player;
 int gy=2,gx=3,gh=0;
 extern int FOV;
