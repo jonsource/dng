@@ -18,7 +18,7 @@ extern unsigned short int MAP_SIZE;
 TEXTURE * floor1, * floor2, * floor3, * floor4;
 TEXTURE * wall1, * wall2;
 TEXTURE * static1, *static2, *static3;
-TEXTURED_ELEMENT * element1;
+TEXTURED_ELEMENT * element1, * element2, * element3, * element4, * element5, * element6;
 CAMERA cam;
 
 int check_coords(int x, int y)
@@ -26,63 +26,80 @@ int check_coords(int x, int y)
   else return map[x][y];
 }
 
-TEXTURE * load_texture(string s)
-{   PALETTE pal;
-    TEXTURE *text;
-    string fn,cfn,ext;
-    char buf[30];
-    int pos;
-    
-    text = new (TEXTURE);
-    fn.assign("data/images/");
-
-    pos = s.rfind(".");
-    fn.append(s.substr(0,pos));
-    ext = s.substr(pos+1);
-
-    cfn.assign(fn);
-    cfn.append("_close."+ext);
-    text->close = load_bitmap(cfn.c_str(), pal);
-    if(!text->close) { debug("Missing texture"); debug(cfn.c_str()); }
-    else { sprintf(buf,"Texture depth %d\n",bitmap_color_depth(text->close)); debug(buf); }
-    cfn.assign(fn);
-    cfn.append("_medium."+ext);
-    text->medium = load_bitmap(cfn.c_str(), pal);
-    if(!text->medium)
-    { 	debug("Missing texture"); debug(cfn.c_str());
-    	if(text->close)
-    	{ debug("resizing close texture\n");
-    	  text->medium = create_bitmap(128,128);
-    	  stretch_blit(text->close,text->medium,0,0,text->close->w,text->close->h,0,0,text->medium->w,text->medium->h);
-    	}
-    	else debug("\n");
-    }
-    cfn.assign(fn);
-    cfn.append("_far."+ext);
-    text->far = load_bitmap(cfn.c_str(), pal);
-    if(!text->far)
-    { 	debug("Missing texture"); debug(cfn.c_str());
-		if(text->medium)
-    	{ debug("resizing medium texture\n");
-    	  text->far = create_bitmap(64,64);
-    	  stretch_blit(text->medium,text->far,0,0,text->medium->w,text->medium->h,0,0,text->far->w,text->far->h);
-    	}
-    	else debug("\n");
-    }
-    return text;
-}
-
-TEXTURED_ELEMENT * load_textured_element()
+TEXTURED_ELEMENT * load_textured_element(int i)
 {	TEXTURED_ELEMENT * txtel = new(TEXTURED_ELEMENT);
-	txtel->animator = NULL;
-	txtel->w=1.5;
-	txtel->h=0.5;
-	txtel->x=0.5;
-	txtel->z=0.5;
+	txtel->transparent=false;
+	if(i==1)
+	{txtel->animator = NULL;
+	txtel->w=1;
+	txtel->h=1;
+	txtel->x=0;
+	txtel->z=0;
 	txtel->y=0;
-	txtel->texture = static1;
-	txtel->type = TILE_STATIC;
-	return txtel;
+	txtel->texture = floor1;
+	txtel->type = TILE_FLOOR;
+	return txtel;}
+	if(i==2)
+	{	txtel->animator = NULL;
+		txtel->w=1;
+		txtel->h=1;
+		txtel->x=0;
+		txtel->z=0;
+		txtel->y=0;
+		txtel->texture = wall1;
+		txtel->type = TILE_FRONT;
+		return txtel;
+	}
+	if(i==3)
+	{	txtel->animator = NULL;
+		txtel->w=1;
+		txtel->h=1;
+		txtel->x=0;
+		txtel->z=0;
+		txtel->y=0;
+		txtel->texture = wall1;
+		txtel->type = TILE_SIDE;
+		return txtel;
+	}
+	if(i==4)
+	{	txtel->animator = NULL;
+		txtel->transparent = true;
+		txtel->w=1.5;
+		txtel->h=0.5;
+		txtel->x=0.5;
+		txtel->z=0.5;
+		txtel->y=0;
+		txtel->texture = static1;
+		txtel->type = TILE_STATIC;
+		return txtel;
+	}
+	if(i==5)
+		{	ANIMATOR * an = new(ANIMATOR);
+			an->frames = 8;
+			an->offset = 128;
+			an->speed = 100;
+			txtel->animator = an;
+			txtel->w=1;
+			txtel->h=1;
+			txtel->x=0;
+			txtel->z=0.5;
+			txtel->y=0;
+			txtel->texture = static3;
+			an->frame = create_bitmap(txtel->texture->close->w,txtel->texture->close->w);
+			txtel->type = TILE_STATIC;
+			return txtel;
+		}
+	if(i==6)
+		{	txtel->animator = NULL;
+			txtel->w=1;
+			txtel->h=1;
+			txtel->x=0.5;
+			txtel->z=0;
+			txtel->y=0;
+			txtel->texture = static2;
+			txtel->type = TILE_STATIC;
+			return txtel;
+		}
 }
 
 int load_graphics()
@@ -100,7 +117,12 @@ int load_graphics()
 	static2 = load_texture("static/door.bmp");
 	static3 = load_texture("static/explosion.bmp");
 
-	element1 = load_textured_element();
+	element1 = load_textured_element(1);
+	element2 = load_textured_element(2);
+	element3 = load_textured_element(3);
+	element4 = load_textured_element(4);
+	element5 = load_textured_element(5);
+	element6 = load_textured_element(6);
     
     debug("Done loading tiles!\n");
       
@@ -170,104 +192,7 @@ void update_camera(CAMERA * cam)
 		       cam->aspect);                           /* aspect ratio */
 }
 
-void render_tile(int type, BITMAP *bmp, BITMAP * text, int w, int h, CAMERA * cam, int x, int z)
-{  V3D_f _v[4], _vout[8], _vtmp[8];
-   V3D_f *v[4], *vout[8], *vtmp[8];
-   int flags[4], out[8];
-   int c, vc;
-
-   // inicializace pointeru
-   for (c=0; c<4; c++)
-      v[c] = &_v[c];
-
-   // inicializace pointeru
-   for (c=0; c<8; c++) {
-      vout[c] = &_vout[c];
-      vtmp[c] = &_vtmp[c];
-   }
-   
-   //make_static_tile(v,x,z,w,h,cam);
-
-   switch(type)
-   { case TILE_FLOOR: make_floor_tile(v,x,z,w,h);
-   	   	   	 debug("  floor tile",2);
-   	   	   	 break;
-     case TILE_STATIC: make_static_tile(v,x,z,w,h,cam);
-     	 	 debug("  static tile",2);
-     	 	 break;
-     case TILE_FRONT: make_front_tile(v,x,z,w,h,cam);
-     	 	 debug("  front tile",2);
-     	 	 break;
-     case TILE_SIDE: make_side_tile(v,x,z,w,h,cam);
-     	 	 debug("  side tile",2);
-     	 	 break;
-     case TILE_STATIC_NS: make_static_ns_tile(v,x,z,w,h);
-          	 	 debug("  static NS tile",2);
-          	 	 break;
-     case TILE_STATIC_EW: make_static_ew_tile(v,x,z,w,h);
-               	 	 debug("  static EW tile",2);
-               	 	 break;
-     case TILE_CEILING: make_ceiling_tile(v,x,z,w,h);
-     	 	 debug("  ceiling tile",2);
-     	 	 break;
-   }
-        
-   /* apply the camera matrix, translating world space -> view space */
-   for (c=0; c<4; c++) {
-      apply_matrix_f(&cam->camera, v[c]->x, v[c]->y, v[c]->z,
-		     &v[c]->x, &v[c]->y, &v[c]->z);
-
-      flags[c] = 0;
-
-      /* set flags if this vertex is off the edge of the screen */
-      if (v[c]->x < -v[c]->z)
-	 flags[c] |= 1;
-      else if (v[c]->x > v[c]->z)
-	 flags[c] |= 2;
-
-      if (v[c]->y < -v[c]->z)
-	 flags[c] |= 4;
-      else if (v[c]->y > v[c]->z)
-	 flags[c] |= 8;
-
-      if (v[c]->z < 0.1)
-	 flags[c] |= 16;
-   }
-   debug("  before clipping!\n");
-   /* quit if all vertices are off the same edge of the screen */
-   if (flags[0] & flags[1] & flags[2] & flags[3])
-      return;
-
-   if (flags[0] | flags[1] | flags[2] | flags[3]) {
-       /*clip if any vertices are off the edge of the screen */
-      vc = clip3d_f(POLYTYPE_PTEX_MASK, 0.45, 0, 4, (AL_CONST V3D_f **)v,
-		    vout, vtmp, out);
-
-      if (vc <= 0)
-	 return;
-   }
-   else {
-      /* no need to bother clipping this one */
-      vout[0] = v[0];
-      vout[1] = v[1];
-      vout[2] = v[2];
-      vout[3] = v[3];
-
-      vc = 4;
-   }
-   debug("  before projection!\n");
-   /* project view space -> screen space */
-   for (c=0; c<vc; c++)
-      persp_project_f(vout[c]->x, vout[c]->y, vout[c]->z,
-		      &vout[c]->x, &vout[c]->y);
-   debug("  before polygon3d!\n");
-   if(!text) debug("  missing texture!\n");
-   /* render the polygon */
-   polygon3d_f(bmp, POLYTYPE_PTEX_MASK, text, vc, vout);
-   debug("  after polygon3d!\n");
-} 
-
-void render_element(TEXTURED_ELEMENT * element, BITMAP *bmp, int x, int z, CAMERA * cam,int far)
+void render_element(int type, TEXTURED_ELEMENT * element, BITMAP *bmp, int x, int z, CAMERA * cam,int far)
 {  V3D_f _v[4], _vout[8], _vtmp[8];
    V3D_f *v[4], *vout[8], *vtmp[8];
    int flags[4], out[8];
@@ -283,8 +208,17 @@ void render_element(TEXTURED_ELEMENT * element, BITMAP *bmp, int x, int z, CAMER
       vtmp[c] = &_vtmp[c];
    }
 
-
-   make_static_element(v,element,x,z,cam,far);
+   switch(type)
+   {   case TILE_FLOOR: make_floor_element(v,element,x,z,cam,far); break;
+   	   case TILE_CEILING: make_ceiling_element(v,element,x,z,cam,far); break;
+   	   case TILE_FLAT: make_flat_element(v,element,x,z,cam,far); break;
+   	   case TILE_FRONT: make_front_element(v,element,x,z,cam,far); break;
+   	   case TILE_SIDE: make_side_element(v,element,x,z,cam,far); break;
+   	   case TILE_STATIC: make_static_element(v,element,x,z,cam,far); break;
+   	   case TILE_STATIC_NS: make_static_element_ns(v,element,x,z,cam,far); break;
+   	   case TILE_STATIC_EW: make_static_element_ew(v,element,x,z,cam,far); break;
+   	   default: debug("Missing tile type!\n"); break;
+   }
 
    /* apply the camera matrix, translating world space -> view space */
    for (c=0; c<4; c++) {
@@ -329,7 +263,7 @@ void render_element(TEXTURED_ELEMENT * element, BITMAP *bmp, int x, int z, CAMER
 
       vc = 4;
    }
-   debug("  in elment before projection!\n");
+   debug("  in element before projection!\n");
    /* project view space -> screen space */
    for (c=0; c<vc; c++)
       persp_project_f(vout[c]->x, vout[c]->y, vout[c]->z,
@@ -337,25 +271,25 @@ void render_element(TEXTURED_ELEMENT * element, BITMAP *bmp, int x, int z, CAMER
    debug("  in element before polygon3d!\n");
    if(!element->texture->close) debug("  missing texture!\n");
    /* render the polygon */
-   polygon3d_f(bmp, TRANSPARENT?POLYTYPE_PTEX_MASK_TRANS:POLYTYPE_PTEX_MASK, far_texture(element->texture,far), vc, vout);
+   polygon3d_f(bmp, (TRANSPARENT && element->transparent)?POLYTYPE_PTEX_MASK_TRANS:POLYTYPE_PTEX_MASK, far_texture(element,far), vc, vout);
 
    debug("  in element after polygon3d!\n");
 }
 
-BITMAP * far_texture(TEXTURE * txt, int far)
-{	/*if(txt->animated)
-	{	int frame=(tmsec/txt->anim_speed)%txt->anim_frames;
+BITMAP * far_texture(TEXTURED_ELEMENT * txt, int far)
+{	if(txt->animator)
+	{	int frame=(tmsec/txt->animator->speed)%txt->animator->frames;
 		//destroy_bitmap(txt->medium);
 		//txt->medium=create_bitmap(txt->close->w,txt->close->w);
-		blit(txt->close,txt->medium,0,frame*txt->anim_offset,0,0,txt->close->w,txt->close->h);
-		return txt->medium;
-	}*/
-	switch(far)
-	{ case 0: return txt->close;
-	  case 1: return txt->medium;
-	  case 2: return txt->far;
+		blit(txt->texture->close,txt->animator->frame,0,frame*txt->animator->offset,0,0,txt->animator->frame->w,txt->animator->frame->h);
+		return txt->animator->frame;
 	}
-	return txt->close;
+	switch(far)
+	{ case 0: return txt->texture->close;
+	  case 1: return txt->texture->medium;
+	  case 2: return txt->texture->far;
+	}
+	return txt->texture->close;
 }
 
 /* nakresli tile z mapy */
@@ -384,26 +318,25 @@ void draw_tile(BITMAP *bmp, CAMERA * cam, int x, int z)
   if(dist<9) { wf=128; hf=128; far=1;}
   if(dist<4) { wf=256; hf=256; far=0;}
 
-  switch(map[x][z])
-  { case 1: render_tile(TILE_FLOOR, bmp, far_texture(ct_floor,far), wf, hf, cam, x, z); break;
-    case 2: render_tile(TILE_FLOOR, bmp, far_texture(ct_floor,far), wf, hf, cam, x, z);
-            //render_tile(TILE_STATIC, bmp, far_texture(ct_static,far), wf, hf, cam, x, z); break;
-    		render_element(element1,bmp,x,z,cam,far); break;
-    case 3: render_tile(TILE_FLOOR, bmp, far_texture(ct_floor,far), wf, hf, cam, x, z);
-            render_tile(TILE_SIDE, bmp, far_texture(ct_wall,far), wf, hf, cam, x, z);
-            render_tile(TILE_FRONT, bmp, far_texture(ct_wall,far), wf, hf, cam, x, z); break;
-    case 4: render_tile(TILE_FLOOR, bmp, far_texture(ct_floor,far), wf, hf, cam, x, z);
-    		render_tile(TILE_CEILING, bmp, far_texture(ct_wall,far), wf, hf, cam, x, z);
-            break;
-    case 5: render_tile(TILE_FLOOR, bmp, far_texture(ct_floor,far), wf, hf, cam, x, z);
-        	render_tile(TILE_CEILING, bmp, far_texture(ct_wall,far), wf, hf, cam, x, z);
-        	//render_tile(TILE_STATIC_NS, bmp, far_texture(ct_static,far), wf, hf, cam, x, z); break;
-            break;  
-    case 6: render_tile(TILE_FLOOR, bmp, far_texture(ct_floor,far), wf, hf, cam, x, z);
-           	render_tile(TILE_CEILING, bmp, far_texture(ct_wall,far), wf, hf, cam, x, z);
-           	//render_tile(TILE_STATIC, bmp, far_texture(ct_static,far), wf, hf, cam, x, z); break;
-            break;
-  }
+ switch(map[x][z])
+    { case 1: render_element(TILE_FLOOR, element1, bmp, x, z, cam, far); break;
+      case 2: render_element(TILE_FLOOR, element1, bmp, x, z, cam, far);
+              render_element(TILE_STATIC,element4,bmp,x,z,cam,far); break;
+      case 3: render_element(TILE_FLOOR, element1, bmp, x, z, cam, far);
+      	  	  render_element(TILE_SIDE, element3, bmp, x, z, cam, far);
+      	  	  render_element(TILE_FRONT, element2, bmp, x, z, cam, far); break;
+      case 4: render_element(TILE_FLOOR, element1, bmp, x, z, cam, far);
+      	  	  render_element(TILE_CEILING, element1, bmp, x, z, cam, far);
+              break;
+      case 5: render_element(TILE_FLOOR, element1, bmp, x, z, cam, far);
+      	  	  render_element(TILE_CEILING, element1, bmp, x, z, cam, far);
+      	  	  render_element(TILE_STATIC_NS, element5, bmp, x, z, cam, far); break;
+              break;
+      case 6: render_element(TILE_FLOOR, element1, bmp, x, z, cam, far);
+	  	  	  render_element(TILE_CEILING, element1, bmp, x, z, cam, far);
+	  	  	  render_element(TILE_STATIC_EW, element6, bmp, x, z, cam, far); break;
+              break;
+    }
 }
 
 void draw_view(int xpos, int zpos, int heading)

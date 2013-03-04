@@ -15,9 +15,11 @@ Character *Player;
 int gz=2,gx=3,gh=0;
 extern int FOV;
 extern double STB;
-int DEBUG_LVL_MAIN = 10;
+int DEBUG_LVL_MAIN = 1;
 int DEBUG_LVL = DEBUG_LVL_MAIN;
 int TRANSPARENT = 0;
+
+char chbuf[256];
 
 void game_load()
 { FILE *log;
@@ -32,15 +34,41 @@ void game_load()
   STB=-0.35;
 }
 
+string to_str(int i)
+{	sprintf(chbuf,"%d",i);
+	return chbuf;
+}
+
+string to_str(float f)
+{	sprintf(chbuf,"%.2f",f);
+	return chbuf;
+}
+
+string to_str(bool b)
+{	if(b) return "true";
+	return "false";
+}
+
 void debug(string s, int lvl)
 {  if(lvl<DEBUG_LVL) return;
-   s="%d "+s;
-   fprintf(dbg,s.c_str(),time(NULL));
+   s="\n"+to_str((int)time(NULL))+" "+s;
+   //fprintf(dbg,s.c_str(),time(NULL));
+   fprintf(dbg,s.c_str());
    fflush(dbg); 
 }
 
 void debug(string s)
 { debug(s,4);
+}
+
+void dappend(string s, int lvl)
+{ 	if(lvl<DEBUG_LVL) return;
+	fprintf(dbg,s.c_str());
+	fflush(dbg);
+}
+
+void dappend(string s)
+{ 	dappend(s,4);
 }
 
 void set_debug_lvl(int lvl)
@@ -144,4 +172,13 @@ void keypress(int i)
    keyb_ignore = 10;
 }
 
-
+bool to_bool(string s)
+{  if(s=="false" || s=="False") return false;
+   if(s=="true" || s=="True") return true;
+   else
+   { char buf[30];
+     sprintf(buf,"Unclear argument %s, making False\n",s.c_str());
+     debug(buf,9);
+     return false;
+   }
+}
