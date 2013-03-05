@@ -10,12 +10,16 @@ extern int keyb_ignore,mode;
 extern BITMAP *game_bmp;
 extern int status;
 extern ClassTemplates *Classes;
+extern TEXTURED_ELEMENT ** Elements;
+extern int Elements_max,Elements_len;
+extern TILE ** Tiles;
+extern int Tiles_max;
 extern FILE *dbg;
 Character *Player;
 int gz=2,gx=3,gh=0;
 extern int FOV;
 extern double STB;
-int DEBUG_LVL_MAIN = 1;
+int DEBUG_LVL_MAIN = 3;
 int DEBUG_LVL = DEBUG_LVL_MAIN;
 int TRANSPARENT = 0;
 
@@ -29,7 +33,13 @@ void game_load()
   Player = new Character(1);
   load_graphics();
   load_map("map1.map");
-  debug("%d done game_load\n");
+  debug("done game_load");
+  //debug("El max "+to_str(Elements_max)+"  El len "+to_str(Elements_len)+"  Element #0 -> "+to_str(Elements[0]->x));
+  debug("Tiles max "+to_str(Tiles_max));
+  dappend(" Tiles[0]->len "+to_str(Tiles[0]->types[0]));
+  dappend(" .elements[0]"+to_str(Tiles[0]->elements[0]->type));
+  //exit(1);
+  //exit(1);
   FOV=40;
   STB=-0.35;
 }

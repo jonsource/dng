@@ -123,50 +123,35 @@ int load_map(string fname)
 					add_element(create_element(type,x,y,z,w,h,transparent,texture,animator));
 				}
 			}
+			if(str1.compare(":tiles")==0)
+			{ 	debug("Loading tiles");
+				char type[20];
+				int element;
+				string sub;
+				TILE * tile;
+				while(!feof(f))
+				{ 	str2=get_line(f);
+					if(str2.find(":")==0)
+					{	debug("Done loading tiles");
+						str1=str2; break;
+					} //next part of definitions
+					tile = create_tile();
+					while(sscanf(str2.c_str(),"%s %d",type,&element)==2)
+					{ sub=type;
+					  sub+=" "+to_str(element)+" ";  //reconstruct read part to measure its length, add a whitespace at the end
+					  str2=str2.substr(sub.size()); //remove read part from string
+					  debug("sub: "+sub+" "+to_str((int)sub.size())+" str2: "+str2,1);
+					  tile_add_element(tile,type,element);
+					}
+					add_tile(tile);
+				}
+			}
 
 			if(str1.compare(":end")==0)
 			{ 	debug("End of definitions"); break; }
 		}
 	}
-	exit(1);
-/*
-	  if(str1==":animators")
-	  {  debug("Loading animators\n");
-		 int speed, offset, frames,w,h,count;
-		 while( (count=fscanf(f,"%s %d %d %d %d",chbuf,&offset,&frames,&w,&h)) )
-		 {  str2=chbuf;
-			if(str2.find(":")==0)  //next part of definitions
-	 		{ str1=str2; break; }
-	 	    if(count<5)
-	 	    { debug("Not enough arguments, skipping\n",8);
-			  continue;
-		    }
-	 	    if(!sscanf(str2.c_str(),"%d",&speed))
-	 	    {	debug("Invalid speed, should be integer\n");
-	 	    	speed=100;
-	 	    }
-		   ANIMATOR * ntx = create_animator(speed,offset,frames,w,h);
-		   add_animator(ntx);
-	 	}
-	  }
-	  if(str1==":elements")
-	  { debug("Loading elements\n");
-		float x,y,z,w,h;
-	    int txt, anim, count;
-	    char chbuf2[64];
-		while( (count=fscanf(f,"%s %f %f %f %f %f %s %d %d",chbuf,&x,&y,&z,&w,&h,chbuf2,&txt,&anim)) )
-	    {  str2=chbuf;
-		   if(str2.find(":")==0)  //next part of definitions
-           { str1=str2; break; }
-	       if(count<9)
-	       { debug("Not enough arguments, skiping\n",8);
-	         continue;
-	       }
-		   TEXTURED_ELEMENT * ntx = create_element(chbuf,x,y,z,w,h,chbuf2,txt,anim);
-		   add_element(ntx);
-	    }
-	  }
-	}*/
+
 	return 1;
 }
 
