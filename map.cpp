@@ -14,6 +14,7 @@ using namespace std;
 
 unsigned short int MAP_SIZE;
 int **map;
+int **linesight;
 
 extern char chbuf[256];
 
@@ -45,10 +46,14 @@ int load_map(string fname)
 				if(sscanf(str2.c_str(),"%d",&MAP_SIZE))
 				{	delete []map;
 					map = (int **) malloc(MAP_SIZE*sizeof(int *));
+					linesight = (int **) malloc(MAP_SIZE*sizeof(int *));
 					for(int i=0; i<MAP_SIZE; i++)
 					{	map[i]= (int*) malloc(MAP_SIZE*sizeof(int));
+						linesight[i]= (int*) malloc(MAP_SIZE*sizeof(int));
 						for(int j=0; j<MAP_SIZE; j++)
-						map[i][j]=0;
+						{ map[i][j]=0;
+						  linesight[i][j]=0;
+						}
 					}
 					debug("Map size: "+to_str(MAP_SIZE));
 				}

@@ -6,6 +6,8 @@
 #define GRID_SIZE 2
 #define M_PI 3.14159
 
+#define MAX_VIEW_DIST 13
+
 #define TILE_FLOOR 1
 #define TILE_CEILING 2
 #define TILE_FLAT 3

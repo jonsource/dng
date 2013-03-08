@@ -89,16 +89,27 @@ fflush(dbg);
     quit=1;
     return;
   }
+  /* set up the viewport region */
+  int viewport_w = 640;
+  int viewport_h = 320;
+  int x = (SCREEN_W - viewport_w) / 2;
+  //y = (SCREEN_H - viewport_h) / 2;
+  int y=20;
+  w = viewport_w;
+  h = viewport_h;
+  set_projection_viewport(x, y, w, h);
   set_alpha_blender();
   first=create_bitmap(SCREEN_W, SCREEN_H);
   second=create_bitmap(SCREEN_W, SCREEN_H);
   game_bmp = first;
-if(game_bmp==NULL) 
-{  fprintf(dbg,"%d couldn't acquire screen!!\n",time(NULL));
-   fflush(dbg);  
-}
-fprintf(dbg,"screen depth: %d\n",bitmap_color_depth(game_bmp));
-fflush(dbg);
+  rect(game_bmp, x, y, x+w-1, y+h-1, makecol(255, 0, 0));
+  set_clip_rect(game_bmp, x, y, x+w-1, y+h-1);
+  if(game_bmp==NULL)
+  {  fprintf(dbg,"%d couldn't acquire screen!!\n",time(NULL));
+     fflush(dbg);
+  }
+  fprintf(dbg,"screen depth: %d\n",bitmap_color_depth(game_bmp));
+  fflush(dbg);
 //  text_mode(0);
   clear(game_bmp);
 

@@ -19,7 +19,7 @@ Character *Player;
 int gz=2,gx=3,gh=0;
 extern int FOV;
 extern double STB;
-int DEBUG_LVL_MAIN = 3;
+int DEBUG_LVL_MAIN = 4;
 int DEBUG_LVL = DEBUG_LVL_MAIN;
 int TRANSPARENT = 0;
 
@@ -108,7 +108,7 @@ void line_print(/*char *lines[]*/)
 }
 
 void game_draw()
-{ int num,y,*pass;
+{ /*int num,y,*pass;
   string str="";
   //line_print();
   char *lines[] = {"     Courage  %2d",
@@ -128,17 +128,17 @@ void game_draw()
                   Player->intelligence,
                   Player->wisdom,
                   Player->charisma, -1};
-//  acquire_bitmap(bmp);                
+//  acquire_bitmap(bmp);*/
 
-debug("begin game_draw\n");
-  for (num = 0, y = 20; lines[num]; num++, y += text_height(font))
+debug("begin game_draw");
+  /*for (num = 0, y = 20; lines[num]; num++, y += text_height(font))
 //         textout_ex(bmp, font, lines[num], 300, y,makecol(0, 0, 0), makecol(255, 255, 255));
          textprintf_ex(game_bmp, font, 30, y, makecol(255, 255, 255), -1, lines[num], stats[num]);
   pass=Classes->Check(Player);       
   for(num = 0; num<Classes->size; num++)
       if(pass[num]) str+=Classes->Templates[num]->name+" ";
   textprintf_ex(game_bmp, font, 30, 150, makecol(255, 255, 255), -1, str.c_str());
-  delete pass;
+  delete pass;*/
   
   draw_view(gx,gz,gh);
 //  release_bitmap(bmp);       
