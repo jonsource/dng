@@ -16,7 +16,7 @@ extern TILE ** Tiles;
 extern int Tiles_max;
 extern FILE *dbg;
 Character *Player;
-int gz=2,gx=3,gh=0;
+int gy=0,gz=2,gx=3,gh=0;
 extern int FOV;
 extern double STB;
 int DEBUG_LVL_MAIN = 4;
@@ -140,7 +140,7 @@ debug("begin game_draw");
   textprintf_ex(game_bmp, font, 30, 150, makecol(255, 255, 255), -1, str.c_str());
   delete pass;*/
   
-  draw_view(gx,gz,gh);
+  draw_view(gx,gy,gz,gh);
 //  release_bitmap(bmp);       
 }  
 
@@ -155,6 +155,8 @@ void keypress(int i)
      if(i == KEY_S) z=-1;
      if(i == KEY_A) x=1;
      if(i == KEY_D) x=-1;
+     if(i == KEY_R) gy+=1;
+     if(i == KEY_F) gy-=1;
      if(i == KEY_H) FOV+=1;
      if(i == KEY_J) FOV-=1;
      if(i == KEY_I) STB+=0.1;

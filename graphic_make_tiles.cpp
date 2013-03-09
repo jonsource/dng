@@ -24,8 +24,8 @@ void make_flat_element(V3D_f **v, TEXTURED_ELEMENT * element, int x, int z, CAME
 
 void make_flat_element_subr(V3D_f **v, TEXTURED_ELEMENT * element, int x, int z, CAMERA * cam, int far, float height)
 {	BITMAP * text = far_texture(element,far);
-	int w = text->w;
-	int h = text->h;
+	int w = text->w*element->w;
+	int h = text->h*element->h;
 	v[0]->x = x + 0.5 - element->w/2;
 	v[0]->y = element->y+height;
 	v[0]->z = z + 0.5 - element->h/2;
@@ -54,8 +54,8 @@ void make_flat_element_subr(V3D_f **v, TEXTURED_ELEMENT * element, int x, int z,
 
 void make_front_element(V3D_f **v, TEXTURED_ELEMENT * element, int x, int z, CAMERA * cam, int far)
 {  BITMAP * text = far_texture(element,far);
-   int w = text->w;
-   int h = text->h;
+   int w = text->w*element->w;
+   int h = text->h*element->h;
    int dif;
    if(cam->xfront<0.5 && cam->xfront>-0.5)  //xfront je nula
    { if(cam->zfront<0.0) dif=1; else dif = 0;
@@ -115,8 +115,8 @@ void make_front_element(V3D_f **v, TEXTURED_ELEMENT * element, int x, int z, CAM
 
 void make_side_element(V3D_f **v,TEXTURED_ELEMENT * element, int x, int z, CAMERA * cam, int far)
 {  BITMAP * text = far_texture(element,far);
-   int w = text->w;
-   int h = text->h;
+   int w = text->w*element->w;
+   int h = text->h*element->h;
    int dif=0;
    if(cam->zfront<0.5 && cam->zfront>-0.5)  //zfront je nula
    { if(cam->zpos > z) dif=1; else dif=0;

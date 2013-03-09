@@ -99,6 +99,7 @@ fflush(dbg);
   h = viewport_h;
   set_projection_viewport(x, y, w, h);
   set_alpha_blender();
+  set_trans_blender(0,0,0,128);
   first=create_bitmap(SCREEN_W, SCREEN_H);
   second=create_bitmap(SCREEN_W, SCREEN_H);
   game_bmp = first;
@@ -176,6 +177,8 @@ int main(int argc, char *argv[])
       if(key[KEY_S]) keypress(KEY_S);
       if(key[KEY_A]) keypress(KEY_A);
       if(key[KEY_D]) keypress(KEY_D);
+      if(key[KEY_R]) keypress(KEY_R);
+      if(key[KEY_F]) keypress(KEY_F);
       if(key[KEY_E]) keypress(KEY_E);
       if(key[KEY_Q]) keypress(KEY_Q);
       if(key[KEY_M]) keypress(KEY_M);

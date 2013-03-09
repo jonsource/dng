@@ -17,6 +17,7 @@ int **map;
 int **linesight;
 
 extern char chbuf[256];
+extern int DEBUG_LVL_MAIN;
 
 string get_line(FILE * f)
 {	string ret="";
@@ -41,6 +42,17 @@ int load_map(string fname)
 	{ 	str1=get_line(f);
 		if(str1.find(":")==0) // : at the beginning of new line
 		{				// is new block
+			if(str1.compare(":debuglevel")==0)
+			{	str2=get_line(f);
+				if(sscanf(str2.c_str(),"%d",&DEBUG_LVL_MAIN))
+				{	reset_debug_lvl();
+					debug("Debug level: "+to_str(DEBUG_LVL_MAIN),10);
+				}
+				else
+				{ 	debug("Debug level missing: 0 for all, 10 for none.");
+					exit(0);
+				}
+			}
 			if(str1.compare(":mapsize")==0)
 			{	str2=get_line(f);
 				if(sscanf(str2.c_str(),"%d",&MAP_SIZE))

@@ -27,6 +27,11 @@ TEXTURE * static1, *static2, *static3;
 TEXTURED_ELEMENT * element1, * element2, * element3, * element4, * element5, * element6;
 CAMERA cam;
 
+float dist(int x,int z,CAMERA * cam)
+{ return ((x-(int)cam->xpos)*(x-(int)cam->xpos))+((z-(int)cam->zpos)*(z-(int)cam->zpos));
+
+}
+
 int check_coords(int x, int y)
 { if(x<0 || y<0 || x>=MAP_SIZE || y>=MAP_SIZE) return 0;
   else return map[x][y];
@@ -168,6 +173,7 @@ void update_camera(CAMERA * cam)
    	  else cam->xpos+=(cam->xfront>0)?cam->stepback:1-cam->stepback;
    if(cam->zfront==0) cam->zpos+=0.5;  //ano zfront a ypos tu maj byt takhle
       else cam->zpos+=(cam->zfront>0)?cam->stepback:1-cam->stepback;
+   cam->ypos+=0.5;
    cam->yfront=0;
 
    /* rotate the up vector around the in-front vector by the roll angle */
@@ -189,10 +195,19 @@ void render_element(int type, TEXTURED_ELEMENT * element, BITMAP *bmp, int x, in
    V3D_f *v[4], *vout[8], *vtmp[8];
    int flags[4], out[8];
    int c, vc;
-   int polytype = (TRANSPARENT && element->transparent)?POLYTYPE_PTEX_MASK_TRANS:POLYTYPE_PTEX_MASK;
+   int polytype;
+
+   if(TRANSPARENT && element->transparent)
+   {	polytype = POLYTYPE_PTEX_MASK_TRANS;
+   	   set_alpha_blender();
+   }
+   else
+   {	polytype = POLYTYPE_PTEX_MASK_LIT;
+   	   set_trans_blender(0,0,0,128);
+   }
 
    for (c=0; c<4; c++)
-      v[c] = &_v[c];
+	   v[c] = &_v[c];
 
    for (c=0; c<8; c++) {
       vout[c] = &_vout[c];
@@ -209,6 +224,10 @@ void render_element(int type, TEXTURED_ELEMENT * element, BITMAP *bmp, int x, in
    	   case TILE_STATIC_NS: make_static_element_ns(v,element,x,z,cam,far); break;
    	   case TILE_STATIC_EW: make_static_element_ew(v,element,x,z,cam,far); break;
    	   default: debug("Missing or bad tile type in render element!",3); break;
+   }
+   for (c=0; c<4; c++)
+   {  	v[c]->c=256-dist(v[c]->x,v[c]->z,cam)*3;
+
    }
 
    /* apply the camera matrix, translating world space -> view space */
@@ -255,9 +274,10 @@ void render_element(int type, TEXTURED_ELEMENT * element, BITMAP *bmp, int x, in
    }
    /* project view space -> screen space */
    for (c=0; c<vc; c++)
-      persp_project_f(vout[c]->x, vout[c]->y, vout[c]->z,
-		      &vout[c]->x, &vout[c]->y);
+   {   	persp_project_f(vout[c]->x, vout[c]->y, vout[c]->z, &vout[c]->x, &vout[c]->y);
+   }
    /* render the polygon */
+   //debug("before polygon 3d "+to_str(x)+" "+to_str(z),1);
    polygon3d_f(bmp, polytype, far_texture(element,far), vc, vout);
 }
 
@@ -276,7 +296,8 @@ BITMAP * far_texture(TEXTURED_ELEMENT * txt, int far)
 }
 
 void render_tile(TILE * tile,BITMAP * bmp, int x, int z, CAMERA * cam, int far)
-{	for(int i=0; i<tile->len; i++)
+{	//debug("render_tile "+to_str(x)+" "+to_str(z),1);
+	for(int i=0; i<tile->len; i++)
 	{	if(tile->types[i]==TILE_FRONT)
 		{	render_element(TILE_SIDE,tile->elements[i],bmp,x,z,cam,far);
 			render_element(TILE_FRONT,tile->elements[i],bmp,x,z,cam,far);
@@ -288,45 +309,62 @@ void render_tile(TILE * tile,BITMAP * bmp, int x, int z, CAMERA * cam, int far)
 /* nakresli tile z mapy */
 void draw_tile(BITMAP *bmp, CAMERA * cam, int x, int z)
 { 	unsigned short int far;
-	int dist = ((x-(int)cam->xpos)*(x-(int)cam->xpos))+((z-(int)cam->zpos)*(z-(int)cam->zpos));
+	int d = dist(x,z,cam);
 
 	far=2;
-	if(dist<9) { far=1;}
-	if(dist<4) { far=0;}
+	if(d<9) { far=1;}
+	if(d<4) { far=0;}
 
 	render_tile(Tiles[map[x][z]-1],bmp,x,z,cam,far);
+	//debug("end draw tile "+to_str(x)+" "+to_str(z),1);
 }
 
 void see_tile(int x, int z, CAMERA cam)
-{	int s=check_coords(x,z);
+{	//debug("  see tile "+to_str(x)+" "+to_str(z),1);
+	int s=check_coords(x,z);
 	int see=1;
 	if(s)
-	{ if(linesight[x][z]) return;
+	{ if(linesight[x][z])
+	  { dappend(" already seen",1);
+		return;
+	  }
 	  linesight[x][z]=s;
-	  for(int i=0;i<Tiles[s]->len;i++)
-		  if(Tiles[s-1]->types[i]==TILE_STATIC) { see=0; return; }
+	  for(int i=0;i<Tiles[s-1]->len;i++)
+		  if(Tiles[s-1]->types[i]==TILE_FRONT) { see=0; return; }
 	  if(see)
-	  {   see_tile(x+cam.xfront,z+cam.zfront,cam);
+	  {   if(!see_coords(x+cam.xfront,z+cam.zfront)) see_tile(x+cam.xfront,z+cam.zfront,cam);
 	  	  if(cam.xfront==0)
-	  	  { see_tile(x+1,z+cam.zfront,cam);
-	  	  	see_tile(x-1,z+cam.zfront,cam);
+	  	  { if(x>=cam.dolly_xpos-1 && !see_coords(x+1,z+cam.zfront)) see_tile(x+1,z+cam.zfront,cam);
+	  	    if(x<cam.dolly_xpos && !see_coords(x-1,z+cam.zfront)) see_tile(x-1,z+cam.zfront,cam);
 	  	  }
 	  	  else
-	  	  { see_tile(x+cam.xfront,z+1,cam);
-	  	    see_tile(x+cam.xfront,z-1,cam);
+	  	  { if(z>=cam.dolly_zpos-1 && !see_coords(x+cam.xfront,z+1)) see_tile(x+cam.xfront,z+1,cam);
+	  	  	if(z<cam.dolly_zpos && !see_coords(x+cam.xfront,z-1)) see_tile(x+cam.xfront,z-1,cam);
 	  	  }
 	  }
 	}
+	//dappend("  done "+to_str(x)+" "+to_str(z));
 }
 
 void make_linesight(int x, int z, CAMERA cam)
-{	for(int i=0; i<MAP_SIZE; i++)
+{	debug(" linesight "+to_str(x)+" "+to_str(z),1);
+	for(int i=0; i<MAP_SIZE; i++)
 		for(int j=0; j<MAP_SIZE; j++)
 			linesight[i][j]=0;
-	see_tile(x-cam.xfront,z-cam.zfront,cam); //ano je tam (-) abz se to spravne zacalo
+	debug(" * after sight reset",1);
+	// three initial tiles
+	see_tile(x,z,cam);
+	if(cam.xfront==0)
+	{ 	see_tile(x-1,z,cam);
+		see_tile(x+1,z,cam);
+	}
+	else
+	{ 	see_tile(x,z+1,cam);
+		see_tile(x,z-1,cam);
+	}
 }
 
-void draw_view(int xpos, int zpos, int heading)
+void draw_view(int xpos, int ypos, int zpos, int heading)
 {  int c,x, y, w, h, dx, dz;
 //   float xfront, yfront, zfront;
 //   float xup, yup, zup;
@@ -338,7 +376,7 @@ void draw_view(int xpos, int zpos, int heading)
 //   float fov = 75;
    cam.fov=FOV;
    cam.stepback=STB;
-   cam.ypos = 0.5;
+   cam.ypos = ypos;
    cam.xpos=xpos;
    cam.zpos=zpos;
    cam.aspect = 1.33f;
@@ -360,7 +398,7 @@ void draw_view(int xpos, int zpos, int heading)
    update_camera(&cam);
 
    make_linesight(xpos,zpos,cam);
-   
+   debug(" * in draw_view after linesight",1);
   int fx, fz;
  for(dx=MAX_VIEW_DIST; dx>=0; dx--)
      for(dz=dx+1; dz>=0; dz--)
