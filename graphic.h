@@ -6,6 +6,8 @@
 #define GRID_SIZE 2
 #define M_PI 3.14159
 
+#define MAX_VIEW_DIST 20
+
 #define TILE_FLOOR 1
 #define TILE_CEILING 2
 #define TILE_FLAT 3
@@ -34,7 +36,7 @@ typedef struct {
 
 int load_graphics();
 void unload_graphics();
-void draw_view(int x, int y, int heading);
+void draw_view(int x, int y,int z, int heading);
 int count_view_x(int x, int i, int j, int h);
 int count_view_y(int y, int i, int j, int h);
 BITMAP * far_texture(TEXTURED_ELEMENT * txt, int dist);

@@ -89,16 +89,28 @@ fflush(dbg);
     quit=1;
     return;
   }
+  /* set up the viewport region */
+  int viewport_w = 640;
+  int viewport_h = 320;
+  int x = (SCREEN_W - viewport_w) / 2;
+  //y = (SCREEN_H - viewport_h) / 2;
+  int y=20;
+  w = viewport_w;
+  h = viewport_h;
+  set_projection_viewport(x, y, w, h);
   set_alpha_blender();
+  set_trans_blender(0,0,0,128);
   first=create_bitmap(SCREEN_W, SCREEN_H);
   second=create_bitmap(SCREEN_W, SCREEN_H);
   game_bmp = first;
-if(game_bmp==NULL) 
-{  fprintf(dbg,"%d couldn't acquire screen!!\n",time(NULL));
-   fflush(dbg);  
-}
-fprintf(dbg,"screen depth: %d\n",bitmap_color_depth(game_bmp));
-fflush(dbg);
+  rect(game_bmp, x, y, x+w-1, y+h-1, makecol(255, 0, 0));
+  set_clip_rect(game_bmp, x, y, x+w-1, y+h-1);
+  if(game_bmp==NULL)
+  {  fprintf(dbg,"%d couldn't acquire screen!!\n",time(NULL));
+     fflush(dbg);
+  }
+  fprintf(dbg,"screen depth: %d\n",bitmap_color_depth(game_bmp));
+  fflush(dbg);
 //  text_mode(0);
   clear(game_bmp);
 
@@ -165,6 +177,8 @@ int main(int argc, char *argv[])
       if(key[KEY_S]) keypress(KEY_S);
       if(key[KEY_A]) keypress(KEY_A);
       if(key[KEY_D]) keypress(KEY_D);
+      if(key[KEY_R]) keypress(KEY_R);
+      if(key[KEY_F]) keypress(KEY_F);
       if(key[KEY_E]) keypress(KEY_E);
       if(key[KEY_Q]) keypress(KEY_Q);
       if(key[KEY_M]) keypress(KEY_M);
