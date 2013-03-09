@@ -197,13 +197,20 @@ void render_element(int type, TEXTURED_ELEMENT * element, BITMAP *bmp, int x, in
    int c, vc;
    int polytype;
 
+   /* set necessary POLYTYPE, affine texture mapping is OK and faster than perspective correct mapping */
    if(TRANSPARENT && element->transparent)
-   {	polytype = POLYTYPE_PTEX_MASK_TRANS;
-   	   set_alpha_blender();
+   {	polytype = POLYTYPE_ATEX_MASK_TRANS;
+   		set_alpha_blender();
    }
    else
-   {	polytype = POLYTYPE_PTEX_MASK_LIT;
-   	   set_trans_blender(0,0,0,128);
+   {	switch(type)
+   	   	{	case TILE_FLOOR:
+   	   		case TILE_CEILING:
+   	   		case TILE_SIDE: polytype = POLYTYPE_ATEX_LIT; break;
+   	   		case TILE_FRONT: polytype = POLYTYPE_ATEX_LIT; break;
+   	   		default: polytype = POLYTYPE_ATEX_MASK_LIT; break;
+   	   	}
+   		set_trans_blender(0,0,0,128);
    }
 
    for (c=0; c<4; c++)
@@ -214,6 +221,7 @@ void render_element(int type, TEXTURED_ELEMENT * element, BITMAP *bmp, int x, in
       vtmp[c] = &_vtmp[c];
    }
 
+   /* create vertices of rendered element */
    switch(type)
    {   case TILE_FLOOR: make_floor_element(v,element,x,z,cam,far); break;
    	   case TILE_CEILING: make_ceiling_element(v,element,x,z,cam,far); break;
@@ -225,9 +233,11 @@ void render_element(int type, TEXTURED_ELEMENT * element, BITMAP *bmp, int x, in
    	   case TILE_STATIC_EW: make_static_element_ew(v,element,x,z,cam,far); break;
    	   default: debug("Missing or bad tile type in render element!",3); break;
    }
-   for (c=0; c<4; c++)
-   {  	v[c]->c=256-dist(v[c]->x,v[c]->z,cam)*3;
 
+   /* apply lighting to vertices, used to render lit textures */
+   for (c=0; c<4; c++)
+   {  	v[c]->c=256-sqrt(dist(v[c]->x,v[c]->z,cam))*50;
+   	    if(v[c]->c<0) v[c]->c=0;
    }
 
    /* apply the camera matrix, translating world space -> view space */
@@ -237,7 +247,7 @@ void render_element(int type, TEXTURED_ELEMENT * element, BITMAP *bmp, int x, in
 
       flags[c] = 0;
 
-      /* set flags if this vertex is off the edge of the screen */
+   /* set flags if this vertex is off the edge of the screen */
       if (v[c]->x < -v[c]->z)
 	 flags[c] |= 1;
       else if (v[c]->x > v[c]->z)
