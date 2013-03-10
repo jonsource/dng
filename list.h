@@ -20,6 +20,7 @@ class List
 	int max_item,alloc_size;
 public:
 	List(void);
+	void add(void * item);
 	void add(T * item);
 	T* operator[](const int index);
 	int len();

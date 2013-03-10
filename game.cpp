@@ -52,9 +52,13 @@ string to_str(bool b)
 	return "false";
 }
 
+int mstime()
+{	return clock()/(float)CLOCKS_PER_SEC*100;
+}
+
 void debug(string s, int lvl)
 {  if(lvl<DEBUG_LVL) return;
-   s="\n"+to_str((int)time(NULL))+" "+s;
+   s="\n"+to_str((int)mstime())+" "+s;
    //fprintf(dbg,s.c_str(),time(NULL));
    fprintf(dbg,s.c_str());
    fflush(dbg); 

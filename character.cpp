@@ -15,6 +15,8 @@ Character::Character(int race)
   charisma = rand()%8+6;
   name = "nulhar";
   classname = "Fighter";
+  HP = SP = MP = HP_max = SP_max = MP_max = 10;
+  Class = -1;
 }
 
 Character::~Character()

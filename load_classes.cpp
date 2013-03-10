@@ -125,7 +125,7 @@ void Class::NextLevel(Character *Ch)
   int secondaries[NO_STATS];
   int tertiary=0;
   int tertiaries[NO_STATS];
-  int pc=0,sc=0,i;
+  int i;
   int increases;
   
   for(i = 0; i<NO_STATS; i++)

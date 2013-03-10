@@ -16,12 +16,7 @@ extern int light_power;
 extern int **map;
 extern int **linesight;
 extern unsigned short int MAP_SIZE;
-
-typedef struct
-{	int x, z, power,dim;
-} LIGHT_SOURCE;
-
-List<LIGHT_SOURCE> Lightsources;
+extern List<LIGHT_SOURCE> Lightsources;
 
 //TEXTURE * floor1, * floor2, * floor3, * floor4;
 //TEXTURE * wall1, * wall2;
@@ -75,8 +70,7 @@ int load_graphics()
     ls->z=6;
     ls->power = 256;
     ls->dim = 200;
-    Lightsources.add(ls);
-
+    return 1;
 }
 
 void unload_graphics()
@@ -173,8 +167,10 @@ void render_element(int type, TEXTURED_ELEMENT * element, BITMAP *bmp, int x, in
    }
 
    /* apply lighting to vertices, used to render lit textures */
+   int ls;
    for (c=0; c<4; c++)
-   {  	int ls=light_power-sqrt(dist2(v[c]->x,v[c]->z,cam->xpos,cam->zpos))*30;
+   {  	ls=light_power-sqrt(dist2(v[c]->x,v[c]->z,cam->xpos,cam->zpos))*30;
+
    	    v[c]->c=ls>0?ls:0;
 	    //v[c]->c=0;
    	    for(int i=0; i<Lightsources.len(); i++)

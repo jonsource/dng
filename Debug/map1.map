@@ -30,6 +30,8 @@ static/explosion.bmp
 static/tree.bmp
 static/mist1.tga
 static/button1.bmp
+:lightsources
+255 30 6 4
 :animators
 100 128 8 128 128
 200 64 3 64 64

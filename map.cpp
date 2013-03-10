@@ -9,6 +9,7 @@
 #include "game.h"
 #include "texture.h"
 #include <string>
+#include "list.h"
 
 using namespace std;
 
@@ -22,6 +23,7 @@ extern List<TEXTURE> Textures;
 extern List<TEXTURED_ELEMENT> Elements;
 extern List<ANIMATOR> Animators;
 extern List<TILE> Tiles;
+extern List<LIGHT_SOURCE> Lightsources;
 
 string get_line(FILE * f)
 {	string ret="";
@@ -30,6 +32,25 @@ string get_line(FILE * f)
 		return "";	// is comment go-on
 	ret=ret.substr(0,ret.size()-1);
 	return ret;
+}
+
+template<class T>
+unsigned short int load_block(FILE *f, string block, List<T> * l, T * (*loader)(string), string * str1)
+{	string str2;
+	unsigned short int count = 0;
+	if(str1->compare(":"+block)==0)
+	{ 	debug("Loading "+block);
+		while(!feof(f))
+		{ 	str2=get_line(f);
+			if(str2.find(":")==0)
+			{	debug("Done loading "+block);
+				str1[0] = str2; break;
+			} //next part of definitions
+			l->add(loader(str2));
+			count ++;
+		}
+	}
+	return count;
 }
 
 int load_map(string fname)
@@ -95,18 +116,13 @@ int load_map(string fname)
 
 				}
 			}
-			if(str1.compare(":textures")==0)
-			{ 	debug("Loading textures");
-				while(!feof(f))
-			    { 	str2=get_line(f);
-					if(str2.find(":")==0)
-					{	debug("Done loading textures");
-						str1=str2; break;
-					} //next part of definitions
-			        Textures.add(load_texture(str2));
-				}
-			}
-			if(str1.compare(":animators")==0)
+
+			load_block(f,"textures",&Textures, load_texture, &str1);
+			load_block(f,"lightsources", &Lightsources, load_lightsource, &str1);
+			load_block(f,"animators", &Animators, load_animator, &str1);
+			load_block(f,"elements", &Elements, load_element, &str1);
+			load_block(f,"tiles", &Tiles, load_tile, &str1);
+			/*if(str1.compare(":animators")==0)
 			{ 	debug("Loading animators");
 				int speed, offset, frames, w, h;
 
@@ -122,8 +138,8 @@ int load_map(string fname)
 					}
 					Animators.add(create_animator(speed,offset,frames,w,h));
 				}
-			}
-			if(str1.compare(":elements")==0)
+			}*/
+			/*if(str1.compare(":elements")==0)
 			{ 	debug("Loading elements");
 				char type[20], transparent[10];
 				float x, y, z, w, h;
@@ -141,8 +157,8 @@ int load_map(string fname)
 					}
 					Elements.add(create_element(type,x,y,z,w,h,transparent,texture,animator));
 				}
-			}
-			if(str1.compare(":tiles")==0)
+			}*/
+			/*if(str1.compare(":tiles")==0)
 			{ 	debug("Loading tiles");
 				char type[20];
 				int element;
@@ -164,7 +180,7 @@ int load_map(string fname)
 					}
 					Tiles.add(tile);
 				}
-			}
+			}*/
 
 			if(str1.compare(":end")==0)
 			{ 	debug("End of definitions"); break; }
