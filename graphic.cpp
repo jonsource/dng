@@ -11,20 +11,31 @@ extern BITMAP *game_bmp;
 extern int fps, tmsec;
 extern int TRANSPARENT;
 extern TILE ** Tiles;
-FILE *dbg;
+extern int light_power;
 
 extern int **map;
 extern int **linesight;
 extern unsigned short int MAP_SIZE;
 
-TEXTURE * floor1, * floor2, * floor3, * floor4;
-TEXTURE * wall1, * wall2;
-TEXTURE * static1, *static2, *static3;
-TEXTURED_ELEMENT * element1, * element2, * element3, * element4, * element5, * element6;
+typedef struct
+{	int x, z, power,dim;
+} LIGHT_SOURCE;
+
+List<LIGHT_SOURCE> Lightsources;
+
+//TEXTURE * floor1, * floor2, * floor3, * floor4;
+//TEXTURE * wall1, * wall2;
+//TEXTURE * static1, *static2, *static3;
+//TEXTURED_ELEMENT * element1, * element2, * element3, * element4, * element5, * element6;
 CAMERA cam;
 
+float dist2(int x,int z,int xx, int zz)
+{ return ((x-xx)*(x-xx))+((z-zz)*(z-zz));
+
+}
+
 float dist(int x,int z,CAMERA * cam)
-{ return ((x-(int)cam->xpos)*(x-(int)cam->xpos))+((z-(int)cam->zpos)*(z-(int)cam->zpos));
+{ return dist2(x,z,cam->xpos,cam->zpos);
 
 }
 
@@ -36,83 +47,6 @@ int check_coords(int x, int y)
 int see_coords(int x, int y)
 { if(check_coords(x,y)) return linesight[x][y];
   return 0;
-}
-
-TEXTURED_ELEMENT * load_textured_element(int i)
-{	TEXTURED_ELEMENT * txtel = new(TEXTURED_ELEMENT);
-	txtel->transparent=false;
-	if(i==1)
-	{txtel->animator = NULL;
-	txtel->w=1;
-	txtel->h=1;
-	txtel->x=0;
-	txtel->z=0;
-	txtel->y=0;
-	txtel->texture = floor1;
-	txtel->type = TILE_FLOOR;
-	return txtel;}
-	if(i==2)
-	{	txtel->animator = NULL;
-		txtel->w=1;
-		txtel->h=1;
-		txtel->x=0;
-		txtel->z=0;
-		txtel->y=0;
-		txtel->texture = wall1;
-		txtel->type = TILE_FRONT;
-		return txtel;
-	}
-	if(i==3)
-	{	txtel->animator = NULL;
-		txtel->w=1;
-		txtel->h=1;
-		txtel->x=0;
-		txtel->z=0;
-		txtel->y=0;
-		txtel->texture = wall1;
-		txtel->type = TILE_SIDE;
-		return txtel;
-	}
-	if(i==4)
-	{	txtel->animator = NULL;
-		txtel->transparent = true;
-		txtel->w=1.5;
-		txtel->h=0.5;
-		txtel->x=0.5;
-		txtel->z=0.5;
-		txtel->y=0;
-		txtel->texture = static1;
-		txtel->type = TILE_STATIC;
-		return txtel;
-	}
-	if(i==5)
-		{	ANIMATOR * an = new(ANIMATOR);
-			an->frames = 8;
-			an->offset = 128;
-			an->speed = 100;
-			txtel->animator = an;
-			txtel->w=1;
-			txtel->h=1;
-			txtel->x=0;
-			txtel->z=0.5;
-			txtel->y=0;
-			txtel->texture = static3;
-			an->frame = create_bitmap(txtel->texture->close->w,txtel->texture->close->w);
-			txtel->type = TILE_STATIC;
-			return txtel;
-		}
-	if(i==6)
-		{	txtel->animator = NULL;
-			txtel->w=1;
-			txtel->h=1;
-			txtel->x=0.5;
-			txtel->z=0;
-			txtel->y=0;
-			txtel->texture = static2;
-			txtel->type = TILE_STATIC;
-			return txtel;
-		}
-	return NULL;
 }
 
 int load_graphics()
@@ -136,19 +70,26 @@ int load_graphics()
       if(!api) debug("Missing api_mask texture!\n",4);
       debug("done load graphics\n",10);
 
-return 1;
+    LIGHT_SOURCE * ls = new(LIGHT_SOURCE);
+    ls->x=4;
+    ls->z=6;
+    ls->power = 256;
+    ls->dim = 200;
+    Lightsources.add(ls);
+
 }
 
 void unload_graphics()
-{ delete [] (void **) floor1;
+{ //delete [] (void **) floor1;
 //  delete [] (void **) floor2;
 //  delete [] (void *) fwall1;
-  delete [] (void **) wall1;
+  //delete [] (void **) wall1;
 }
 
-/* updates the camera matrix 
-   needs the variables heading, pitch and roll to be set */
-
+/**
+ * updates the camera matrix
+ * needs the variables heading, pitch and roll to be set
+ */
 void update_camera(CAMERA * cam)
 {
      /* calculate the in-front vector */
@@ -203,9 +144,9 @@ void render_element(int type, TEXTURED_ELEMENT * element, BITMAP *bmp, int x, in
    {	switch(type)
    	   	{	case TILE_FLOOR:
    	   		case TILE_CEILING:
-   	   		case TILE_SIDE: polytype = POLYTYPE_ATEX_LIT; break;
-   	   		case TILE_FRONT: polytype = POLYTYPE_ATEX_LIT; break;
-   	   		default: polytype = POLYTYPE_ATEX_MASK_LIT; break;
+   	   		case TILE_SIDE: polytype = POLYTYPE_PTEX_LIT; break;
+   	   		case TILE_FRONT: polytype = POLYTYPE_PTEX_LIT; break;
+   	   		default: polytype = POLYTYPE_PTEX_MASK_LIT; break;
    	   	}
    		set_trans_blender(0,0,0,128);
    }
@@ -233,8 +174,15 @@ void render_element(int type, TEXTURED_ELEMENT * element, BITMAP *bmp, int x, in
 
    /* apply lighting to vertices, used to render lit textures */
    for (c=0; c<4; c++)
-   {  	v[c]->c=256-sqrt(dist(v[c]->x,v[c]->z,cam))*50;
-   	    if(v[c]->c<0) v[c]->c=0;
+   {  	int ls=light_power-sqrt(dist2(v[c]->x,v[c]->z,cam->xpos,cam->zpos))*30;
+   	    v[c]->c=ls>0?ls:0;
+	    //v[c]->c=0;
+   	    for(int i=0; i<Lightsources.len(); i++)
+   	    { ls=Lightsources[i]->power-sqrt(dist2(v[c]->x,v[c]->z,Lightsources[i]->x+0.5,Lightsources[i]->z+0.5))*Lightsources[i]->dim;
+   	      v[c]->c+=ls>0?ls:0;
+   	    }
+        if(v[c]->c<0) v[c]->c=0;
+        if(v[c]->c>255) v[c]->c=255;
    }
 
    /* apply the camera matrix, translating world space -> view space */
@@ -264,7 +212,7 @@ void render_element(int type, TEXTURED_ELEMENT * element, BITMAP *bmp, int x, in
 
    if (flags[0] | flags[1] | flags[2] | flags[3]) {
       /* clip if any vertices are off the edge of the screen */
-      vc = clip3d_f(polytype, 0.45, 0, 4, (AL_CONST V3D_f **)v,
+      vc = clip3d_f(polytype, 0.15, 0, 4, (AL_CONST V3D_f **)v,
 		    vout, vtmp, out);
 
       if (vc <= 0)
@@ -424,7 +372,7 @@ void draw_view(int xpos, int ypos, int zpos, int heading)
    //textprintf_ex(bmp, font, 0,  32, makecol(0, 0, 0), -1,
 		 //"Viewport height: %d (h/H changes)", viewport_h);
    textprintf_ex(bmp, font, 0, 40, makecol(0, 0, 0), -1,
-		 "Field of view: %f  Aspect: %.2f", cam.fov,cam.aspect);
+		 "Field of view: %f  Aspect: %.2f Light: %d", cam.fov,cam.aspect,light_power);
    //textprintf_ex(bmp, font, 0, 48, makecol(0, 0, 0), -1,
 		 //"Aspect ratio: %.2f (a/A changes)", cam.aspect);
    textprintf_ex(bmp, font, 0, 56, makecol(0, 0, 0), -1,
