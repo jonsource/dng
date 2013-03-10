@@ -10,28 +10,20 @@
 #include <string.h>
 #include <stdio.h>
 
-TEXTURE ** Textures;
-int Textures_len = 0;
-int Textures_max = -1;
-
-TEXTURED_ELEMENT ** Elements;
-int Elements_len = 0;
-int Elements_max = -1;
-
-ANIMATOR ** Animators;
-int Animators_len = 0;
-int Animators_max = -1;
+List<TEXTURE> Textures;
+List<TEXTURED_ELEMENT> Elements;
+List<ANIMATOR> Animators;
 
 TILE ** Tiles;
 int Tiles_len = 0;
 int Tiles_max = -1;
 
 void unload_textures()
-{	delete []Textures;
+{	//delete []Textures;
 }
 
 int add_texture(TEXTURE * txt)
-{	if(Textures_max+1 >= Textures_len)
+{	/*if(Textures_max+1 >= Textures_len)
 	{	debug("Expanding Textures from: "+to_str(Textures_len),2);
 		TEXTURE ** re = (TEXTURE **) malloc((Textures_len?(Textures_len*2):4)*sizeof(TEXTURE *));
 		for(int i=0;i<Textures_len; i++) re[i]=Textures[i];
@@ -44,6 +36,8 @@ int add_texture(TEXTURE * txt)
 	Textures[Textures_max+1]=txt;
 	dappend(" - texture added",1);
 	Textures_max++;
+	return 1;*/
+	Textures.add(txt);
 	return 1;
 }
 
@@ -92,23 +86,11 @@ TEXTURE * load_texture(string s)
 }
 
 void unload_elements()
-{	delete []Elements;
+{	//delete []Elements;
 }
 
 int add_element(TEXTURED_ELEMENT * ele)
-{	if(Elements_max+1 >= Elements_len)
-	{	debug("Expanding Elements from: "+to_str(Elements_len),2);
-		TEXTURED_ELEMENT ** re = (TEXTURED_ELEMENT **) malloc((Elements_len?(Elements_len*2):4)*sizeof(TEXTURED_ELEMENT *));
-		for(int i=0;i<Elements_len; i++) re[i]=Elements[i];
-		delete []Elements;
-		Elements = re;
-		Elements_len=(Elements_len?(Elements_len*2):4);
-		debug(" ... to: "+to_str(Elements_len),1);
-	}
-	debug("Adding element as #"+to_str(Elements_max));
-	Elements[Elements_max+1]=ele;
-	Elements_max++;
-	dappend(" - element added",2);
+{	Elements.add(ele);
 	return 1;
 }
 
@@ -122,14 +104,14 @@ TEXTURED_ELEMENT * create_element(string type, float x, float y, float z, float 
    ele->w = w;
    ele->h = h;
    ele->transparent = to_bool(transparent);
-   if(texture>Textures_max)
+   if(texture>=Textures.len())
    { debug("Referencing undefined texture "+to_str(texture),10);
    	 ele->texture = Textures[0];
    }
    else ele->texture = Textures[texture];
    ele->transparent = to_bool(transparent);
    if(animator>-1)
-   {   if(animator<=Animators_max)	ele->animator = Animators[animator];
+   {   if(animator<Animators.len())	ele->animator = Animators[animator];
    	   else
    	   {	debug("Referencing undefined animator "+to_str(animator),10);
    	   	   exit(1);
@@ -143,23 +125,11 @@ TEXTURED_ELEMENT * create_element(string type, float x, float y, float z, float 
 }
 
 void unload_animators()
-{	delete []Animators;
+{	//delete []Animators;
 }
 
-int add_animator(ANIMATOR * txt)
-{	if(Animators_max+1 >= Animators_len)
-	{	debug("Expanding Animators from: "+to_str(Animators_len),2);
-		ANIMATOR ** re = (ANIMATOR **) malloc((Animators_len?(Animators_len*2):4)*sizeof(ANIMATOR *));
-		for(int i=0;i<Animators_len; i++) re[i]=Animators[i];
-		delete []Animators;
-		Animators = re;
-		Animators_len=(Animators_len?(Animators_len*2):4);
-		debug(" ... to: "+to_str(Animators_len),1);
-	}
-	debug("Adding animator as #"+to_str(Animators_max));
-	Animators[Animators_max+1]=txt;
-	Animators_max++;
-	dappend(" - animator added",2);
+int add_animator(ANIMATOR * ani)
+{	Animators.add(ani);
 	return 1;
 }
 
@@ -201,7 +171,7 @@ int tile_add_element(TILE * til, string type, int element)
 	    return 0;
 	}
 	typ = tile_type_resolve(type);
-	if(element<=Elements_max)	til->elements[til->len] = Elements[element];
+	if(element<Elements.len())	til->elements[til->len] = Elements[element];
 	else
 	{	debug("Referencing undefined element "+to_str(element),10);
 	   exit(1);

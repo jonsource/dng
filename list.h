@@ -10,6 +10,8 @@
 
 #include <stdlib.h>
 #include <cassert>
+#include <string>
+#include "game.h"
 
 template <class T>
 class List
