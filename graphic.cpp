@@ -6,14 +6,10 @@ BITMAP * sky1[4];
 BITMAP * api;
 RGB pal[256];
 int FOV;
-int **line_sight();
 double STB;
 extern BITMAP *game_bmp;
-extern int fps, tot_frames, tmsec, mode;
+extern int fps, tmsec;
 extern int TRANSPARENT;
-extern TEXTURE ** Textures;
-extern TEXTURED_ELEMENT ** Elements;
-extern ANIMATOR ** Animators;
 extern TILE ** Tiles;
 FILE *dbg;
 
@@ -116,6 +112,7 @@ TEXTURED_ELEMENT * load_textured_element(int i)
 			txtel->type = TILE_STATIC;
 			return txtel;
 		}
+	return NULL;
 }
 
 int load_graphics()
@@ -375,10 +372,7 @@ void make_linesight(int x, int z, CAMERA cam)
 }
 
 void draw_view(int xpos, int ypos, int zpos, int heading)
-{  int c,x, y, w, h, dx, dz;
-//   float xfront, yfront, zfront;
-//   float xup, yup, zup;
-   double head=0;   
+{  int dz,dx,c;
 //   float pitch=0;
    cam.pitch=0;
 //   float roll=0;

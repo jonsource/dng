@@ -55,8 +55,7 @@ void fps_proc(void)
 END_OF_FUNCTION(fps_proc)
 
 void init()
-{ int card = GFX_AUTODETECT;
-  int w = 640;
+{ int w = 640;
   int h = 480;
   int depth = 32;
   mode = 1;
@@ -106,7 +105,7 @@ fflush(dbg);
   rect(game_bmp, x, y, x+w-1, y+h-1, makecol(255, 0, 0));
   set_clip_rect(game_bmp, x, y, x+w-1, y+h-1);
   if(game_bmp==NULL)
-  {  fprintf(dbg,"%d couldn't acquire screen!!\n",time(NULL));
+  {  fprintf(dbg,"%ld couldn't acquire screen!!\n",time(NULL));
      fflush(dbg);
   }
   fprintf(dbg,"screen depth: %d\n",bitmap_color_depth(game_bmp));

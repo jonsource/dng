@@ -1,3 +1,7 @@
+/*
+ *	Player character Class - basic definitions
+ */
+
 #include "character.h"
 
 Character::Character(int race)

@@ -1,3 +1,7 @@
+/*
+ * Character classes (classes are in-game RPG classes, Classes are C++ Classes) - proof of concept
+ */
+
 #include "load_classes.h"
 
 #define CL_NAME   1
@@ -22,6 +26,9 @@ ClassTemplates::ClassTemplates()
   string buf;
   char cstr[30];
   
+  /* TODO switch from malloc and local implementation to Class List in "list.h"
+   */
+
   Templates = (Class **) malloc(4*sizeof(Class *));
   max=4;
   size=0;
