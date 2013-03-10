@@ -23,21 +23,7 @@ void unload_textures()
 }
 
 int add_texture(TEXTURE * txt)
-{	/*if(Textures_max+1 >= Textures_len)
-	{	debug("Expanding Textures from: "+to_str(Textures_len),2);
-		TEXTURE ** re = (TEXTURE **) malloc((Textures_len?(Textures_len*2):4)*sizeof(TEXTURE *));
-		for(int i=0;i<Textures_len; i++) re[i]=Textures[i];
-		delete []Textures;
-		Textures = re;
-		Textures_len=(Textures_len?(Textures_len*2):4);
-		debug(" ... to: "+to_str(Textures_len),2);
-	}
-	debug("Adding texture as #"+to_str(Textures_max));
-	Textures[Textures_max+1]=txt;
-	dappend(" - texture added",1);
-	Textures_max++;
-	return 1;*/
-	Textures.add(txt);
+{	Textures.add(txt);
 	return 1;
 }
 
