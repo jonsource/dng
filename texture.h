@@ -35,17 +35,20 @@ typedef struct {
 	unsigned short int * types;
 } TILE;
 
-int add_texture(TEXTURE * txt);
+typedef struct
+{	int x, z, power,dim;
+} LIGHT_SOURCE;
+
 TEXTURE * load_texture(string s);
-int add_element(TEXTURED_ELEMENT * ele);
+TEXTURED_ELEMENT * load_element(string s);
 TEXTURED_ELEMENT * create_element(string type, float x, float y, float z, float w, float h, string transparent, int texture, int animator);
-int add_animator(ANIMATOR * txt);
+ANIMATOR * load_animator(string s);
 ANIMATOR * create_animator(int speed, int offset, int frames, int w, int h);
-int add_tile(TILE * til);
+TILE * load_tile(string s);
 TILE * create_tile();
 int tile_add_element(TILE * til,string type,int element);
-
 unsigned short int tile_type_resolve(string type);
-
+LIGHT_SOURCE * load_lightsource(string s);
+LIGHT_SOURCE * create_lightsource(int power, int dim, int x, int z);
 
 #endif /* TEXTURE_H_ */

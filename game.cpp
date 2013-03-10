@@ -13,6 +13,7 @@ extern List<TILE> Tiles;
 extern FILE *dbg;
 Character *Player;
 int gy=0,gz=2,gx=3,gh=0;
+int light_power=128;
 extern int FOV;
 extern double STB;
 int DEBUG_LVL_MAIN = 4;
@@ -51,9 +52,13 @@ string to_str(bool b)
 	return "false";
 }
 
+int mstime()
+{	return clock()/(float)CLOCKS_PER_SEC*100;
+}
+
 void debug(string s, int lvl)
 {  if(lvl<DEBUG_LVL) return;
-   s="\n"+to_str((int)time(NULL))+" "+s;
+   s="\n"+to_str((int)mstime())+" "+s;
    //fprintf(dbg,s.c_str(),time(NULL));
    fprintf(dbg,s.c_str());
    fflush(dbg); 
@@ -154,6 +159,8 @@ void keypress(int i)
      if(i == KEY_J) FOV-=1;
      if(i == KEY_I) STB+=0.1;
      if(i == KEY_K) STB-=0.1;
+     if(i == KEY_O) light_power+=1;
+     if(i == KEY_L) light_power-=1;
      if(i == KEY_T) {if(TRANSPARENT) TRANSPARENT =0; else TRANSPARENT=1;}
      switch(gh)
      { case HEAD_NORTH: gz-=x; gx+=z; break;

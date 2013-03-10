@@ -36,5 +36,6 @@ string to_str(float f);
 string to_str(bool b);
 void dappend(string s, int lvl);
 void dappend(string s);
+int mstime();
 
 #endif
