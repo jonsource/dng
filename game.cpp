@@ -7,13 +7,9 @@
 #include "map.h"
 
 extern int keyb_ignore,mode;
-extern BITMAP *game_bmp;
 extern int status;
 extern ClassTemplates *Classes;
-extern TEXTURED_ELEMENT ** Elements;
-extern int Elements_max,Elements_len;
-extern TILE ** Tiles;
-extern int Tiles_max;
+extern List<TILE> Tiles;
 extern FILE *dbg;
 Character *Player;
 int gy=0,gz=2,gx=3,gh=0;
@@ -26,20 +22,16 @@ int TRANSPARENT = 0;
 char chbuf[256];
 
 void game_load()
-{ FILE *log;
-  srand(time(0));
+{ srand(time(0));
   status = CREATE;
   Classes = new ClassTemplates();
   Player = new Character(1);
   load_graphics();
   load_map("map1.map");
   debug("done game_load");
-  //debug("El max "+to_str(Elements_max)+"  El len "+to_str(Elements_len)+"  Element #0 -> "+to_str(Elements[0]->x));
-  debug("Tiles max "+to_str(Tiles_max));
+  debug("Tiles.len() "+to_str(Tiles.len()));
   dappend(" Tiles[0]->len "+to_str(Tiles[0]->types[0]));
   dappend(" .elements[0]"+to_str(Tiles[0]->elements[0]->type));
-  //exit(1);
-  //exit(1);
   FOV=40;
   STB=-0.35;
 }
@@ -96,8 +88,8 @@ void game_unload()
 }
 
 
-
-void line_print(/*char *lines[]*/)
+/*
+void line_print(char *lines[])
 { int num,y;
   char *lines[] = {"Line %02d: Draws justified text",
                        "Line %02d: within the specified",
@@ -105,7 +97,7 @@ void line_print(/*char *lines[]*/)
                        "Line %02d: T H I S !", NULL};
   for (num = 0, y = 200; lines[num]; num++, y += text_height(font))
          textprintf_ex(game_bmp, font, 300, y, makecol(0, 0, 0), makecol(255, 255, 255), lines[num], num);
-}
+}*/
 
 void game_draw()
 { /*int num,y,*pass;
@@ -130,7 +122,7 @@ void game_draw()
                   Player->charisma, -1};
 //  acquire_bitmap(bmp);*/
 
-debug("begin game_draw");
+
   /*for (num = 0, y = 20; lines[num]; num++, y += text_height(font))
 //         textout_ex(bmp, font, lines[num], 300, y,makecol(0, 0, 0), makecol(255, 255, 255));
          textprintf_ex(game_bmp, font, 30, y, makecol(255, 255, 255), -1, lines[num], stats[num]);
@@ -139,9 +131,10 @@ debug("begin game_draw");
       if(pass[num]) str+=Classes->Templates[num]->name+" ";
   textprintf_ex(game_bmp, font, 30, 150, makecol(255, 255, 255), -1, str.c_str());
   delete pass;*/
-  
+//  release_bitmap(bmp);
+  debug("begin game_draw");
   draw_view(gx,gy,gz,gh);
-//  release_bitmap(bmp);       
+
 }  
 
 
