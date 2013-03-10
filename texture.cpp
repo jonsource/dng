@@ -13,25 +13,12 @@
 List<TEXTURE> Textures;
 List<TEXTURED_ELEMENT> Elements;
 List<ANIMATOR> Animators;
-
-TILE ** Tiles;
-int Tiles_len = 0;
-int Tiles_max = -1;
-
-void unload_textures()
-{	//delete []Textures;
-}
-
-int add_texture(TEXTURE * txt)
-{	Textures.add(txt);
-	return 1;
-}
+List<TILE> Tiles;
 
 TEXTURE * load_texture(string s)
 {   PALETTE pal;
     TEXTURE *text;
     string fn,cfn,ext;
-    char buf[30];
     int pos;
 
     text = new (TEXTURE);
@@ -71,15 +58,6 @@ TEXTURE * load_texture(string s)
     return text;
 }
 
-void unload_elements()
-{	//delete []Elements;
-}
-
-int add_element(TEXTURED_ELEMENT * ele)
-{	Elements.add(ele);
-	return 1;
-}
-
 TEXTURED_ELEMENT * create_element(string type, float x, float y, float z, float w, float h, string transparent, int texture, int animator)
 {	//char buf[60];
 	TEXTURED_ELEMENT * ele = new(TEXTURED_ELEMENT);
@@ -110,15 +88,6 @@ TEXTURED_ELEMENT * create_element(string type, float x, float y, float z, float 
    return ele;
 }
 
-void unload_animators()
-{	//delete []Animators;
-}
-
-int add_animator(ANIMATOR * ani)
-{	Animators.add(ani);
-	return 1;
-}
-
 ANIMATOR * create_animator(int speed, int offset, int frames, int w, int h)
 { ANIMATOR * ani = new(ANIMATOR);
 	ani->speed=speed;
@@ -126,28 +95,6 @@ ANIMATOR * create_animator(int speed, int offset, int frames, int w, int h)
 	ani->frames=frames;
 	ani->frame=create_bitmap(w,h);
   return ani;
-}
-
-void unload_tiles()
-{	delete []Tiles;
-}
-
-int add_tile(TILE * til)
-{	if(Tiles_max+1 >= Tiles_len)
-	{	debug("Expanding Tiles from: "+to_str(Tiles_len),2);
-		TILE ** re = (TILE **) malloc((Tiles_len?(Tiles_len*2):4)*sizeof(TILE *));
-		for(int i=0;i<Tiles_len; i++) re[i]=Tiles[i];
-		delete []Tiles;
-		Tiles = re;
-		Tiles_len=(Tiles_len?(Tiles_len*2):4);
-		debug(" ... to: "+to_str(Tiles_len),1);
-	}
-	debug("Adding tile as #"+to_str(Tiles_max));
-	Tiles[Tiles_max+1]=til;
-	Tiles_max++;
-	dappend(" - tile added",2);
-	dappend(": "+to_str(Tiles[Tiles_max]->types[Tiles[Tiles_max]->len])+" "+to_str(Tiles[Tiles_max]->elements[Tiles[Tiles_max]->len]->type),2);
-	return 1;
 }
 
 int tile_add_element(TILE * til, string type, int element)

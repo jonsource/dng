@@ -18,6 +18,10 @@ int **linesight;
 
 extern char chbuf[256];
 extern int DEBUG_LVL_MAIN;
+extern List<TEXTURE> Textures;
+extern List<TEXTURED_ELEMENT> Elements;
+extern List<ANIMATOR> Animators;
+extern List<TILE> Tiles;
 
 string get_line(FILE * f)
 {	string ret="";
@@ -29,9 +33,7 @@ string get_line(FILE * f)
 }
 
 int load_map(string fname)
-{	char chbuf[256];
-	string str1, str2;
-	int mapsize;
+{	string str1, str2;
 	int tile;
 	FILE *f=fopen(fname.c_str(),"r");
 	if(!f)
@@ -55,7 +57,7 @@ int load_map(string fname)
 			}
 			if(str1.compare(":mapsize")==0)
 			{	str2=get_line(f);
-				if(sscanf(str2.c_str(),"%d",&MAP_SIZE))
+				if(sscanf(str2.c_str(),"%hu",&MAP_SIZE))
 				{	delete []map;
 					map = (int **) malloc(MAP_SIZE*sizeof(int *));
 					linesight = (int **) malloc(MAP_SIZE*sizeof(int *));
@@ -101,7 +103,7 @@ int load_map(string fname)
 					{	debug("Done loading textures");
 						str1=str2; break;
 					} //next part of definitions
-			        add_texture(load_texture(str2));
+			        Textures.add(load_texture(str2));
 				}
 			}
 			if(str1.compare(":animators")==0)
@@ -118,7 +120,7 @@ int load_map(string fname)
 					{ debug("Not enough parameters.");
 					  exit(1);
 					}
-					add_animator(create_animator(speed,offset,frames,w,h));
+					Animators.add(create_animator(speed,offset,frames,w,h));
 				}
 			}
 			if(str1.compare(":elements")==0)
@@ -137,7 +139,7 @@ int load_map(string fname)
 					{ debug("Not enough parameters.");
 					  exit(1);
 					}
-					add_element(create_element(type,x,y,z,w,h,transparent,texture,animator));
+					Elements.add(create_element(type,x,y,z,w,h,transparent,texture,animator));
 				}
 			}
 			if(str1.compare(":tiles")==0)
@@ -160,7 +162,7 @@ int load_map(string fname)
 					  debug("sub: "+sub+" "+to_str((int)sub.size())+" str2: "+str2,1);
 					  tile_add_element(tile,type,element);
 					}
-					add_tile(tile);
+					Tiles.add(tile);
 				}
 			}
 
