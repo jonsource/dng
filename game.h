@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <allegro.h>
 #include <string>
+#include "list.h"
 
 using namespace std;
 
