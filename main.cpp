@@ -25,7 +25,7 @@ int fps;
 int keyb_ignore;
 BITMAP *game_bmp,*first,*second;
 int status,mode;
-extern FILE *dbg;
+FILE *dbg;
 
 int courage, strength, constitution, intelligence, wisdom, charisma, dexterity, agility;
 int level,XP,maxHP,HP,MP;
@@ -61,8 +61,8 @@ void init()
   mode = 1;
   
 dbg = fopen("dng0a.log","w");  
-fprintf(dbg,"\n*** NEW RUN ***\n");
-fflush(dbg);
+debug("*** NEW RUN ***");
+
 
   LOCK_VARIABLE(game_time);
   LOCK_VARIABLE(state);
@@ -91,7 +91,7 @@ fflush(dbg);
   /* set up the viewport region */
   int viewport_w = 640;
   int viewport_h = 320;
-  int x = (SCREEN_W - viewport_w) / 2;
+  int x = 0;
   //y = (SCREEN_H - viewport_h) / 2;
   int y=20;
   w = viewport_w;
@@ -102,15 +102,12 @@ fflush(dbg);
   first=create_bitmap(SCREEN_W, SCREEN_H);
   second=create_bitmap(SCREEN_W, SCREEN_H);
   game_bmp = first;
-  rect(game_bmp, x, y, x+w-1, y+h-1, makecol(255, 0, 0));
-  set_clip_rect(game_bmp, x, y, x+w-1, y+h-1);
+  //rect(game_bmp, x, y, x+w-1, y+h-1, makecol(255, 0, 0));
+  //set_clip_rect(game_bmp, x, y, x+w, y+h);
   if(game_bmp==NULL)
-  {  fprintf(dbg,"%ld couldn't acquire screen!!\n",time(NULL));
-     fflush(dbg);
+  {  debug("Couldn't acquire screen!");
   }
-  fprintf(dbg,"screen depth: %d\n",bitmap_color_depth(game_bmp));
-  fflush(dbg);
-//  text_mode(0);
+  debug("screen depth: "+to_str(bitmap_color_depth(game_bmp)));
   clear(game_bmp);
 
   install_int(fps_proc,1000);
@@ -188,6 +185,8 @@ int main(int argc, char *argv[])
       if(key[KEY_J]) keypress(KEY_J);
       if(key[KEY_I]) keypress(KEY_I);
       if(key[KEY_K]) keypress(KEY_K);
+      if(key[KEY_L]) keypress(KEY_L);
+      if(key[KEY_O]) keypress(KEY_O);
       if(key[KEY_X]) keypress(KEY_X);
       if(key[KEY_V]) keypress(KEY_V);
       if(key[KEY_N]) keypress(KEY_N);
