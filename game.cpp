@@ -22,86 +22,28 @@ int TRANSPARENT = 0;
 
 char chbuf[256];
 
+/**
+ * initialiye and load game
+ */
+
 void game_load()
-{ srand(time(0));
-  status = CREATE;
-  Classes = new ClassTemplates();
-  Player = new Character(1);
-  load_graphics();
-  load_map("map1.map");
-  debug("done game_load");
-  debug("Tiles.len() "+to_str(Tiles.len()));
-  dappend(" Tiles[0]->len "+to_str(Tiles[0]->types[0]));
-  dappend(" .elements[0]"+to_str(Tiles[0]->elements[0]->type));
-  FOV=40;
-  STB=-0.85;
+{	srand(time(0));
+	status = CREATE;
+	Classes = new ClassTemplates();
+	Player = new Character(1);
+	load_graphics();
+	load_map("map1.map");
+	debug("done game_load");
+	debug("Tiles.len() "+to_str(Tiles.len()));
+	dappend(" Tiles[0]->len "+to_str(Tiles[0]->types[0]));
+	dappend(" .elements[0]"+to_str(Tiles[0]->elements[0]->type));
+	FOV=40;
+	STB=-0.85;
 }
 
-string to_str(int i)
-{	sprintf(chbuf,"%d",i);
-	return chbuf;
-}
-
-string to_str(float f)
-{	sprintf(chbuf,"%.2f",f);
-	return chbuf;
-}
-
-string to_str(bool b)
-{	if(b) return "true";
-	return "false";
-}
-
-int mstime()
-{	return clock()/(float)CLOCKS_PER_SEC*100;
-}
-
-void debug(string s, int lvl)
-{  if(lvl<DEBUG_LVL) return;
-   s="\n"+to_str((int)mstime())+" "+s;
-   fprintf(dbg,s.c_str());
-   fflush(dbg); 
-}
-
-void debug(string s)
-{ debug(s,4);
-}
-
-void dappend(string s, int lvl)
-{ 	if(lvl<DEBUG_LVL) return;
-	fprintf(dbg,s.c_str());
-	fflush(dbg);
-}
-
-void dappend(string s)
-{ 	dappend(s,4);
-}
-
-void set_debug_lvl(int lvl)
-{
-	DEBUG_LVL=lvl;
-}
-
-void reset_debug_lvl()
-{
-	DEBUG_LVL=DEBUG_LVL_MAIN;
-}
-
-void game_unload()
-{ 
-}
-
-
-/*
-void line_print(char *lines[])
-{ int num,y;
-  char *lines[] = {"Line %02d: Draws justified text",
-                       "Line %02d: within the specified",
-                       "Line %02d: x2-x1 area. But not",
-                       "Line %02d: T H I S !", NULL};
-  for (num = 0, y = 200; lines[num]; num++, y += text_height(font))
-         textprintf_ex(game_bmp, font, 300, y, makecol(0, 0, 0), makecol(255, 255, 255), lines[num], num);
-}*/
+/**
+ * draw current view
+ */
 
 void game_draw()
 { /*int num,y,*pass;
@@ -138,9 +80,11 @@ void game_draw()
 //  release_bitmap(bmp);
   debug("begin game_draw");
   draw_view(gx,gy,gz,gh);
-
 }  
 
+/**
+ * handle input
+ */
 
 void keypress(int i)
 {  int x=0,z=0;
@@ -183,6 +127,9 @@ void keypress(int i)
    keyb_ignore = 10;
 }
 
+/**
+ * convert string to bool
+ */
 bool to_bool(string s)
 {  if(s=="false" || s=="False") return false;
    if(s=="true" || s=="True") return true;
@@ -192,4 +139,89 @@ bool to_bool(string s)
      debug(buf,9);
      return false;
    }
+}
+
+/**
+ * convert integer to string
+ */
+string to_str(int i)
+{	sprintf(chbuf,"%d",i);
+	return chbuf;
+}
+
+/**
+ * convert float to string
+ */
+string to_str(float f)
+{	sprintf(chbuf,"%.2f",f);
+	return chbuf;
+}
+
+/**
+ * convert bool to string
+ */
+string to_str(bool b)
+{	if(b) return "true";
+	return "false";
+}
+
+/**
+ * get current time in miliseconds based on processor clock
+ */
+int mstime()
+{	return clock()/(float)CLOCKS_PER_SEC*100;
+}
+
+/**
+ * write debug information to log
+ * lvl - level of importance, the higher the more important
+ */
+void debug(string s, int lvl)
+{  if(lvl<DEBUG_LVL) return;
+   s="\n"+to_str((int)mstime())+" "+s;
+   fprintf(dbg,s.c_str());
+   fflush(dbg);
+}
+/**
+ * write debug information to log with default lvl
+ */
+void debug(string s)
+{ debug(s,4);
+}
+
+/**
+ * append debug information (omits current time stamp)
+ */
+void dappend(string s, int lvl)
+{ 	if(lvl<DEBUG_LVL) return;
+	fprintf(dbg,s.c_str());
+	fflush(dbg);
+}
+
+/**
+ * append debug information (omits current time stamp), with default lvl
+ */
+void dappend(string s)
+{ 	dappend(s,4);
+}
+
+/**
+ * set what lvl of importance is needed to be logged, 0 for everything, 10 for production version
+ * may be used to temporarily increase logging in parts of code
+ */
+void set_debug_lvl(int lvl)
+{
+	DEBUG_LVL=lvl;
+}
+
+/**
+ * reset debug level to main lvl
+ */
+void reset_debug_lvl()
+{
+	DEBUG_LVL=DEBUG_LVL_MAIN;
+}
+
+void game_unload()
+{
 }

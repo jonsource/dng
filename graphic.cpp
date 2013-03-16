@@ -20,26 +20,42 @@ extern List<LIGHT_SOURCE> Lightsources;
 
 CAMERA * cam=NULL;
 
+/**
+ * square of distance of two coordinates
+ */
 float dist2(int x,int z,int xx, int zz)
 { return ((x-xx)*(x-xx))+((z-zz)*(z-zz));
 
 }
 
+/**
+ * square of distance of coordinates to camera
+ */
 float dist(int x,int z,CAMERA * cam)
-{ return dist2(x,z,cam->xpos,cam->zpos);
+{ return dist2(x,z,cam->dolly_xpos,cam->dolly_zpos);
 
 }
 
+/**
+ * check whether coordinates are on map
+ */
 int check_coords(int x, int y)
 { if(x<0 || y<0 || x>=MAP_SIZE || y>=MAP_SIZE) return 0;
   else return map[x][y];
 }
 
+/**
+ * check whether we can see the coordinates,
+ * valid only after make_linesight is called for current camera position
+ */
 int see_coords(int x, int y)
 { if(check_coords(x,y)) return linesight[x][y];
   return 0;
 }
 
+/**
+ * load graphics
+ */
 int load_graphics()
 {   string s;
     PALETTE pal;
@@ -77,7 +93,7 @@ void unload_graphics()
 }
 
 /**
- * updates the camera matrix
+ * updates the camera matrix after moving
  * needs the variables heading, pitch and roll to be set
  */
 void update_camera(CAMERA * cam)
@@ -114,6 +130,9 @@ void update_camera(CAMERA * cam)
 		       cam->aspect);                           /* aspect ratio */
 }
 
+/**
+ * render a single element with type
+ */
 void render_element(int type, TEXTURED_ELEMENT * element, BITMAP *bmp, int x, int z, CAMERA * cam,int far)
 {  V3D_f _v[4], _vout[8], _vtmp[8];
    V3D_f *v[4], *vout[8], *vtmp[8];
@@ -225,6 +244,9 @@ void render_element(int type, TEXTURED_ELEMENT * element, BITMAP *bmp, int x, in
    polygon3d_f(bmp, polytype, far_texture(element,far), vc, vout);
 }
 
+/**
+ * get appropriate texture for given distance and animation
+ */
 BITMAP * far_texture(TEXTURED_ELEMENT * txt, int far)
 {	if(txt->animator)
 	{	int frame=(tmsec/txt->animator->speed)%txt->animator->frames;
@@ -239,8 +261,17 @@ BITMAP * far_texture(TEXTURED_ELEMENT * txt, int far)
 	return txt->texture->close;
 }
 
-void render_tile(TILE * tile,BITMAP * bmp, int x, int z, CAMERA * cam, int far)
+/**
+ * render a tile of map, i.e. render all of its elements as necessary
+ */
+void render_tile(TILE * tile,BITMAP * bmp, int x, int z, CAMERA * cam)
 {	//debug("render_tile "+to_str(x)+" "+to_str(z),1);
+	int d = dist(x,z,cam);
+
+	int far=2;
+	if(d<9) { far=1;}
+	if(d<4) { far=0;}
+
 	for(int i=0; i<tile->len; i++)
 	{	if(tile->types[i]==TILE_FRONT)
 		{	render_element(TILE_SIDE,tile->elements[i],bmp,x,z,cam,far);
@@ -250,19 +281,9 @@ void render_tile(TILE * tile,BITMAP * bmp, int x, int z, CAMERA * cam, int far)
 	}
 }
 
-/* nakresli tile z mapy */
-void draw_tile(BITMAP *bmp, CAMERA * cam, int x, int z)
-{ 	unsigned short int far;
-	int d = dist(x,z,cam);
-
-	far=2;
-	if(d<9) { far=1;}
-	if(d<4) { far=0;}
-
-	render_tile(Tiles[map[x][z]-1],bmp,x,z,cam,far);
-	//debug("end draw tile "+to_str(x)+" "+to_str(z),1);
-}
-
+/**
+ * subroutine of make_linesight, check whether the given tile can be seen and recursively adds it's neighbors if true
+ */
 void see_tile(int x, int z, CAMERA * cam)
 {	//debug("  see tile "+to_str(x)+" "+to_str(z),1);
 	int s=check_coords(x,z);
@@ -290,6 +311,9 @@ void see_tile(int x, int z, CAMERA * cam)
 	//dappend("  done "+to_str(x)+" "+to_str(z));
 }
 
+/**
+ * recursively count what tiles we  can see from current position
+ */
 void make_linesight(int x, int z, CAMERA * cam)
 {	debug(" linesight "+to_str(x)+" "+to_str(z),1);
 	for(int i=0; i<MAP_SIZE; i++)
@@ -308,6 +332,9 @@ void make_linesight(int x, int z, CAMERA * cam)
 	}
 }
 
+/**
+ * init camera, or reset the values afteer changes to FOV, aspoct and stepback
+ */
 void init_camera(float stepback,float fov, float aspect)
 {	if(cam==NULL) cam=new CAMERA;
 	if(cam==NULL)
@@ -322,6 +349,9 @@ void init_camera(float stepback,float fov, float aspect)
 	debug("Camera init",10);
 }
 
+/**
+ * draw the current view of the map
+ */
 void draw_view(int xpos, int ypos, int zpos, int heading)
 {  int dz,dx,c;
 
@@ -354,11 +384,11 @@ void draw_view(int xpos, int ypos, int zpos, int heading)
      { fx=xpos+dx*cam->xfront+dz*cam->zfront;  // ano zfront, y je nahoru
        fz=zpos+dz*cam->xfront+dx*cam->zfront;
        if(see_coords(fx,fz))
-         draw_tile(game_bmp, cam, fx, fz);
+         render_tile(Tiles[map[fx][fz]-1],game_bmp, fx, fz, cam);
        fx=xpos+dx*cam->xfront-dz*cam->zfront;  // ano zfront, y je nahoru
        fz=zpos-dz*cam->xfront+dx*cam->zfront;
        if(see_coords(fx,fz))
-         draw_tile(game_bmp, cam, fx, fz);
+    	 render_tile(Tiles[map[fx][fz]-1],game_bmp, fx, fz, cam);
      }
 
     /* overlay some text */
