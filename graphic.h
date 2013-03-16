@@ -35,6 +35,7 @@ typedef struct {
 } CAMERA;
 
 int init_graphic();
+void init_camera(float stepback,float fov, float aspect);
 int load_graphics();
 void unload_graphics();
 void draw_view(int x, int y,int z, int heading);

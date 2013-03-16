@@ -59,7 +59,6 @@ int mstime()
 void debug(string s, int lvl)
 {  if(lvl<DEBUG_LVL) return;
    s="\n"+to_str((int)mstime())+" "+s;
-   //fprintf(dbg,s.c_str(),time(NULL));
    fprintf(dbg,s.c_str());
    fflush(dbg); 
 }
@@ -155,10 +154,10 @@ void keypress(int i)
      if(i == KEY_D) x=-1;
      if(i == KEY_R) gy+=1;
      if(i == KEY_F) gy-=1;
-     if(i == KEY_H) FOV+=1;
-     if(i == KEY_J) FOV-=1;
-     if(i == KEY_I) STB+=0.1;
-     if(i == KEY_K) STB-=0.1;
+     if(i == KEY_H) { FOV+=1; init_camera(STB,FOV,1.33f); }
+     if(i == KEY_J) { FOV-=1; init_camera(STB,FOV,1.33f); }
+     if(i == KEY_I) { STB+=0.1; init_camera(STB,FOV,1.33f); }
+     if(i == KEY_K) { STB-=0.1; init_camera(STB,FOV,1.33f); }
      if(i == KEY_O) light_power+=1;
      if(i == KEY_L) light_power-=1;
      if(i == KEY_T) {if(TRANSPARENT) TRANSPARENT =0; else TRANSPARENT=1;}
