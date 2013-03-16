@@ -23,9 +23,9 @@ long int tmsec;
 int quit;
 int fps;
 int keyb_ignore;
-BITMAP *game_bmp,*first,*second;
+BITMAP *game_bmp=NULL,*first=NULL,*second=NULL;
 int status,mode;
-FILE *dbg;
+FILE *dbg=NULL;
 
 int courage, strength, constitution, intelligence, wisdom, charisma, dexterity, agility;
 int level,XP,maxHP,HP,MP;
@@ -55,9 +55,7 @@ void fps_proc(void)
 END_OF_FUNCTION(fps_proc)
 
 void init()
-{ int w = 640;
-  int h = 480;
-  int depth = 32;
+{
   mode = 1;
   
 dbg = fopen("dng0a.log","w");  
@@ -81,34 +79,7 @@ debug("*** NEW RUN ***");
  //install_mouse();
   install_timer();
 
-  set_color_depth(depth);
-  if(set_gfx_mode(GFX_AUTODETECT_WINDOWED, 640, 480, 0, 0) < 0) 
-  { // Initialise video mode
-    //error("Select video mode failed!", EXIT_FAILURE);
-    quit=1;
-    return;
-  }
-  /* set up the viewport region */
-  int viewport_w = 640;
-  int viewport_h = 320;
-  int x = 0;
-  //y = (SCREEN_H - viewport_h) / 2;
-  int y=20;
-  w = viewport_w;
-  h = viewport_h;
-  set_projection_viewport(x, y, w, h);
-  set_alpha_blender();
-  set_trans_blender(0,0,0,128);
-  first=create_bitmap(SCREEN_W, SCREEN_H);
-  second=create_bitmap(SCREEN_W, SCREEN_H);
-  game_bmp = first;
-  //rect(game_bmp, x, y, x+w-1, y+h-1, makecol(255, 0, 0));
-  //set_clip_rect(game_bmp, x, y, x+w, y+h);
-  if(game_bmp==NULL)
-  {  debug("Couldn't acquire screen!");
-  }
-  debug("screen depth: "+to_str(bitmap_color_depth(game_bmp)));
-  clear(game_bmp);
+  init_graphic();
 
   install_int(fps_proc,1000);
   install_int(game_timer,TIMER);

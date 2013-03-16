@@ -34,7 +34,7 @@ void game_load()
   dappend(" Tiles[0]->len "+to_str(Tiles[0]->types[0]));
   dappend(" .elements[0]"+to_str(Tiles[0]->elements[0]->type));
   FOV=40;
-  STB=-0.35;
+  STB=-0.85;
 }
 
 string to_str(int i)

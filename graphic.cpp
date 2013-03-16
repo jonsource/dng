@@ -3,11 +3,11 @@
 #include <math.h>
 
 BITMAP * sky1[4];
-BITMAP * api;
+BITMAP * api=NULL;
 RGB pal[256];
 int FOV;
 double STB;
-extern BITMAP *game_bmp;
+extern BITMAP *game_bmp,* first,* second;
 extern int fps, tmsec;
 extern int TRANSPARENT;
 extern TILE ** Tiles;
@@ -18,11 +18,7 @@ extern int **linesight;
 extern unsigned short int MAP_SIZE;
 extern List<LIGHT_SOURCE> Lightsources;
 
-//TEXTURE * floor1, * floor2, * floor3, * floor4;
-//TEXTURE * wall1, * wall2;
-//TEXTURE * static1, *static2, *static3;
-//TEXTURED_ELEMENT * element1, * element2, * element3, * element4, * element5, * element6;
-CAMERA cam;
+CAMERA * cam=NULL;
 
 float dist2(int x,int z,int xx, int zz)
 { return ((x-xx)*(x-xx))+((z-zz)*(z-zz));
@@ -98,16 +94,12 @@ void update_camera(CAMERA * cam)
      case HEAD_SOUTH : cam->xfront = -1; cam->zfront = 0; break;
      
    }
-   cam->dolly_xpos=cam->xpos+0.5;
-   cam->dolly_ypos=cam->ypos+0.5;
-   cam->dolly_zpos=cam->zpos+0.5;
-   if(cam->xfront==0) cam->xpos+=0.5;
-   	  else cam->xpos+=(cam->xfront>0)?cam->stepback:1-cam->stepback;
-   if(cam->zfront==0) cam->zpos+=0.5;  //ano zfront a ypos tu maj byt takhle
-      else cam->zpos+=(cam->zfront>0)?cam->stepback:1-cam->stepback;
-   cam->ypos+=0.5;
+   if(cam->xfront==0) cam->xpos=cam->dolly_xpos;
+   	  else cam->xpos=cam->dolly_xpos+((cam->xfront>0)?cam->stepback:-cam->stepback);
+   if(cam->zfront==0) cam->zpos=cam->dolly_zpos;  //ano zfront a ypos tu maj byt takhle
+      else cam->zpos=cam->dolly_zpos+((cam->zfront>0)?cam->stepback:-cam->stepback);
+   cam->ypos=cam->dolly_ypos;
    cam->yfront=0;
-
    /* rotate the up vector around the in-front vector by the roll angle */
    get_vector_rotation_matrix_f(&cam->roller, cam->xfront, cam->yfront, cam->zfront,
 				cam->roll*128.0/M_PI);
@@ -139,7 +131,7 @@ void render_element(int type, TEXTURED_ELEMENT * element, BITMAP *bmp, int x, in
    	   	{	case TILE_FLOOR:
    	   		case TILE_CEILING:
    	   		case TILE_SIDE: polytype = POLYTYPE_PTEX_LIT; break;
-   	   		case TILE_FRONT: polytype = POLYTYPE_PTEX_LIT; break;
+   	   		case TILE_FRONT: polytype = POLYTYPE_ATEX_LIT; break; //no need to account for perspective with front tiles
    	   		default: polytype = POLYTYPE_PTEX_MASK_LIT; break;
    	   	}
    		set_trans_blender(0,0,0,128);
@@ -181,6 +173,7 @@ void render_element(int type, TEXTURED_ELEMENT * element, BITMAP *bmp, int x, in
         if(v[c]->c>255) v[c]->c=255;
    }
 
+
    /* apply the camera matrix, translating world space -> view space */
    for (c=0; c<4; c++) {
       apply_matrix_f(&cam->camera, v[c]->x, v[c]->y, v[c]->z,
@@ -199,7 +192,7 @@ void render_element(int type, TEXTURED_ELEMENT * element, BITMAP *bmp, int x, in
       else if (v[c]->y > v[c]->z)
 	 flags[c] |= 8;
 
-      if (v[c]->z < 0.1)
+      if (v[c]->z < -cam->stepback)
 	 flags[c] |= 16;
    }
    /* quit if all vertices are off the same edge of the screen */
@@ -208,7 +201,7 @@ void render_element(int type, TEXTURED_ELEMENT * element, BITMAP *bmp, int x, in
 
    if (flags[0] | flags[1] | flags[2] | flags[3]) {
       /* clip if any vertices are off the edge of the screen */
-      vc = clip3d_f(polytype, 0.15, 0, 4, (AL_CONST V3D_f **)v,
+      vc = clip3d_f(polytype, -cam->stepback, 0, 4, (AL_CONST V3D_f **)v,
 		    vout, vtmp, out);
 
       if (vc <= 0)
@@ -270,7 +263,7 @@ void draw_tile(BITMAP *bmp, CAMERA * cam, int x, int z)
 	//debug("end draw tile "+to_str(x)+" "+to_str(z),1);
 }
 
-void see_tile(int x, int z, CAMERA cam)
+void see_tile(int x, int z, CAMERA * cam)
 {	//debug("  see tile "+to_str(x)+" "+to_str(z),1);
 	int s=check_coords(x,z);
 	int see=1;
@@ -283,21 +276,21 @@ void see_tile(int x, int z, CAMERA cam)
 	  for(int i=0;i<Tiles[s-1]->len;i++)
 		  if(Tiles[s-1]->types[i]==TILE_FRONT) { see=0; return; }
 	  if(see)
-	  {   if(!see_coords(x+cam.xfront,z+cam.zfront)) see_tile(x+cam.xfront,z+cam.zfront,cam);
-	  	  if(cam.xfront==0)
-	  	  { if(x>=cam.dolly_xpos-1 && !see_coords(x+1,z+cam.zfront)) see_tile(x+1,z+cam.zfront,cam);
-	  	    if(x<cam.dolly_xpos && !see_coords(x-1,z+cam.zfront)) see_tile(x-1,z+cam.zfront,cam);
+	  {   if(!see_coords(x+cam->xfront,z+cam->zfront)) see_tile(x+cam->xfront,z+cam->zfront,cam);
+	  	  if(cam->xfront==0)
+	  	  { if(x>=cam->dolly_xpos-1 && !see_coords(x+1,z+cam->zfront)) see_tile(x+1,z+cam->zfront,cam);
+	  	    if(x<cam->dolly_xpos && !see_coords(x-1,z+cam->zfront)) see_tile(x-1,z+cam->zfront,cam);
 	  	  }
 	  	  else
-	  	  { if(z>=cam.dolly_zpos-1 && !see_coords(x+cam.xfront,z+1)) see_tile(x+cam.xfront,z+1,cam);
-	  	  	if(z<cam.dolly_zpos && !see_coords(x+cam.xfront,z-1)) see_tile(x+cam.xfront,z-1,cam);
+	  	  { if(z>=cam->dolly_zpos-1 && !see_coords(x+cam->xfront,z+1)) see_tile(x+cam->xfront,z+1,cam);
+	  	  	if(z<cam->dolly_zpos && !see_coords(x+cam->xfront,z-1)) see_tile(x+cam->xfront,z-1,cam);
 	  	  }
 	  }
 	}
 	//dappend("  done "+to_str(x)+" "+to_str(z));
 }
 
-void make_linesight(int x, int z, CAMERA cam)
+void make_linesight(int x, int z, CAMERA * cam)
 {	debug(" linesight "+to_str(x)+" "+to_str(z),1);
 	for(int i=0; i<MAP_SIZE; i++)
 		for(int j=0; j<MAP_SIZE; j++)
@@ -305,7 +298,7 @@ void make_linesight(int x, int z, CAMERA cam)
 	debug(" * after sight reset",1);
 	// three initial tiles
 	see_tile(x,z,cam);
-	if(cam.xfront==0)
+	if(cam->xfront==0)
 	{ 	see_tile(x-1,z,cam);
 		see_tile(x+1,z,cam);
 	}
@@ -315,19 +308,27 @@ void make_linesight(int x, int z, CAMERA cam)
 	}
 }
 
+void init_camera(float stepback,float fov, float aspect)
+{	if(cam==NULL) cam=new CAMERA;
+	if(cam==NULL)
+	{	debug("Couldn't init camera",10);
+		exit(1);
+	}
+	cam->pitch=0;
+	cam->roll=0;
+	cam->fov=fov;
+	cam->stepback=stepback;
+	cam->aspect = aspect;
+	debug("Camera init",10);
+}
+
 void draw_view(int xpos, int ypos, int zpos, int heading)
 {  int dz,dx,c;
-//   float pitch=0;
-   cam.pitch=0;
-//   float roll=0;
-   cam.roll=0;
-//   float fov = 75;
-   cam.fov=FOV;
-   cam.stepback=STB;
-   cam.ypos = ypos;
-   cam.xpos=xpos;
-   cam.zpos=zpos;
-   cam.aspect = 1.33f;
+
+
+   cam->dolly_ypos=ypos+0.5;
+   cam->dolly_xpos=xpos+0.5;
+   cam->dolly_zpos=zpos+0.5;
    debug("begin draw_view()",3);
    
    //blit(api, game_bmp, 0, 0, 0, 0, 640, 480);
@@ -342,22 +343,22 @@ void draw_view(int xpos, int ypos, int zpos, int heading)
    }
 
 
-   cam.heading=heading;
-   update_camera(&cam);
+   cam->heading=heading;
+   update_camera(cam);
 
    make_linesight(xpos,zpos,cam);
    debug(" * in draw_view after linesight",1);
   int fx, fz;
  for(dx=MAX_VIEW_DIST; dx>=0; dx--)
      for(dz=dx+1; dz>=0; dz--)
-     { fx=xpos+dx*cam.xfront+dz*cam.zfront;  // ano zfront, y je nahoru
-       fz=zpos+dz*cam.xfront+dx*cam.zfront;
+     { fx=xpos+dx*cam->xfront+dz*cam->zfront;  // ano zfront, y je nahoru
+       fz=zpos+dz*cam->xfront+dx*cam->zfront;
        if(see_coords(fx,fz))
-         draw_tile(game_bmp, &cam, fx, fz);
-       fx=xpos+dx*cam.xfront-dz*cam.zfront;  // ano zfront, y je nahoru
-       fz=zpos-dz*cam.xfront+dx*cam.zfront;
+         draw_tile(game_bmp, cam, fx, fz);
+       fx=xpos+dx*cam->xfront-dz*cam->zfront;  // ano zfront, y je nahoru
+       fz=zpos-dz*cam->xfront+dx*cam->zfront;
        if(see_coords(fx,fz))
-         draw_tile(game_bmp, &cam, fx, fz);
+         draw_tile(game_bmp, cam, fx, fz);
      }
 
     /* overlay some text */
@@ -368,26 +369,57 @@ void draw_view(int xpos, int ypos, int zpos, int heading)
    //textprintf_ex(bmp, font, 0,  32, makecol(0, 0, 0), -1,
 		 //"Viewport height: %d (h/H changes)", viewport_h);
    textprintf_ex(bmp, font, 0, 40, makecol(0, 0, 0), -1,
-		 "Field of view: %f  Aspect: %.2f Light: %d", cam.fov,cam.aspect,light_power);
+		 "Field of view: %f  Aspect: %.2f Light: %d", cam->fov,cam->aspect,light_power);
    //textprintf_ex(bmp, font, 0, 48, makecol(0, 0, 0), -1,
 		 //"Aspect ratio: %.2f (a/A changes)", cam.aspect);
    textprintf_ex(bmp, font, 0, 56, makecol(0, 0, 0), -1,
-		 "Position X: %.2f  Y: %.2f  Z: %.2f", (float)cam.xpos,(float)cam.ypos,(float)cam.zpos);
+		 "Position X: %.2f(%.2f) Y: %.2f(%.2f) Z: %.2f(%.2f)", (float)cam->xpos,cam->dolly_xpos,(float)cam->ypos,cam->dolly_ypos,(float)cam->zpos,cam->dolly_zpos);
    //textprintf_ex(bmp, font, 0, 64, makecol(0, 0, 0), -1,
 	//	 "Y position: %.2f (y/Y changes)", (float)cam.ypos);
    //textprintf_ex(bmp, font, 0, 72, makecol(0, 0, 0), -1,
 	//	 "Z position: %.2f (z/Z changes)", (float)cam.zpos);
    textprintf_ex(bmp, font, 0, 80, makecol(0, 0, 0), -1,
-		 "Heading: %d  Stepback: %.2f", cam.heading,cam.stepback);
+		 "Heading: %d  Stepback: %.2f", cam->heading,cam->stepback);
    textprintf_ex(bmp, font, 0, 88, makecol(0, 0, 0), -1,
-		 "Pitch: %.2f deg (pgup/pgdn changes)", cam.pitch);
+		 "Pitch: %.2f deg (pgup/pgdn changes)", cam->pitch);
    textprintf_ex(bmp, font, 0, 96, makecol(0, 0, 0), -1,
-		 "Roll: %.2f deg (r/R changes)", cam.roll);
+		 "Roll: %.2f deg (r/R changes)", cam->roll);
    textprintf_ex(bmp, font, 0, 104, makecol(0, 0, 0), -1,
-		 "Front vector: %d, %d, %d", cam.xfront, cam.yfront, cam.zfront);
+		 "Front vector: %d, %d, %d", cam->xfront, cam->yfront, cam->zfront);
    textprintf_ex(bmp, font, 0, 112, makecol(0, 0, 0), -1,
-		 "Up vector: %.2f, %.2f, %.2f", cam.xup, cam.yup, cam.zup);
+		 "Up vector: %.2f, %.2f, %.2f", cam->xup, cam->yup, cam->zup);
    textprintf_ex(bmp, font, 0, 120, makecol(0, 0, 0), -1,
 		 "Frames per second: %d", fps);
    
+}
+
+int init_graphic()
+{	int depth = 32;
+
+	set_color_depth(depth);
+	if(set_gfx_mode(GFX_AUTODETECT_WINDOWED, 640, 480, 0, 0) < 0)
+	{ 	debug("Select video mode failed!",10);
+		return 0;
+	}
+	/* set up the viewport region */
+	int viewport_w = 640;
+	int viewport_h = 320;
+	int x = 0;
+	int y=20;
+	set_projection_viewport(x-1, y-1, viewport_w+1, viewport_h+1);
+	set_alpha_blender();
+	set_trans_blender(0,0,0,128);
+	first=create_bitmap(SCREEN_W, SCREEN_H);
+	second=create_bitmap(SCREEN_W, SCREEN_H);
+	game_bmp = first;
+	//rect(game_bmp, x, y, x+w-1, y+h-1, makecol(255, 0, 0));
+	set_clip_rect(game_bmp, x, y, x+viewport_w, y+viewport_h);
+	if(game_bmp==NULL)
+	{  debug("Couldn't acquire screen!");
+	   return 0;
+	}
+	debug("screen depth: "+to_str(bitmap_color_depth(game_bmp)));
+	clear(game_bmp);
+	init_camera(-0.85,40,1.33);
+	return 1;
 }
