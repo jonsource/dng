@@ -78,7 +78,7 @@ void game_draw()
   textprintf_ex(game_bmp, font, 30, 150, makecol(255, 255, 255), -1, str.c_str());
   delete pass;*/
 //  release_bitmap(bmp);
-  debug("begin game_draw");
+  debug("begin game_draw",3);
   draw_view(gx,gy,gz,gh);
 }  
 
@@ -177,10 +177,12 @@ int mstime()
  * lvl - level of importance, the higher the more important
  */
 void debug(string s, int lvl)
-{  if(lvl<DEBUG_LVL) return;
-   s="\n"+to_str((int)mstime())+" "+s;
-   fprintf(dbg,s.c_str());
-   fflush(dbg);
+{
+	if(lvl<DEBUG_LVL) return;
+	s="\n"+to_str((int)mstime())+" "+s;
+	printf(s.c_str());
+	fprintf(dbg,s.c_str());
+	fflush(dbg);
 }
 /**
  * write debug information to log with default lvl

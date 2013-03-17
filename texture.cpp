@@ -16,6 +16,11 @@ List<ANIMATOR> Animators;
 List<TILE> Tiles;
 List<LIGHT_SOURCE> Lightsources;
 
+/**
+ * loads texture from file. Separates the string s into filename and extension, and loads filename_close.extension
+ * and then _medium and _far. If can't find appropriate texture, falls back to resizing.
+ */
+
 TEXTURE * load_texture(string s)
 {   PALETTE pal;
     TEXTURE *text;
@@ -111,8 +116,8 @@ int tile_add_element(TILE * til, string type, int element)
 	   exit(1);
 	}
 	til->types[til->len] = typ;
-	til->len++;
 	debug("tile: "+type+":"+to_str(til->types[til->len])+" "+to_str(til->elements[til->len]->type),4);
+	til->len++;
 	return 1;
 };
 

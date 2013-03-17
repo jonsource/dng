@@ -30,13 +30,13 @@ template <class T>
 List<T>::List(void)
 {
 	items=NULL;
-	max_item=-1;
+	max_item=0;
 	alloc_size=0;
 }
 
 template <class T>
 void List<T>::add(T * item)
-{	if(max_item+1 >= alloc_size)
+{	if(max_item >= alloc_size)
 	{	debug("Expanding list from: "+to_str(max_item),2);
 		T ** re = new T* [alloc_size?(alloc_size*2):4];
 		for(int i=0;i<alloc_size; i++) re[i]=items[i];
@@ -46,20 +46,20 @@ void List<T>::add(T * item)
 		debug(" ... to: "+to_str(alloc_size),2);
 	}
 debug("Adding item as #"+to_str(max_item+1));
-items[max_item+1]=item;
+items[max_item]=item;
 dappend(" - item added",1);
 max_item++;
 }
 
 template <class T>
 T* List<T>::operator[](const int index)
-{	assert(index>=0 && index<=max_item);
+{	//assert(index>=0 && index<=max_item);
 	return items[index];
 }
 
 template <class T>
 int List<T>::len()
-{	return max_item+1;
+{	return max_item;
 }
 
 

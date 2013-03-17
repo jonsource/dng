@@ -37,7 +37,7 @@ float dist(int x,int z,CAMERA * cam)
 }
 
 /**
- * check whether coordinates are on map
+ * check whether coordinates are on map and return them
  */
 int check_coords(int x, int y)
 { if(x<0 || y<0 || x>=MAP_SIZE || y>=MAP_SIZE) return 0;
@@ -45,11 +45,19 @@ int check_coords(int x, int y)
 }
 
 /**
+ * check whether coordinates are on map
+ */
+int check_coords_subr(int x, int y)
+{ if(x<0 || y<0 || x>=MAP_SIZE || y>=MAP_SIZE) return 0;
+  else return 1;
+}
+
+/**
  * check whether we can see the coordinates,
  * valid only after make_linesight is called for current camera position
  */
 int see_coords(int x, int y)
-{ if(check_coords(x,y)) return linesight[x][y];
+{ if(check_coords_subr(x,y)) return linesight[x][y];
   return 0;
 }
 
@@ -150,7 +158,8 @@ void render_element(int type, TEXTURED_ELEMENT * element, BITMAP *bmp, int x, in
    	   	{	case TILE_FLOOR:
    	   		case TILE_CEILING:
    	   		case TILE_SIDE: polytype = POLYTYPE_PTEX_LIT; break;
-   	   		case TILE_FRONT: polytype = POLYTYPE_ATEX_LIT; break; //no need to account for perspective with front tiles
+   	   		case TILE_FRONT:
+   	   		case TILE_STATIC: polytype = POLYTYPE_ATEX_LIT; break; //no need to account for perspective with front tiles
    	   		default: polytype = POLYTYPE_PTEX_MASK_LIT; break;
    	   	}
    		set_trans_blender(0,0,0,128);
@@ -174,13 +183,13 @@ void render_element(int type, TEXTURED_ELEMENT * element, BITMAP *bmp, int x, in
    	   case TILE_STATIC: make_static_element(v,element,x,z,cam,far); break;
    	   case TILE_STATIC_NS: make_static_element_ns(v,element,x,z,cam,far); break;
    	   case TILE_STATIC_EW: make_static_element_ew(v,element,x,z,cam,far); break;
-   	   default: debug("Missing or bad tile type in render element!",3); break;
+   	   default: debug("Missing or bad tile type in render element!",3); return;
    }
 
    /* apply lighting to vertices, used to render lit textures */
    int ls;
    for (c=0; c<4; c++)
-   {  	ls=light_power-sqrt(dist2(v[c]->x,v[c]->z,cam->xpos,cam->zpos))*30;
+   {  	ls=light_power-sqrt(dist2(v[c]->x,v[c]->z,cam->dolly_xpos,cam->dolly_zpos))*30;
 
    	    v[c]->c=ls>0?ls:0;
 	    //v[c]->c=0;
@@ -272,12 +281,15 @@ void render_tile(TILE * tile,BITMAP * bmp, int x, int z, CAMERA * cam)
 	if(d<9) { far=1;}
 	if(d<4) { far=0;}
 
+	/** TODO
+	 *  for SIDE and FRONT check if neighboring tile is seen, if not, don't draw
+	 */
 	for(int i=0; i<tile->len; i++)
-	{	if(tile->types[i]==TILE_FRONT)
+	{	/*if(tile->types[i]==TILE_FRONT)
 		{	render_element(TILE_SIDE,tile->elements[i],bmp,x,z,cam,far);
 			render_element(TILE_FRONT,tile->elements[i],bmp,x,z,cam,far);
 		}
-		else render_element(tile->types[i],tile->elements[i],bmp,x,z,cam,far);
+		else*/ render_element(tile->types[i],tile->elements[i],bmp,x,z,cam,far);
 	}
 }
 
@@ -287,25 +299,23 @@ void render_tile(TILE * tile,BITMAP * bmp, int x, int z, CAMERA * cam)
 void see_tile(int x, int z, CAMERA * cam)
 {	//debug("  see tile "+to_str(x)+" "+to_str(z),1);
 	int s=check_coords(x,z);
-	int see=1;
 	if(s)
 	{ if(linesight[x][z])
-	  { dappend(" already seen",1);
+	  { //dappend(" already seen",1);
 		return;
 	  }
 	  linesight[x][z]=s;
 	  for(int i=0;i<Tiles[s-1]->len;i++)
-		  if(Tiles[s-1]->types[i]==TILE_FRONT) { see=0; return; }
-	  if(see)
-	  {   if(!see_coords(x+cam->xfront,z+cam->zfront)) see_tile(x+cam->xfront,z+cam->zfront,cam);
-	  	  if(cam->xfront==0)
-	  	  { if(x>=cam->dolly_xpos-1 && !see_coords(x+1,z+cam->zfront)) see_tile(x+1,z+cam->zfront,cam);
-	  	    if(x<cam->dolly_xpos && !see_coords(x-1,z+cam->zfront)) see_tile(x-1,z+cam->zfront,cam);
-	  	  }
-	  	  else
-	  	  { if(z>=cam->dolly_zpos-1 && !see_coords(x+cam->xfront,z+1)) see_tile(x+cam->xfront,z+1,cam);
-	  	  	if(z<cam->dolly_zpos && !see_coords(x+cam->xfront,z-1)) see_tile(x+cam->xfront,z-1,cam);
-	  	  }
+		  if(Tiles[s-1]->types[i]==TILE_FRONT) { return; }
+
+	  if(!see_coords(x+cam->xfront,z+cam->zfront)) see_tile(x+cam->xfront,z+cam->zfront,cam);
+	  if(cam->xfront==0)
+	  { if(x>=cam->dolly_xpos-1 && !see_coords(x+1,z+cam->zfront)) see_tile(x+1,z+cam->zfront,cam);
+	    if(x<cam->dolly_xpos && !see_coords(x-1,z+cam->zfront)) see_tile(x-1,z+cam->zfront,cam);
+	  }
+	  else
+	  { if(z>=cam->dolly_zpos-1 && !see_coords(x+cam->xfront,z+1)) see_tile(x+cam->xfront,z+1,cam);
+	  	if(z<cam->dolly_zpos && !see_coords(x+cam->xfront,z-1)) see_tile(x+cam->xfront,z-1,cam);
 	  }
 	}
 	//dappend("  done "+to_str(x)+" "+to_str(z));
@@ -319,7 +329,7 @@ void make_linesight(int x, int z, CAMERA * cam)
 	for(int i=0; i<MAP_SIZE; i++)
 		for(int j=0; j<MAP_SIZE; j++)
 			linesight[i][j]=0;
-	debug(" * after sight reset",1);
+	//debug(" * after sight reset",1);
 	// three initial tiles
 	see_tile(x,z,cam);
 	if(cam->xfront==0)
@@ -377,7 +387,7 @@ void draw_view(int xpos, int ypos, int zpos, int heading)
    update_camera(cam);
 
    make_linesight(xpos,zpos,cam);
-   debug(" * in draw_view after linesight",1);
+   //debug(" * in draw_view after linesight",1);
   int fx, fz;
  for(dx=MAX_VIEW_DIST; dx>=0; dx--)
      for(dz=dx+1; dz>=0; dz--)
@@ -392,33 +402,32 @@ void draw_view(int xpos, int ypos, int zpos, int heading)
      }
 
     /* overlay some text */
-   BITMAP *bmp = game_bmp;  
-   set_clip_rect(bmp, 0, 0, bmp->w, bmp->h);
+   set_clip_rect(game_bmp, 0, 0, game_bmp->w, game_bmp->h);
   // textprintf_ex(bmp, font, 0,  0, makecol(0, 0, 0), -1,
 //		 "Viewport width: %d  height: %d", viewport_w,viewport_h);
    //textprintf_ex(bmp, font, 0,  32, makecol(0, 0, 0), -1,
 		 //"Viewport height: %d (h/H changes)", viewport_h);
-   textprintf_ex(bmp, font, 0, 40, makecol(0, 0, 0), -1,
+   textprintf_ex(game_bmp, font, 0, 40, makecol(0, 0, 0), -1,
 		 "Field of view: %f  Aspect: %.2f Light: %d", cam->fov,cam->aspect,light_power);
    //textprintf_ex(bmp, font, 0, 48, makecol(0, 0, 0), -1,
 		 //"Aspect ratio: %.2f (a/A changes)", cam.aspect);
-   textprintf_ex(bmp, font, 0, 56, makecol(0, 0, 0), -1,
+   textprintf_ex(game_bmp, font, 0, 56, makecol(0, 0, 0), -1,
 		 "Position X: %.2f(%.2f) Y: %.2f(%.2f) Z: %.2f(%.2f)", (float)cam->xpos,cam->dolly_xpos,(float)cam->ypos,cam->dolly_ypos,(float)cam->zpos,cam->dolly_zpos);
    //textprintf_ex(bmp, font, 0, 64, makecol(0, 0, 0), -1,
 	//	 "Y position: %.2f (y/Y changes)", (float)cam.ypos);
    //textprintf_ex(bmp, font, 0, 72, makecol(0, 0, 0), -1,
 	//	 "Z position: %.2f (z/Z changes)", (float)cam.zpos);
-   textprintf_ex(bmp, font, 0, 80, makecol(0, 0, 0), -1,
+   textprintf_ex(game_bmp, font, 0, 80, makecol(0, 0, 0), -1,
 		 "Heading: %d  Stepback: %.2f", cam->heading,cam->stepback);
-   textprintf_ex(bmp, font, 0, 88, makecol(0, 0, 0), -1,
+   textprintf_ex(game_bmp, font, 0, 88, makecol(0, 0, 0), -1,
 		 "Pitch: %.2f deg (pgup/pgdn changes)", cam->pitch);
-   textprintf_ex(bmp, font, 0, 96, makecol(0, 0, 0), -1,
+   textprintf_ex(game_bmp, font, 0, 96, makecol(0, 0, 0), -1,
 		 "Roll: %.2f deg (r/R changes)", cam->roll);
-   textprintf_ex(bmp, font, 0, 104, makecol(0, 0, 0), -1,
+   textprintf_ex(game_bmp, font, 0, 104, makecol(0, 0, 0), -1,
 		 "Front vector: %d, %d, %d", cam->xfront, cam->yfront, cam->zfront);
-   textprintf_ex(bmp, font, 0, 112, makecol(0, 0, 0), -1,
+   textprintf_ex(game_bmp, font, 0, 112, makecol(0, 0, 0), -1,
 		 "Up vector: %.2f, %.2f, %.2f", cam->xup, cam->yup, cam->zup);
-   textprintf_ex(bmp, font, 0, 120, makecol(0, 0, 0), -1,
+   textprintf_ex(game_bmp, font, 0, 120, makecol(0, 0, 0), -1,
 		 "Frames per second: %d", fps);
    
 }
