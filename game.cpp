@@ -82,12 +82,28 @@ void game_draw()
   draw_view(gx,gy,gz,gh);
 }  
 
+void player_move(int x, int y, int z, int h)
+{	int nz,nx;
+	gh+=h;
+	if(gh<0) gh=3;
+	if(gh>3) gh=0;
+	switch(gh)
+	{ case HEAD_NORTH: nz=gz-x; nx=gx+z; break;
+	  case HEAD_EAST: nz=gz+z; nx=gx+x; break;
+	  case HEAD_SOUTH: nz=gz+x; nx=gx-z; break;
+	  case HEAD_WEST: nz=gz-z; nx=gx-x; break;
+	}
+	gy+=y;
+	if(check_coords(nz,nx)!=3)
+	{	gz=nz; gx=nx;
+	}
+}
+
 /**
  * handle input
  */
-
 void keypress(int i)
-{  int x=0,z=0;
+{  int x=0,z=0,y=0,h=0;
    if(status == CREATE)
    { if(i == KEY_P) status = PLAY;
      if(i == KEY_M) { mode = mode+1; mode = mode%6; }
@@ -96,8 +112,8 @@ void keypress(int i)
      if(i == KEY_S) z=-1;
      if(i == KEY_A) x=1;
      if(i == KEY_D) x=-1;
-     if(i == KEY_R) gy+=1;
-     if(i == KEY_F) gy-=1;
+     if(i == KEY_R) y=1;
+     if(i == KEY_F) y-=1;
      if(i == KEY_H) { FOV+=1; init_camera(STB,FOV,1.33f); }
      if(i == KEY_J) { FOV-=1; init_camera(STB,FOV,1.33f); }
      if(i == KEY_I) { STB+=0.1; init_camera(STB,FOV,1.33f); }
@@ -105,22 +121,16 @@ void keypress(int i)
      if(i == KEY_O) light_power+=1;
      if(i == KEY_L) light_power-=1;
      if(i == KEY_T) {if(TRANSPARENT) TRANSPARENT =0; else TRANSPARENT=1;}
-     switch(gh)
-     { case HEAD_NORTH: gz-=x; gx+=z; break;
-       case HEAD_EAST: gz+=z; gx+=x; break;
-       case HEAD_SOUTH: gz+=x; gx-=z; break;
-       case HEAD_WEST: gz-=z; gx-=x; break;
-     }
-     if(i == KEY_E) {gh--; if(gh<0) gh=3; }
-     if(i == KEY_Q) {gh++; if(gh>3) gh=0; }
-     
+     if(i == KEY_E) {h=1;}
+     if(i == KEY_Q) {h=1;}
      if(i == KEY_N) 
      { Class *cl=Classes->GetTemplate(Player->classname);
        cl->NextLevel(Player);
      }
+     player_move(x,y,z,h);
    }
    if(status == PLAY)
-   { 
+   {
    }
    if(status == PAUSE)
    { if(i == KEY_SPACE) { status = PLAY; } }
