@@ -15,6 +15,7 @@ List<TEXTURED_ELEMENT> Elements;
 List<ANIMATOR> Animators;
 List<TILE> Tiles;
 List<LIGHT_SOURCE> Lightsources;
+List<TRIGGER> Triggers;
 
 /**
  * loads texture from file. Separates the string s into filename and extension, and loads filename_close.extension
@@ -103,6 +104,15 @@ ANIMATOR * create_animator(int speed, int offset, int frames, int w, int h)
   return ani;
 }
 
+ANIMATOR * load_animator(string s)
+{	int speed, offset, frames, w, h;
+	if(sscanf(s.c_str(),"%d %d %d %d %d",&speed,&offset,&frames,&w,&h)<5)
+	{ debug("Not enough parameters.");
+	  exit(1);
+	}
+	return create_animator(speed, offset, frames, w, h);
+}
+
 int tile_add_element(TILE * til, string type, int element)
 {   unsigned short int typ;
 	if(til->len+1 >= MAX_TILE_ELE)
@@ -169,15 +179,6 @@ LIGHT_SOURCE * load_lightsource(string s)
 	return create_lightsource(power,dim,x,z);
 }
 
-ANIMATOR * load_animator(string s)
-{	int speed, offset, frames, w, h;
-	if(sscanf(s.c_str(),"%d %d %d %d %d",&speed,&offset,&frames,&w,&h)<5)
-	{ debug("Not enough parameters.");
-	  exit(1);
-	}
-	return create_animator(speed, offset, frames, w, h);
-}
-
 TEXTURED_ELEMENT * load_element(string s)
 {	char type[32], transparent[32];
 	float x,y,z,w,h;
@@ -203,4 +204,42 @@ TILE * load_tile(string s)
 	  tile_add_element(tile,type,element);
 	}
 	return tile;
+}
+
+/*
+TRIGGER * create_trigger(int speed, int offset, int frames, int w, int h)
+{ ANIMATOR * ani = new(ANIMATOR);
+	ani->speed=speed;
+	ani->offset=offset;
+	ani->frames=frames;
+	ani->frame=create_bitmap(w,h);
+  return ani;
+}*/
+
+TRIGGER * load_trigger(string s)
+{	int type;
+    int xpos;
+    int zpos;
+    int w1,h1,w2,h2;
+	if(sscanf(s.c_str(),"%d %d %d %d %d %d %d",&type,&xpos,&zpos,&w1,&h1,&w2,&h2)<7)
+	{ debug("Not enough parameters loading trigger: "+s);
+	  exit(1);
+	}
+	TRIGGER * ret = new TRIGGER(type,xpos,zpos,w1,h1,w2,h2);
+	return ret;
+}
+
+TRIGGER::TRIGGER(int xpos, int zpos, int type, int w1, int h1, int w2, int h2)
+{   this->type=type;
+    this->xpos=xpos;
+    this->zpos=zpos;
+    this->h1=h1;
+    this->w1=w1;
+    this->h2=h2;
+    this->w2=w2;
+}
+
+void TRIGGER::fire()
+{   debug("Trigger at "+to_str(this->xpos)+" "+to_str(this->zpos)+" fired!");
+
 }

@@ -39,10 +39,11 @@ void init_camera(float stepback,float fov, float aspect);
 int load_graphics();
 void unload_graphics();
 void draw_view(int x, int y,int z, int heading);
+void draw_triggers(int x, int z, int heading);
 int count_view_x(int x, int i, int j, int h);
 int count_view_y(int y, int i, int j, int h);
 BITMAP * far_texture(TEXTURED_ELEMENT * txt, int dist);
-int check_coords(int x, int y);
+int check_coords(int x, int z);
 
 void make_static_element_subr(V3D_f **v,TEXTURED_ELEMENT * element,int x, int z, CAMERA * cam, int far, int type);
 void make_static_element(V3D_f **v,TEXTURED_ELEMENT * element,int x, int z, CAMERA * cam, int far);

@@ -24,6 +24,7 @@ extern List<TEXTURED_ELEMENT> Elements;
 extern List<ANIMATOR> Animators;
 extern List<TILE> Tiles;
 extern List<LIGHT_SOURCE> Lightsources;
+extern List<TRIGGER> Triggers;
 
 string get_line(FILE * f)
 {	string ret="";
@@ -122,65 +123,7 @@ int load_map(string fname)
 			load_block(f,"animators", &Animators, load_animator, &str1);
 			load_block(f,"elements", &Elements, load_element, &str1);
 			load_block(f,"tiles", &Tiles, load_tile, &str1);
-			/*if(str1.compare(":animators")==0)
-			{ 	debug("Loading animators");
-				int speed, offset, frames, w, h;
-
-				while(!feof(f))
-				{ 	str2=get_line(f);
-					if(str2.find(":")==0)
-					{	debug("Done loading animators");
-						str1=str2; break;
-					} //next part of definitions
-					if(sscanf(str2.c_str(),"%d %d %d %d %d",&speed,&offset,&frames,&w,&h)<5)
-					{ debug("Not enough parameters.");
-					  exit(1);
-					}
-					Animators.add(create_animator(speed,offset,frames,w,h));
-				}
-			}*/
-			/*if(str1.compare(":elements")==0)
-			{ 	debug("Loading elements");
-				char type[20], transparent[10];
-				float x, y, z, w, h;
-				int texture, animator;
-
-				while(!feof(f))
-				{ 	str2=get_line(f);
-					if(str2.find(":")==0)
-					{	debug("Done loading elements");
-						str1=str2; break;
-					} //next part of definitions
-					if(sscanf(str2.c_str(),"%s %f %f %f %f %f %s %d %d",type,&x,&y,&z,&w,&h,transparent,&texture,&animator)<9)
-					{ debug("Not enough parameters.");
-					  exit(1);
-					}
-					Elements.add(create_element(type,x,y,z,w,h,transparent,texture,animator));
-				}
-			}*/
-			/*if(str1.compare(":tiles")==0)
-			{ 	debug("Loading tiles");
-				char type[20];
-				int element;
-				string sub;
-				TILE * tile;
-				while(!feof(f))
-				{ 	str2=get_line(f);
-					if(str2.find(":")==0)
-					{	debug("Done loading tiles");
-						str1=str2; break;
-					} //next part of definitions
-					tile = create_tile();
-					while(sscanf(str2.c_str(),"%s %d",type,&element)==2)
-					{ sub=type;
-					  sub+=" "+to_str(element)+" ";  //reconstruct read part to measure its length, add a whitespace at the end
-					  str2=str2.substr(sub.size()); //remove read part from string
-					  debug("sub: "+sub+" "+to_str((int)sub.size())+" str2: "+str2,1);
-					  tile_add_element(tile,type,element);
-					}
-					Tiles.add(tile);
-				}
-			}*/
+			load_block(f,"triggers", &Triggers, load_trigger, &str1);
 
 			if(str1.compare(":end")==0)
 			{ 	debug("End of definitions"); break; }

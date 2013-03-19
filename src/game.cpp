@@ -22,8 +22,11 @@ int TRANSPARENT = 0;
 
 char chbuf[256];
 
+List<CLICKABLE> Clickables;
+extern List<TRIGGER> Triggers;
+
 /**
- * initialiye and load game
+ * initialize and load game
  */
 
 void game_load()
@@ -79,7 +82,10 @@ void game_draw()
   delete pass;*/
 //  release_bitmap(bmp);
   debug("begin game_draw",3);
+    scare_mouse();
   draw_view(gx,gy,gz,gh);
+  draw_triggers(gx,gz,gh);
+    unscare_mouse();
 }
 
 void player_move(int x, int y, int z, int h)
@@ -104,6 +110,37 @@ void player_move(int x, int y, int z, int h)
 	}
 	else
     {   debug("Bump! tried to move to "+to_str(nx)+" "+to_str(nz)+" = "+to_str(check_coords(nz,nx)),5);
+    }
+
+
+    for(int i=0; i<Triggers.len(); i++)
+    {   TRIGGER * t;
+        debug("["+to_str(gx)+","+to_str(gz)+"] Trigger "+to_str(Triggers[i]->xpos)+" "+to_str(Triggers[i]->zpos),4);
+        if(Triggers[i]->xpos==gx && Triggers[i]->zpos==gz)
+        {   t=Triggers[i];
+            debug("Trigger encountered. "+to_str(t->type));
+            CLICKABLE * clk = new CLICKABLE;
+            clk->h1=t->h1;
+            clk->w1=t->w1;
+            clk->h2=t->h2;
+            clk->w2=t->w2;
+            clk->callback = t;
+            Clickables.add(clk);
+        }
+    }
+    //draw_triggers(gx,gz,gh);
+}
+
+
+void mouse_click(int mw, int mh)
+{   CLICKABLE * clk;
+    debug("Left mouse button "+to_str(mw)+" "+to_str(mh));
+
+    for(int i=0; i<Clickables.len(); i++)
+    {   clk=Clickables[i];
+        if(mw>=clk->w1 && mw <=clk->w2 && mh>=clk->h1 && mh<= clk->h2)
+        {   clk->callback->fire();
+        }
     }
 }
 

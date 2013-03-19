@@ -39,6 +39,21 @@ typedef struct
 {	int x, z, power,dim;
 } LIGHT_SOURCE;
 
+class TRIGGER
+{   public:
+        int xpos;
+        int zpos;
+        int type;
+        int w1,h1,w2,h2;
+        TRIGGER(int xpos, int zpos, int type, int w1, int h1, int w2, int h2);
+        void fire();
+};
+
+typedef struct
+{   int w1,h1,w2,h2;
+    TRIGGER * callback;
+} CLICKABLE;
+
 TEXTURE * load_texture(string s);
 TEXTURED_ELEMENT * load_element(string s);
 TEXTURED_ELEMENT * create_element(string type, float x, float y, float z, float w, float h, string transparent, int texture, int animator);
@@ -50,5 +65,6 @@ int tile_add_element(TILE * til,string type,int element);
 unsigned short int tile_type_resolve(string type);
 LIGHT_SOURCE * load_lightsource(string s);
 LIGHT_SOURCE * create_lightsource(int power, int dim, int x, int z);
+TRIGGER * load_trigger(string s);
 
 #endif /* TEXTURE_H_ */

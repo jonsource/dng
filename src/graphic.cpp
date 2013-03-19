@@ -17,6 +17,8 @@ extern int **map;
 extern int **linesight;
 extern unsigned short int MAP_SIZE;
 extern List<LIGHT_SOURCE> Lightsources;
+extern List<TRIGGER> Triggers;
+extern List<CLICKABLE> Clickables;
 
 CAMERA * cam=NULL;
 
@@ -116,7 +118,7 @@ void update_camera(CAMERA * cam)
      case HEAD_NORTH : cam->xfront = 1; cam->zfront = 0; break;
      case HEAD_WEST : cam->xfront = 0; cam->zfront = -1; break;
      case HEAD_SOUTH : cam->xfront = -1; cam->zfront = 0; break;
-     
+
    }
    if(cam->xfront==0) cam->xpos=cam->dolly_xpos;
    	  else cam->xpos=cam->dolly_xpos+((cam->xfront>0)?cam->stepback:-cam->stepback);
@@ -370,10 +372,10 @@ void draw_view(int xpos, int ypos, int zpos, int heading)
    cam->dolly_xpos=xpos+0.5;
    cam->dolly_zpos=zpos+0.5;
    debug("begin draw_view()",3);
-   
+
    //blit(api, game_bmp, 0, 0, 0, 0, 640, 480);
-   
-   c=(tmsec/500)%2560;  
+
+   c=(tmsec/500)%2560;
 
    switch(heading)
    { case 0: blit(sky1[0], game_bmp, 0+c, 145, 0, 20, sky1[0]->w, sky1[0]->h); break;
@@ -400,6 +402,8 @@ void draw_view(int xpos, int ypos, int zpos, int heading)
        if(see_coords(fx,fz))
     	 render_tile(Tiles[map[fx][fz]-1],game_bmp, fx, fz, cam);
      }
+
+
 
     /* overlay some text */
    set_clip_rect(game_bmp, 0, 0, game_bmp->w, game_bmp->h);
@@ -429,7 +433,7 @@ void draw_view(int xpos, int ypos, int zpos, int heading)
 		 "Up vector: %.2f, %.2f, %.2f", cam->xup, cam->yup, cam->zup);
    textprintf_ex(game_bmp, font, 0, 120, makecol(0, 0, 0), -1,
 		 "Frames per second: %d", fps);
-   
+
 }
 
 int init_graphic()
@@ -460,5 +464,21 @@ int init_graphic()
 	debug("screen depth: "+to_str(bitmap_color_depth(game_bmp)));
 	clear(game_bmp);
 	init_camera(-0.85,40,1.33);
+    show_mouse(screen);
 	return 1;
+}
+
+void draw_triggers(int x, int z, int heagind)
+{   CLICKABLE* c;
+    for(int i=0; i<Clickables.len(); i++)
+    {   //debug("["+to_str(x)+","+to_str(z)+"] Trigger "+to_str(Triggers[i]->xpos)+" "+to_str(Triggers[i]->zpos),4);
+        c=Clickables[i];
+            //debug("Trigger encountered. "+to_str(t->type));
+        rect(game_bmp,c->w1,c->h1,c->w2,c->h2,makecol(255,0,0));
+        textprintf_ex(game_bmp, font, 0, 140, makecol(255, 0, 0), -1,
+                    "Trigger!");
+
+
+    }
+
 }

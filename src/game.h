@@ -16,7 +16,7 @@ using namespace std;
 #define HEAD_NORTH  1
 #define HEAD_EAST   0
 #define HEAD_SOUTH  3
-#define HEAD_WEST   2 
+#define HEAD_WEST   2
 
 void game_load();
 void game_unload();
@@ -30,6 +30,7 @@ void debug(string s,int lvl);
 void set_debug_lvl(int lvl);
 void reset_debug_lvl();
 bool to_bool(string s);
+void mouse_click(int mw, int mh);
 
 string to_str(int i);
 string to_str(float f);

@@ -22,7 +22,7 @@ int msec,sec,mins,hr;
 long int tmsec;
 int quit;
 int fps;
-int keyb_ignore;
+unsigned short int keyb_ignore;
 BITMAP *game_bmp=NULL,*first=NULL,*second=NULL;
 int status,mode;
 FILE *dbg=NULL;
@@ -85,7 +85,7 @@ void init()
 	LOCK_FUNCTION(game_timer);
 	allegro_init();
 	install_keyboard();
-	//install_mouse();
+	install_mouse();
 	install_timer();
 
 	init_graphic();
@@ -97,7 +97,7 @@ void init()
 	quit=0;
 	fps=0;
 	keyb_ignore=0;
-  
+
 }
 
 /**
@@ -119,7 +119,8 @@ int interpret(int a)
 
 
 int main(int argc, char *argv[])
-{ 
+{
+    int mb,lastmb;
 	//chat_main();
 	//return 0;
 	init();
@@ -151,6 +152,19 @@ int main(int argc, char *argv[])
 			//show_video_bitmap(second);
 			frames++;tot_frames++;
 			game_bmp=first;
+		}
+
+        mb=mouse_b;
+		if(mb!=lastmb)
+		{   lastmb=mb;
+            int mw,mh;
+            int mpos = mouse_pos;
+            if (mb & 1)
+            {   mw = mpos >> 16;
+                mh = mpos & 0x0000ffff;
+                mouse_click(mw,mh);
+            }
+
 		}
 
 	//    game_interpret();
