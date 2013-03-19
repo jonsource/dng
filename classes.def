@@ -158,7 +158,7 @@ class Thief
 courage       0/3
 strength      0/3
 agility       8/2
-dexterity     10/2
+dexterity     10/1
 constitution  0/3
 intelligence  0/3
 wisdom        0/3
@@ -167,4 +167,3 @@ HP			  5/2
 MP			  10/5
 SP			  5/2
 endclass
-

@@ -72,7 +72,7 @@ void game_draw()
   /*for (num = 0, y = 20; lines[num]; num++, y += text_height(font))
 //         textout_ex(bmp, font, lines[num], 300, y,makecol(0, 0, 0), makecol(255, 255, 255));
          textprintf_ex(game_bmp, font, 30, y, makecol(255, 255, 255), -1, lines[num], stats[num]);
-  pass=Classes->Check(Player);       
+  pass=Classes->Check(Player);
   for(num = 0; num<Classes->size; num++)
       if(pass[num]) str+=Classes->Templates[num]->name+" ";
   textprintf_ex(game_bmp, font, 30, 150, makecol(255, 255, 255), -1, str.c_str());
@@ -80,13 +80,17 @@ void game_draw()
 //  release_bitmap(bmp);
   debug("begin game_draw",3);
   draw_view(gx,gy,gz,gh);
-}  
+}
 
 void player_move(int x, int y, int z, int h)
 {	int nz,nx;
-	gh+=h;
-	if(gh<0) gh=3;
-	if(gh>3) gh=0;
+	if(h!=0)
+    {   gh+=h;
+        if(gh<0) gh=3;
+        if(gh>3) gh=0;
+        debug("Change heading to "+to_str(gh),5);
+        return;
+    }
 	switch(gh)
 	{ case HEAD_NORTH: nz=gz-x; nx=gx+z; break;
 	  case HEAD_EAST: nz=gz+z; nx=gx+x; break;
@@ -94,9 +98,13 @@ void player_move(int x, int y, int z, int h)
 	  case HEAD_WEST: nz=gz-z; nx=gx-x; break;
 	}
 	gy+=y;
-	if(check_coords(nz,nx)!=3)
+	if(check_coords(nx,nz)!=3)
 	{	gz=nz; gx=nx;
+        debug("Move to "+to_str(gx)+" "+to_str(gz)+" = "+to_str(check_coords(nz,nx)),5);
 	}
+	else
+    {   debug("Bump! tried to move to "+to_str(nx)+" "+to_str(nz)+" = "+to_str(check_coords(nz,nx)),5);
+    }
 }
 
 /**
@@ -121,9 +129,9 @@ void keypress(int i)
      if(i == KEY_O) light_power+=1;
      if(i == KEY_L) light_power-=1;
      if(i == KEY_T) {if(TRANSPARENT) TRANSPARENT =0; else TRANSPARENT=1;}
-     if(i == KEY_E) {h=1;}
+     if(i == KEY_E) {h=-1;}
      if(i == KEY_Q) {h=1;}
-     if(i == KEY_N) 
+     if(i == KEY_N)
      { Class *cl=Classes->GetTemplate(Player->classname);
        cl->NextLevel(Player);
      }

@@ -42,6 +42,7 @@ void draw_view(int x, int y,int z, int heading);
 int count_view_x(int x, int i, int j, int h);
 int count_view_y(int y, int i, int j, int h);
 BITMAP * far_texture(TEXTURED_ELEMENT * txt, int dist);
+int check_coords(int x, int y);
 
 void make_static_element_subr(V3D_f **v,TEXTURED_ELEMENT * element,int x, int z, CAMERA * cam, int far, int type);
 void make_static_element(V3D_f **v,TEXTURED_ELEMENT * element,int x, int z, CAMERA * cam, int far);

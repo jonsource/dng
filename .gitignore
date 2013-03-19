@@ -1,19 +1,27 @@
-# Project Settings
+# Eclipse project settings
+######
 .settings
 .cproject
 .project
 
+# Code::blocks files
+######
+*.cbp
+*.depend
+*.layout
+
 # Logs
+######
 *.log
 
 # Binaries
+######
 *.o
 *.dll
 *.exe
+obj
 
 # picture sources
+######
 *.xcf
 *.orig
-Debug/gmon.out
-Debug/outfile*
-Profiling/*
