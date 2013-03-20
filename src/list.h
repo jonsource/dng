@@ -22,6 +22,7 @@ public:
 	List(void);
 	void add(void * item);
 	void add(T * item);
+	void clear_all();
 	T* operator[](const int index);
 	int len();
 };
@@ -62,5 +63,13 @@ int List<T>::len()
 {	return max_item;
 }
 
+template <class T>
+void List<T>::clear_all()
+{	debug("Clearing list :"+to_str(max_item)+" items!");
+    delete []items;
+    items=NULL;
+	max_item=0;
+	alloc_size=0;
+}
 
 #endif /* LIST_H_ */

@@ -5,6 +5,7 @@
 #include "load_classes.h"
 #include "graphic.h"
 #include "game_map.h"
+#include "interface.h"
 
 extern int keyb_ignore,mode;
 extern int status;
@@ -22,7 +23,7 @@ int TRANSPARENT = 0;
 
 char chbuf[256];
 
-List<CLICKABLE> Clickables;
+extern CLICKABLE_MAP Clickables;
 extern List<TRIGGER> Triggers;
 
 /**
@@ -90,6 +91,9 @@ void game_draw()
 
 void player_move(int x, int y, int z, int h)
 {	int nz,nx;
+
+    Clickables["place"].clear_all();
+
 	if(h!=0)
     {   gh+=h;
         if(gh<0) gh=3;
@@ -125,7 +129,7 @@ void player_move(int x, int y, int z, int h)
             clk->h2=t->h2;
             clk->w2=t->w2;
             clk->callback = t;
-            Clickables.add(clk);
+            Clickables["place"].add(clk);
         }
     }
     //draw_triggers(gx,gz,gh);
@@ -133,13 +137,20 @@ void player_move(int x, int y, int z, int h)
 
 
 void mouse_click(int mw, int mh)
-{   CLICKABLE * clk;
+{   List<CLICKABLE> clklist;
+    CLICKABLE * clk;
     debug("Left mouse button "+to_str(mw)+" "+to_str(mh));
 
-    for(int i=0; i<Clickables.len(); i++)
-    {   clk=Clickables[i];
-        if(mw>=clk->w1 && mw <=clk->w2 && mh>=clk->h1 && mh<= clk->h2)
-        {   clk->callback->fire();
+    CLICKABLE_MAP_ITERATOR it;
+    for(it = Clickables.begin(); it!=Clickables.end(); it++)
+    {   clklist=Clickables[it->first];
+
+        for(int i=0; i<clklist.len(); i++)
+        {   clk=clklist[i];
+            if(mw>=clk->w1 && mw <=clk->w2 && mh>=clk->h1 && mh<= clk->h2)
+            {   debug(it->first+" ",5);
+                clk->callback->fire();
+            }
         }
     }
 }

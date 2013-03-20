@@ -1,6 +1,7 @@
 #include "graphic.h"
 #include <string.h>
 #include <math.h>
+#include "interface.h"
 
 BITMAP * sky1[4];
 BITMAP * api=NULL;
@@ -18,7 +19,7 @@ extern int **linesight;
 extern unsigned short int MAP_SIZE;
 extern List<LIGHT_SOURCE> Lightsources;
 extern List<TRIGGER> Triggers;
-extern List<CLICKABLE> Clickables;
+extern CLICKABLE_MAP Clickables;
 
 CAMERA * cam=NULL;
 
@@ -470,9 +471,11 @@ int init_graphic()
 
 void draw_triggers(int x, int z, int heagind)
 {   CLICKABLE* c;
-    for(int i=0; i<Clickables.len(); i++)
+    List<CLICKABLE> clklist;
+    clklist=Clickables["place"];
+    for(int i=0; i<clklist.len(); i++)
     {   //debug("["+to_str(x)+","+to_str(z)+"] Trigger "+to_str(Triggers[i]->xpos)+" "+to_str(Triggers[i]->zpos),4);
-        c=Clickables[i];
+        c=clklist[i];
             //debug("Trigger encountered. "+to_str(t->type));
         rect(game_bmp,c->w1,c->h1,c->w2,c->h2,makecol(255,0,0));
         textprintf_ex(game_bmp, font, 0, 140, makecol(255, 0, 0), -1,

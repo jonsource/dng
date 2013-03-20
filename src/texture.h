@@ -56,11 +56,6 @@ class TRIGGER
         void fire();
 };
 
-typedef struct
-{   int w1,h1,w2,h2;
-    TRIGGER * callback;
-} CLICKABLE;
-
 TEXTURE * load_texture(string s);
 TEXTURED_ELEMENT * load_element(string s);
 TEXTURED_ELEMENT * create_element(string type, float x, float y, float z, float w, float h, string transparent, int texture, int animator);
