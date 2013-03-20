@@ -215,21 +215,37 @@ TRIGGER * create_trigger(int speed, int offset, int frames, int w, int h)
 	ani->frame=create_bitmap(w,h);
   return ani;
 }*/
+unsigned short int trigger_type_resolve(string type)
+{	bool type_ok=false;
+	unsigned short int typ;
+    if(type.compare("TRIGGER_ENTER")==0) {typ=TRIGGER_ENTER; type_ok=true;}
+    if(!type_ok && type.compare("TRIGGER_LEAVE")==0) {typ=TRIGGER_LEAVE; type_ok=true;}
+    if(!type_ok && type.compare("TRIGGER_NORTH")==0) {typ=TRIGGER_NORTH; type_ok=true;}
+    if(!type_ok && type.compare("TRIGGER_EAST")==0) {typ=TRIGGER_EAST; type_ok=true;}
+    if(!type_ok && type.compare("TRIGGER_SOUTH")==0) {typ=TRIGGER_SOUTH; type_ok=true;}
+    if(!type_ok && type.compare("TRIGGER_WEST")==0) {typ=TRIGGER_WEST; type_ok=true;}
+	if(!type_ok)
+	{
+		debug("Unknown trigger type "+type,3);
+		exit(1);
+	}
+	return typ;
+}
 
 TRIGGER * load_trigger(string s)
-{	int type;
+{	char buf[30];
     int xpos;
     int zpos;
     int w1,h1,w2,h2;
-	if(sscanf(s.c_str(),"%d %d %d %d %d %d %d",&type,&xpos,&zpos,&w1,&h1,&w2,&h2)<7)
+	if(sscanf(s.c_str(),"%s %d %d %d %d %d %d",buf,&xpos,&zpos,&w1,&h1,&w2,&h2)<7)
 	{ debug("Not enough parameters loading trigger: "+s);
 	  exit(1);
 	}
-	TRIGGER * ret = new TRIGGER(type,xpos,zpos,w1,h1,w2,h2);
+	TRIGGER * ret = new TRIGGER(trigger_type_resolve(buf),xpos,zpos,w1,h1,w2,h2);
 	return ret;
 }
 
-TRIGGER::TRIGGER(int xpos, int zpos, int type, int w1, int h1, int w2, int h2)
+TRIGGER::TRIGGER(int type, int xpos, int zpos, int w1, int h1, int w2, int h2)
 {   this->type=type;
     this->xpos=xpos;
     this->zpos=zpos;

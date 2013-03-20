@@ -10,6 +10,13 @@
 
 #include "game.h"
 
+#define TRIGGER_ENTER 5
+#define TRIGGER_LEAVE 6
+#define TRIGGER_NORTH 1
+#define TRIGGER_EAST 0
+#define TRIGGER_SOUTH 3
+#define TRIGGER_WEST 2
+
 #define MAX_TILE_ELE 6
 
 typedef struct {
