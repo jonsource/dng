@@ -4,7 +4,7 @@
 #include "game.h"
 #include "load_classes.h"
 #include "graphic.h"
-#include "map.h"
+#include "game_map.h"
 
 extern int keyb_ignore,mode;
 extern int status;

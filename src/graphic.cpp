@@ -13,7 +13,7 @@ extern int TRANSPARENT;
 extern TILE ** Tiles;
 extern int light_power;
 
-extern int **map;
+extern int **game_map;
 extern int **linesight;
 extern unsigned short int MAP_SIZE;
 extern List<LIGHT_SOURCE> Lightsources;
@@ -43,11 +43,11 @@ float dist(int x,int z,CAMERA * cam)
  */
 int check_coords(int x, int y)
 { if(x<0 || y<0 || x>=MAP_SIZE || y>=MAP_SIZE) return 0;
-  else return map[x][y];
+  else return game_map[x][y];
 }
 
 /**
- * check whether coordinates are on map
+ * check whether coordinates are on game_map
  */
 int check_coords_subr(int x, int y)
 { if(x<0 || y<0 || x>=MAP_SIZE || y>=MAP_SIZE) return 0;
@@ -396,11 +396,11 @@ void draw_view(int xpos, int ypos, int zpos, int heading)
      { fx=xpos+dx*cam->xfront+dz*cam->zfront;  // ano zfront, y je nahoru
        fz=zpos+dz*cam->xfront+dx*cam->zfront;
        if(see_coords(fx,fz))
-         render_tile(Tiles[map[fx][fz]-1],game_bmp, fx, fz, cam);
+         render_tile(Tiles[game_map[fx][fz]-1],game_bmp, fx, fz, cam);
        fx=xpos+dx*cam->xfront-dz*cam->zfront;  // ano zfront, y je nahoru
        fz=zpos-dz*cam->xfront+dx*cam->zfront;
        if(see_coords(fx,fz))
-    	 render_tile(Tiles[map[fx][fz]-1],game_bmp, fx, fz, cam);
+    	 render_tile(Tiles[game_map[fx][fz]-1],game_bmp, fx, fz, cam);
      }
 
 

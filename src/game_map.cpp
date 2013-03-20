@@ -1,11 +1,11 @@
 /*
- * map.cpp
+ * game_map.cpp
  *
  *  Created on: 2.3.2013
  *      Author: tzeentch
  */
 
-#include "map.h"
+#include "game_map.h"
 #include "game.h"
 #include "texture.h"
 #include <string>
@@ -14,7 +14,7 @@
 using namespace std;
 
 unsigned short int MAP_SIZE;
-int **map;
+int **game_map;
 int **linesight;
 
 extern char chbuf[256];
@@ -80,21 +80,21 @@ int load_map(string fname)
 			if(str1.compare(":mapsize")==0)
 			{	str2=get_line(f);
 				if(sscanf(str2.c_str(),"%hu",&MAP_SIZE))
-				{	delete []map;
-					map = (int **) malloc(MAP_SIZE*sizeof(int *));
+				{	delete []game_map;
+					game_map = (int **) malloc(MAP_SIZE*sizeof(int *));
 					linesight = (int **) malloc(MAP_SIZE*sizeof(int *));
 					for(int i=0; i<MAP_SIZE; i++)
-					{	map[i]= (int*) malloc(MAP_SIZE*sizeof(int));
+					{	game_map[i]= (int*) malloc(MAP_SIZE*sizeof(int));
 						linesight[i]= (int*) malloc(MAP_SIZE*sizeof(int));
 						for(int j=0; j<MAP_SIZE; j++)
-						{ map[i][j]=0;
+						{ game_map[i][j]=0;
 						  linesight[i][j]=0;
 						}
 					}
 					debug("Map size: "+to_str(MAP_SIZE));
 				}
 				else
-				{ 	debug("Error reading map size in "+fname+".");
+				{ 	debug("Error reading game_map size in "+fname+".");
 					exit(0);
 				}
 			}
@@ -105,7 +105,7 @@ int load_map(string fname)
 					j=0;
 					debug("str2 "+str2);
 					while(sscanf(str2.c_str(),"%d,",&tile) && j<MAP_SIZE)
-					{	map[i][j++]=tile;
+					{	game_map[i][j++]=tile;
 					 	debug("Read tile ["+to_str(i)+","+to_str(j)+"]="+to_str(tile),1);
 					  	found=str2.find_first_of(",");
 					  	str2=str2.substr(found+1);
