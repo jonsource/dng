@@ -94,35 +94,39 @@ void player_move(int x, int y, int z, int h)
 
     Clickables["place"].clear_all();
 
+    /* change heading */
 	if(h!=0)
     {   gh+=h;
         if(gh<0) gh=3;
         if(gh>3) gh=0;
         debug("Change heading to "+to_str(gh),5);
-        return;
     }
-	switch(gh)
-	{ case HEAD_NORTH: nz=gz-x; nx=gx+z; break;
-	  case HEAD_EAST: nz=gz+z; nx=gx+x; break;
-	  case HEAD_SOUTH: nz=gz+x; nx=gx-z; break;
-	  case HEAD_WEST: nz=gz-z; nx=gx-x; break;
+    /* change position */
+    else
+	{   switch(gh)
+        { case HEAD_NORTH: nz=gz-x; nx=gx+z; break;
+        case HEAD_EAST: nz=gz+z; nx=gx+x; break;
+        case HEAD_SOUTH: nz=gz+x; nx=gx-z; break;
+        case HEAD_WEST: nz=gz-z; nx=gx-x; break;
+        }
+        gy+=y;
+        if(check_coords(nx,nz)!=3)
+        {	gz=nz; gx=nx;
+            debug("Move to "+to_str(gx)+" "+to_str(gz)+" = "+to_str(check_coords(nz,nx)),5);
+        }
+        else
+        {   debug("Bump! tried to move to "+to_str(nx)+" "+to_str(nz)+" = "+to_str(check_coords(nz,nx)),5);
+        }
 	}
-	gy+=y;
-	if(check_coords(nx,nz)!=3)
-	{	gz=nz; gx=nx;
-        debug("Move to "+to_str(gx)+" "+to_str(gz)+" = "+to_str(check_coords(nz,nx)),5);
-	}
-	else
-    {   debug("Bump! tried to move to "+to_str(nx)+" "+to_str(nz)+" = "+to_str(check_coords(nz,nx)),5);
-    }
 
 
     for(int i=0; i<Triggers.len(); i++)
     {   TRIGGER * t;
-        debug("["+to_str(gx)+","+to_str(gz)+"] Trigger "+to_str(Triggers[i]->xpos)+" "+to_str(Triggers[i]->zpos),4);
-        if(Triggers[i]->xpos==gx && Triggers[i]->zpos==gz)
-        {   t=Triggers[i];
-            debug("Trigger encountered. "+to_str(t->type));
+        t=Triggers[i];
+        debug("["+to_str(gx)+","+to_str(gz)+"] Trigger "+to_str(t->xpos)+" "+to_str(t->zpos),4);
+        /* correct coordinates and (TYPE_ENTER or correct heading) */
+        if(t->xpos==gx && t->zpos==gz && (t->type==TRIGGER_ENTER || t->type==gh))
+        {   debug("Trigger encountered. "+to_str(t->type));
             CLICKABLE * clk = new CLICKABLE;
             clk->h1=t->h1;
             clk->w1=t->w1;

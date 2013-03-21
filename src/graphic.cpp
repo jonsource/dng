@@ -60,8 +60,8 @@ int check_coords_subr(int x, int y)
  * valid only after make_linesight is called for current camera position
  */
 int see_coords(int x, int y)
-{ if(check_coords_subr(x,y)) return linesight[x][y];
-  return 0;
+{   if(x<0 || y<0 || x>=MAP_SIZE || y>=MAP_SIZE) return 0;
+    return linesight[x][y];
 }
 
 /**
