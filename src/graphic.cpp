@@ -260,11 +260,22 @@ void render_element(int type, TEXTURED_ELEMENT * element, BITMAP *bmp, int x, in
  * get appropriate texture for given distance and animation
  */
 BITMAP * far_texture(TEXTURED_ELEMENT * txt, int far)
-{	if(txt->animator)
-	{	int frame=(tmsec/txt->animator->speed)%txt->animator->frames;
-		blit(txt->texture->close,txt->animator->frame,0,frame*txt->animator->offset,0,0,txt->animator->frame->w,txt->animator->frame->h);
-		return txt->animator->frame;
-	}
+{	if(txt->animator!=NULL)
+	{	int frame_no=0;
+	    ANIMATOR * a=txt->animator;
+	    if(a->type==ANIMATOR_TOGGLE)
+        {   //if(a->on) debug("toggle animator "+to_str(a->start)+" "+to_str(a->speed)+" "+to_str(a->frames)+" "+to_str(a->start+a->speed*a->frames)+">"+to_str(tmsec));
+            if(a->on && tmsec>=(a->start+a->speed*a->frames) )
+            { a->on=0;
+            }
+        }
+        if(a->on)
+        {   frame_no=((tmsec-a->start)/a->speed)%a->frames;
+            //debug("  frame no:"+to_str(frame_no));
+        }
+        blit(txt->texture->close,a->frame,0,frame_no*a->offset,0,0,a->frame->w,a->frame->h);
+        return a->frame;
+    }
 	switch(far)
 	{ case 0: return txt->texture->close;
 	  case 1: return txt->texture->medium;

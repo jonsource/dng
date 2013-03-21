@@ -17,6 +17,10 @@
 #define TRIGGER_SOUTH 3
 #define TRIGGER_WEST 2
 
+#define ANIMATOR_TOGGLE 1
+#define ANIMATOR_ON 2
+#define ANIMATOR_OFF 3
+
 #define MAX_TILE_ELE 6
 
 typedef struct {
@@ -24,7 +28,8 @@ typedef struct {
 } TEXTURE;
 
 typedef struct {
-  unsigned short int speed,offset,frames;
+  unsigned short int type,speed,offset,frames,on;
+  int start;
   BITMAP *frame;
 } ANIMATOR;
 
@@ -52,7 +57,8 @@ class TRIGGER
         int zpos;
         int type;
         int w1,h1,w2,h2;
-        TRIGGER(int xpos, int zpos, int type, int w1, int h1, int w2, int h2);
+        ANIMATOR * animator;
+        TRIGGER(int xpos, int zpos, int type, int w1, int h1, int w2, int h2, int animator);
         void fire();
 };
 

@@ -17,6 +17,7 @@ List<TILE> Tiles;
 List<LIGHT_SOURCE> Lightsources;
 List<TRIGGER> Triggers;
 
+extern int tmsec;
 /**
  * loads texture from file. Separates the string s into filename and extension, and loads filename_close.extension
  * and then _medium and _far. If can't find appropriate texture, falls back to resizing.
@@ -95,22 +96,50 @@ TEXTURED_ELEMENT * create_element(string type, float x, float y, float z, float 
    return ele;
 }
 
-ANIMATOR * create_animator(int speed, int offset, int frames, int w, int h)
+TEXTURED_ELEMENT * load_element(string s)
+{	char type[32], transparent[32];
+	float x,y,z,w,h;
+	int texture,animator;
+	if(sscanf(s.c_str(),"%s %f %f %f %f %f %s %d %d",type,&x,&y,&z,&w,&h,transparent,&texture,&animator)<9)
+	{ debug("Not enough parameters.");
+	  exit(1);
+	}
+	return create_element(type,x,y,z,w,h,transparent,texture,animator);
+}
+
+unsigned short int animator_type_resolve(string type)
+{	bool type_ok=false;
+	unsigned short int typ;
+    if(type.compare("ANIMATOR_TOGGLE")==0) {typ=ANIMATOR_TOGGLE; type_ok=true;}
+    if(!type_ok && type.compare("ANIMATOR_ON")==0) {typ=ANIMATOR_ON; type_ok=true;}
+    if(!type_ok && type.compare("ANIMATOR_OFF")==0) {typ=ANIMATOR_OFF; type_ok=true;}
+    if(!type_ok)
+	{	debug("Unknown trigger type "+type,3);
+		exit(1);
+	}
+	return typ;
+}
+
+ANIMATOR * create_animator(int type, int speed, int offset, int frames, int w, int h)
 { ANIMATOR * ani = new(ANIMATOR);
 	ani->speed=speed;
 	ani->offset=offset;
 	ani->frames=frames;
 	ani->frame=create_bitmap(w,h);
+	ani->type=type;
+	if(type==ANIMATOR_ON) ani->on=1;
+	ani->start=0;
   return ani;
 }
 
 ANIMATOR * load_animator(string s)
-{	int speed, offset, frames, w, h;
-	if(sscanf(s.c_str(),"%d %d %d %d %d",&speed,&offset,&frames,&w,&h)<5)
+{	char buf[32];
+    int speed, offset, frames, w, h;
+	if(sscanf(s.c_str(),"%s %d %d %d %d %d",buf,&speed,&offset,&frames,&w,&h)<6)
 	{ debug("Not enough parameters.");
 	  exit(1);
 	}
-	return create_animator(speed, offset, frames, w, h);
+	return create_animator(animator_type_resolve(buf), speed, offset, frames, w, h);
 }
 
 int tile_add_element(TILE * til, string type, int element)
@@ -179,17 +208,6 @@ LIGHT_SOURCE * load_lightsource(string s)
 	return create_lightsource(power,dim,x,z);
 }
 
-TEXTURED_ELEMENT * load_element(string s)
-{	char type[32], transparent[32];
-	float x,y,z,w,h;
-	int texture,animator;
-	if(sscanf(s.c_str(),"%s %f %f %f %f %f %s %d %d",type,&x,&y,&z,&w,&h,transparent,&texture,&animator)<9)
-	{ debug("Not enough parameters.");
-	  exit(1);
-	}
-	return create_element(type,x,y,z,w,h,transparent,texture,animator);
-}
-
 TILE * load_tile(string s)
 {	char type[32];
  	string sub;
@@ -236,16 +254,16 @@ TRIGGER * load_trigger(string s)
 {	char buf[30];
     int xpos;
     int zpos;
-    int w1,h1,w2,h2;
-	if(sscanf(s.c_str(),"%s %d %d %d %d %d %d",buf,&xpos,&zpos,&w1,&h1,&w2,&h2)<7)
+    int w1,h1,w2,h2,anim;
+	if(sscanf(s.c_str(),"%s %d %d %d %d %d %d %d",buf,&xpos,&zpos,&w1,&h1,&w2,&h2,&anim)<8)
 	{ debug("Not enough parameters loading trigger: "+s);
 	  exit(1);
 	}
-	TRIGGER * ret = new TRIGGER(trigger_type_resolve(buf),xpos,zpos,w1,h1,w2,h2);
+	TRIGGER * ret = new TRIGGER(trigger_type_resolve(buf),xpos,zpos,w1,h1,w2,h2,anim);
 	return ret;
 }
 
-TRIGGER::TRIGGER(int type, int xpos, int zpos, int w1, int h1, int w2, int h2)
+TRIGGER::TRIGGER(int type, int xpos, int zpos, int w1, int h1, int w2, int h2,int animator)
 {   this->type=type;
     this->xpos=xpos;
     this->zpos=zpos;
@@ -253,9 +271,22 @@ TRIGGER::TRIGGER(int type, int xpos, int zpos, int w1, int h1, int w2, int h2)
     this->w1=w1;
     this->h2=h2;
     this->w2=w2;
+    if(animator>-1)
+    {   if(animator<Animators.len())	this->animator = Animators[animator];
+        else
+        {	debug("Referencing undefined animator "+to_str(animator),10);
+            exit(1);
+        }
+    }
+    else this->animator=NULL;
 }
 
 void TRIGGER::fire()
-{   debug("Trigger at "+to_str(this->xpos)+" "+to_str(this->zpos)+" fired!");
+{   if(this->animator!=NULL)
+    {   this->animator->on=!this->animator->on;
+        this->animator->start=tmsec;
+        debug("animator toggle "+to_str(this->animator->on)+" "+to_str(this->animator->start));
+    }
+    debug("Trigger at "+to_str(this->xpos)+" "+to_str(this->zpos)+" fired!");
 
 }
