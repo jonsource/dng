@@ -20,6 +20,7 @@
 #define ANIMATOR_TOGGLE 1
 #define ANIMATOR_ON 2
 #define ANIMATOR_OFF 3
+#define MOVATOR_Y 4
 
 #define MAX_TILE_ELE 6
 

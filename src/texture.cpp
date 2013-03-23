@@ -39,15 +39,15 @@ TEXTURE * load_texture(string s)
     cfn.assign(fn);
     cfn.append("_close."+ext);
     text->close = load_bitmap(cfn.c_str(), pal);
-    if(!text->close) debug("Missing texture "+cfn);
+    if(!text->close) debug("Missing texture "+cfn,10);
     else debug(cfn+" texture depth "+to_str(bitmap_color_depth(text->close)),3);
     cfn.assign(fn);
     cfn.append("_medium."+ext);
     text->medium = load_bitmap(cfn.c_str(), pal);
     if(!text->medium)
-    { 	debug("Missing texture "+cfn,2);
+    { 	debug("Missing texture "+cfn,10);
     	if(text->close)
-    	{ dappend(" - resizing close texture",3);
+    	{ dappend(" - resizing close texture");
     	  text->medium = create_bitmap(128,128);
     	  stretch_blit(text->close,text->medium,0,0,text->close->w,text->close->h,0,0,text->medium->w,text->medium->h);
     	}
@@ -56,9 +56,9 @@ TEXTURE * load_texture(string s)
     cfn.append("_far."+ext);
     text->far = load_bitmap(cfn.c_str(), pal);
     if(!text->far)
-    { 	debug("Missing texture "+cfn,2);
+    { 	debug("Missing texture "+cfn,10);
 		if(text->medium)
-    	{ dappend(" - resizing medium texture",3);
+    	{ dappend(" - resizing medium texture");
     	  text->far = create_bitmap(64,64);
     	  stretch_blit(text->medium,text->far,0,0,text->medium->w,text->medium->h,0,0,text->far->w,text->far->h);
     	}
@@ -101,7 +101,7 @@ TEXTURED_ELEMENT * load_element(string s)
 	float x,y,z,w,h;
 	int texture,animator;
 	if(sscanf(s.c_str(),"%s %f %f %f %f %f %s %d %d",type,&x,&y,&z,&w,&h,transparent,&texture,&animator)<9)
-	{ debug("Not enough parameters.");
+	{ debug("Not enough parameters for textured element.",10);
 	  exit(1);
 	}
 	return create_element(type,x,y,z,w,h,transparent,texture,animator);
@@ -113,8 +113,9 @@ unsigned short int animator_type_resolve(string type)
     if(type.compare("ANIMATOR_TOGGLE")==0) {typ=ANIMATOR_TOGGLE; type_ok=true;}
     if(!type_ok && type.compare("ANIMATOR_ON")==0) {typ=ANIMATOR_ON; type_ok=true;}
     if(!type_ok && type.compare("ANIMATOR_OFF")==0) {typ=ANIMATOR_OFF; type_ok=true;}
+    if(!type_ok && type.compare("MOVATOR_Y")==0) {typ=MOVATOR_Y; type_ok=true;}
     if(!type_ok)
-	{	debug("Unknown trigger type "+type,3);
+	{	debug("Unknown trigger type "+type,10);
 		exit(1);
 	}
 	return typ;
@@ -136,7 +137,7 @@ ANIMATOR * load_animator(string s)
 {	char buf[32];
     int speed, offset, frames, w, h;
 	if(sscanf(s.c_str(),"%s %d %d %d %d %d",buf,&speed,&offset,&frames,&w,&h)<6)
-	{ debug("Not enough parameters.");
+	{ debug("Not enough parameters for animator.",10);
 	  exit(1);
 	}
 	return create_animator(animator_type_resolve(buf), speed, offset, frames, w, h);
@@ -183,7 +184,7 @@ unsigned short int tile_type_resolve(string type)
 	if(type.compare("TILE_STATIC_EW")==0) {typ=TILE_STATIC_EW; type_ok=true;}
 	if(!type_ok)
 	{
-		debug("Unknown element type "+type,3);
+		debug("Unknown element type "+type,10);
 		exit(1);
 	}
 	return typ;
@@ -202,7 +203,7 @@ LIGHT_SOURCE * create_lightsource(int power, int dim, int x, int z)
 LIGHT_SOURCE * load_lightsource(string s)
 {	int power, dim, x, z;
 	if(sscanf(s.c_str(),"%d %d %d %d",&power,&dim,&x,&z)<4)
-	{ debug("Not enough parameters.");
+	{ debug("Not enough parameters for lightsource.",10);
 	  exit(1);
 	}
 	return create_lightsource(power,dim,x,z);
@@ -218,7 +219,7 @@ TILE * load_tile(string s)
 	{ sub=type;
 	  sub+=" "+to_str(element)+" ";  //reconstruct read part to measure its length, add a whitespace at the end
 	  s=s.substr(sub.size()); //remove read part from string
-	  debug("sub: "+sub+" "+to_str((int)sub.size())+" str2: "+s,1);
+	  debug("sub: "+sub+" "+to_str((int)sub.size())+" str2: "+s,3);
 	  tile_add_element(tile,type,element);
 	}
 	return tile;
@@ -244,7 +245,7 @@ unsigned short int trigger_type_resolve(string type)
     if(!type_ok && type.compare("TRIGGER_WEST")==0) {typ=TRIGGER_WEST; type_ok=true;}
 	if(!type_ok)
 	{
-		debug("Unknown trigger type "+type,3);
+		debug("Unknown trigger type "+type,10);
 		exit(1);
 	}
 	return typ;
@@ -256,7 +257,7 @@ TRIGGER * load_trigger(string s)
     int zpos;
     int w1,h1,w2,h2,anim;
 	if(sscanf(s.c_str(),"%s %d %d %d %d %d %d %d",buf,&xpos,&zpos,&w1,&h1,&w2,&h2,&anim)<8)
-	{ debug("Not enough parameters loading trigger: "+s);
+	{ debug("Not enough parameters loading trigger: "+s,10);
 	  exit(1);
 	}
 	TRIGGER * ret = new TRIGGER(trigger_type_resolve(buf),xpos,zpos,w1,h1,w2,h2,anim);
