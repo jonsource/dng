@@ -186,6 +186,10 @@ void render_element(int type, TEXTURED_ELEMENT * element, BITMAP *bmp, int x, in
    	   case TILE_STATIC: make_static_element(v,element,x,z,cam,far); break;
    	   case TILE_STATIC_NS: make_static_element_ns(v,element,x,z,cam,far); break;
    	   case TILE_STATIC_EW: make_static_element_ew(v,element,x,z,cam,far); break;
+   	   case TILE_STATIC_NS_X: if(cam->xfront==0) { make_static_element_ns(v,element,x,z,cam,far); break; }
+                              else return;
+   	   case TILE_STATIC_EW_X: if(cam->zfront==0) { make_static_element_ew(v,element,x,z,cam,far); break; }
+                              else return;
    	   default: debug("Missing or bad tile type in render element!",3); return;
    }
 

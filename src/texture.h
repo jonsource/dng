@@ -22,7 +22,7 @@
 #define ANIMATOR_OFF 3
 #define MOVATOR_Y 4
 
-#define MAX_TILE_ELE 6
+#define MAX_TILE_ELE 10
 
 typedef struct {
         BITMAP *close, *medium, *far;

@@ -16,6 +16,8 @@
 #define TILE_STATIC 6
 #define TILE_STATIC_NS 7
 #define TILE_STATIC_EW 8
+#define TILE_STATIC_NS_X 9
+#define TILE_STATIC_EW_X 10
 
 #define ELEMENT_ROTATE 0
 #define ELEMENT_NS 1

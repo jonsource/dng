@@ -182,6 +182,8 @@ unsigned short int tile_type_resolve(string type)
 	if(type.compare("TILE_STATIC")==0) {typ=TILE_STATIC; type_ok=true;}
 	if(type.compare("TILE_STATIC_NS")==0) {typ=TILE_STATIC_NS; type_ok=true;}
 	if(type.compare("TILE_STATIC_EW")==0) {typ=TILE_STATIC_EW; type_ok=true;}
+	if(type.compare("TILE_STATIC_NS_X")==0) {typ=TILE_STATIC_NS_X; type_ok=true;}
+	if(type.compare("TILE_STATIC_EW_X")==0) {typ=TILE_STATIC_EW_X; type_ok=true;}
 	if(!type_ok)
 	{
 		debug("Unknown element type "+type,10);
