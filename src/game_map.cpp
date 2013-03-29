@@ -43,6 +43,8 @@ unsigned short int load_block(FILE *f, string block, List<T> * l, T * (*loader)(
 	{ 	debug("Loading "+block);
 		while(!feof(f))
 		{ 	str2=get_line(f);
+            if(str2.length()==0) continue;
+            if(str2.find("#")==0) continue;
 			if(str2.find(":")==0)
 			{	debug("Done loading "+block);
 				str1[0] = str2; break;
@@ -64,6 +66,9 @@ int load_map(string fname)
 	}
 	while(!feof(f))
 	{ 	str1=get_line(f);
+        debug(to_str((int)str1.length()));
+        if(str1.length()==0) continue;
+        if(str1.find("#")==0) continue;
 		if(str1.find(":")==0) // : at the beginning of new line
 		{				// is new block
 			if(str1.compare(":debuglevel")==0)

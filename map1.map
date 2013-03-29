@@ -1,3 +1,15 @@
+# .map file for dng0b
+# lines starting with # are skipped as comments
+# lines starting with : are beginnings of a new block, no leading white-spaces are allowed
+
+# DEBUGLEVEL
+# debuglevel determines the ammount of debug info given
+# approximate levels are 
+# 1 all info - events happening each second
+# 3 list and mapping operations 
+# 4 game mechanisms
+# 10 critical errors
+
 :debuglevel
 4
 :mapsize
@@ -23,7 +35,14 @@
 1,1,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,1,1,
 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+  
+# TEXTURES
+# textures are loaded from /data/images/DIR/NAME.EXE files
+# first NAME_close.EXT file is read, then NAME_middle.EXT and NAME_far.EXT files are loaded
+# if _middle, or _far files are missing, they are replaced by resizing _close file
+
 :textures
+
 floor/floor1.bmp
 wall/wall1.bmp
 static/explosion.bmp
@@ -33,12 +52,25 @@ static/button1.bmp
 static/doorframe.bmp
 static/door.bmp
 static/doorside.bmp
+
+# LIGHTSOURCES
+# power, decrease per tile, X, Z
+
 :lightsources
 255 30 6 4
+
+# ANIMATORS or efectors
+# ANIMATOR miliseconds per frame, frame offset, number of frames, frame width, frame height
+# MOVATOR speed-1/100 units per second, starting state, end state, texture width, texture height
+
 :animators
 ANIMATOR_OFF 100 128 8 128 128
 ANIMATOR_TOGGLE 200 64 3 64 64
 MOVATOR_Y 80 0 1 256 256
+
+# ELEMENTS
+# elements are parts of a tile: floor, wall, button texture etc..
+
 :elements
 TILE_FLOOR 0 0 0 1 1 false 0 -1
 TILE_FRONT 0 0 0 1 1 false 1 -1
@@ -54,6 +86,10 @@ TILE_STATIC 0.5 0 0.5 1 1 false 6 -1
 TILE_STATIC 0.5 0 0.5 1 1 false 7 2
 TILE_STATIC 0.5 -0.03 0 0.1 1.04 false 8 -1
 TILE_STATIC 0.5 -0.03 1 0.1 1.04 false 8 -1
+
+# TILES
+# tiles make up the map, a tile has many elements (floor, walls ..etc)
+
 :tiles
 TILE_FLOOR 0 
 TILE_FLOOR 0 TILE_STATIC 3 TILE_CEILING 1 
@@ -65,6 +101,10 @@ TILE_FLOOR 0 TILE_STATIC_EW 6 TILE_CEILING 1
 TILE_FLOOR 0 TILE_STATIC_NS 7 TILE_STATIC 3 
 TILE_FLOOR 0 TILE_CEILING 1 TILE_STATIC_EW 9 TILE_STATIC_EW 8 
 TILE_FLOOR 0 TILE_CEILING 1 TILE_STATIC_EW 11 TILE_STATIC_EW_X 10 TILE_STATIC_NS_X 12 TILE_STATIC_NS_X 13 TILE_STATIC_EW 6 
+
+# TRIGGERS
+# triggers handle interaction with the map evironment
+
 :triggers
 TRIGGER_ENTER 3 3 150 150 200 200 -1
 TRIGGER_EAST 3 2 50 50 100 100 0
