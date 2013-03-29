@@ -413,7 +413,7 @@ void draw_view(int xpos, int ypos, int zpos, int heading)
    cam->dolly_ypos=ypos+0.5;
    cam->dolly_xpos=xpos+0.5;
    cam->dolly_zpos=zpos+0.5;
-   debug("begin draw_view()",3);
+   debug("begin draw_view()",2);
 
    //blit(api, game_bmp, 0, 0, 0, 0, 640, 480);
 

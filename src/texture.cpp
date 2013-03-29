@@ -218,12 +218,15 @@ TILE * load_tile(string s)
 	TILE * tile;
 	tile = create_tile();
 	while(sscanf(s.c_str(),"%s %d",type,&element)==2)
-	{ sub=type;
-	  sub+=" "+to_str(element)+" ";  //reconstruct read part to measure its length, add a whitespace at the end
-	  s=s.substr(sub.size()); //remove read part from string
-	  debug("sub: "+sub+" "+to_str((int)sub.size())+" str2: "+s,3);
-	  tile_add_element(tile,type,element);
+	{   sub=type;
+        sub+=" "+to_str(element)+" ";  //reconstruct read part to measure its length, add a whitespace at the end
+        debug("sub: "+sub+" "+to_str((int)sub.size()),3);
+        if(sub.size()>s.size()) s="";
+        else s=s.substr(sub.size());//remove read part from string
+        dappend(" str2: "+s+".");
+        tile_add_element(tile,type,element);
 	}
+	debug("return",3);
 	return tile;
 }
 

@@ -82,7 +82,7 @@ void game_draw()
   textprintf_ex(game_bmp, font, 30, 150, makecol(255, 255, 255), -1, str.c_str());
   delete pass;*/
 //  release_bitmap(bmp);
-  debug("begin game_draw",3);
+  debug("begin game_draw",2);
     scare_mouse();
   draw_view(gx,gy,gz,gh);
   draw_triggers(gx,gz,gh);
@@ -266,6 +266,7 @@ void debug(string s)
  */
 void dappend(string s, int lvl)
 { 	if(lvl<DEBUG_LVL) return;
+    printf(s.c_str());
 	fprintf(dbg,s.c_str());
 	fflush(dbg);
 }
