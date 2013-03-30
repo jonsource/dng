@@ -113,14 +113,16 @@ void update_camera(CAMERA * cam)
 /*   cam->xfront = sin(cam->heading) * cos(cam->pitch);
    cam->yfront = sin(cam->pitch);
    cam->zfront = cos(cam->heading) * cos(cam->pitch);*/
-
+/*
    switch(cam->heading)
-   { case HEAD_EAST : cam->xfront = 0; cam->zfront = 1; break;
-     case HEAD_NORTH : cam->xfront = 1; cam->zfront = 0; break;
-     case HEAD_WEST : cam->xfront = 0; cam->zfront = -1; break;
-     case HEAD_SOUTH : cam->xfront = -1; cam->zfront = 0; break;
+   { case HEAD_EAST : cam->xfront = 1; cam->zfront = 0; break;
+     case HEAD_NORTH : cam->xfront = 0; cam->zfront = -1; break;
+     case HEAD_WEST : cam->xfront = -1; cam->zfront = 0; break;
+     case HEAD_SOUTH : cam->xfront = 0; cam->zfront = 1; break;
 
-   }
+   }*/
+   heading_to_xz(cam->heading,&cam->xfront,&cam->zfront);
+
    if(cam->xfront==0) cam->xpos=cam->dolly_xpos;
    	  else cam->xpos=cam->dolly_xpos+((cam->xfront>0)?cam->stepback:-cam->stepback);
    if(cam->zfront==0) cam->zpos=cam->dolly_zpos;  //ano zfront a ypos tu maj byt takhle
@@ -165,7 +167,7 @@ void render_element(int type, TEXTURED_ELEMENT * element, BITMAP *bmp, int x, in
    	   		case TILE_STATIC: polytype = POLYTYPE_ATEX_LIT; break; //no need to account for perspective with front tiles
    	   		default: polytype = POLYTYPE_PTEX_MASK_LIT; break;
    	   	}
-   		set_trans_blender(0,0,0,128);
+   		set_trans_blender(100,100,150,1);
    }
 
    for (c=0; c<4; c++)
@@ -227,16 +229,17 @@ void render_element(int type, TEXTURED_ELEMENT * element, BITMAP *bmp, int x, in
       else if (v[c]->y > v[c]->z)
 	 flags[c] |= 8;
 
-      if (v[c]->z < -cam->stepback)
+      if (v[c]->z < -cam->stepback+0.05)
 	 flags[c] |= 16;
    }
    /* quit if all vertices are off the same edge of the screen */
-   if (flags[0] & flags[1] & flags[2] & flags[3])
+   if (element->clip && (flags[0] & flags[1] & flags[2] & flags[3]))
       return;
 
-   if (flags[0] | flags[1] | flags[2] | flags[3]) {
+   /* no clipping elements are clipped to fit in the viewport */
+   if (!element->clip || (flags[0] | flags[1] | flags[2] | flags[3])) {
       /* clip if any vertices are off the edge of the screen */
-      vc = clip3d_f(polytype, -cam->stepback, 0, 4, (AL_CONST V3D_f **)v,
+      vc = clip3d_f(polytype, -cam->stepback-0.05, 0, 4, (AL_CONST V3D_f **)v,
 		    vout, vtmp, out);
 
       if (vc <= 0)
@@ -273,17 +276,8 @@ BITMAP * far_texture(TEXTURED_ELEMENT * txt, int far)
         {   /* update state, a->on 1 means it is moving (from position),
                a->offset 0 means start position, a->offset 1 means end position */
 
-            float ydif;
-            if(a->on && (t-a->start)*a->speed/100000 >= a->frames)
-            { a->on=0;
-              a->offset=!a->offset;
-            }
-            if(a->on)
-            {   if(a->offset==0) ydif=(float)(t-a->start)*a->speed/100000;
-                else ydif=a->frames-(float)(t-a->start)*a->speed/100000;
-                debug("MOVATOR "+to_str(a->on)+" "+to_str(ydif));
-            }
-            else ydif=a->offset*a->frames;
+            float ydif=get_movator_dif(a,t);
+            //if(a->on) debug("MOVATOR "+to_str(a->on)+" "+to_str(ydif),3);
             clear_to_color(a->frame,makecol(255,0,255));
             blit(txt->texture->close,a->frame,0,0,0,-(int)(ydif*a->frame->h),a->frame->w,a->frame->h);
             return a->frame;
@@ -464,7 +458,7 @@ void draw_view(int xpos, int ypos, int zpos, int heading)
    //textprintf_ex(bmp, font, 0, 72, makecol(0, 0, 0), -1,
 	//	 "Z position: %.2f (z/Z changes)", (float)cam.zpos);
    textprintf_ex(game_bmp, font, 0, 80, makecol(0, 0, 0), -1,
-		 "Heading: %d  Stepback: %.2f", cam->heading,cam->stepback);
+		 "Heading: %d %s Stepback: %.2f", cam->heading,to_heading_str(cam->heading).c_str(),cam->stepback);
    textprintf_ex(game_bmp, font, 0, 88, makecol(0, 0, 0), -1,
 		 "Pitch: %.2f deg (pgup/pgdn changes)", cam->pitch);
    textprintf_ex(game_bmp, font, 0, 96, makecol(0, 0, 0), -1,
@@ -498,7 +492,10 @@ int init_graphic()
 	second=create_bitmap(SCREEN_W, SCREEN_H);
 	game_bmp = first;
 	//rect(game_bmp, x, y, x+w-1, y+h-1, makecol(255, 0, 0));
-	set_clip_rect(game_bmp, x, y, x+viewport_w, y+viewport_h);
+	set_clip_rect(first, x, y, x+viewport_w, y+viewport_h);
+	set_clip_rect(second, x, y, x+viewport_w, y+viewport_h);
+	set_clip_state(first,0);
+	set_clip_state(second,0);
 	if(game_bmp==NULL)
 	{  debug("Couldn't acquire screen!");
 	   return 0;

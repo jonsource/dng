@@ -12,6 +12,8 @@ extern int status;
 extern ClassTemplates *Classes;
 extern List<TILE> Tiles;
 extern FILE *dbg;
+extern int fps, tmsec;
+extern BITMAP * game_bmp;
 Character *Player;
 int gy=0,gz=2,gx=3,gh=0;
 int light_power=128;
@@ -38,9 +40,6 @@ void game_load()
 	load_graphics();
 	load_map("map1.map");
 	debug("done game_load");
-	debug("Tiles.len() "+to_str(Tiles.len()));
-	dappend(" Tiles[0]->len "+to_str(Tiles[0]->types[0]));
-	dappend(" .elements[0]"+to_str(Tiles[0]->elements[0]->type));
 	FOV=40;
 	STB=-0.85;
 }
@@ -103,10 +102,10 @@ void player_move(int x, int y, int z, int h)
     /* change position */
     else
 	{   switch(gh)
-        { case HEAD_NORTH: nz=gz-x; nx=gx+z; break;
-        case HEAD_EAST: nz=gz+z; nx=gx+x; break;
-        case HEAD_SOUTH: nz=gz+x; nx=gx-z; break;
-        case HEAD_WEST: nz=gz-z; nx=gx-x; break;
+        { case HEAD_NORTH: nz=gz+z; nx=gx+x; break;
+        case HEAD_EAST: nz=gz+x; nx=gx-z; break;
+        case HEAD_SOUTH: nz=gz-z; nx=gx-x; break;
+        case HEAD_WEST: nz=gz-x; nx=gx+z; break;
         }
         gy+=y;
         if(check_coords(nx,nz)==3) can_pass = false;
@@ -120,18 +119,18 @@ void player_move(int x, int y, int z, int h)
         {   clk=clklist[i];
             debug("leave trigger "+to_heading_str(clk->callback->type-8),5);
             //clk->callback->fire();
-            if(clk->callback->type-8==to_heading(nx-gx,nz-gz) && clk->callback->animator->offset==0) can_pass=false;
+            if(clk->callback->type-8==xz_to_heading(nx-gx,nz-gz) && ((int)(get_movator_dif(clk->callback->animator,tmsec)*100))<clk->w1) can_pass=false;
         }
 
 
         if(can_pass)
         {
-            debug("Move to "+to_heading_str(to_heading(nx-gx,nz-gz))+" "+to_str(nx)+" "+to_str(nz)+" = "+to_str(check_coords(nz,nx)),5);
+            debug("Move to "+to_heading_str(xz_to_heading(nx-gx,nz-gz))+" "+to_str(nx)+" "+to_str(nz)+" = "+to_str(check_coords(nz,nx)),5);
             gz=nz; gx=nx;
 
         }
         else
-        {   debug("Bump! tried to move to "+to_str(nx)+" "+to_str(nz)+" = "+to_str(check_coords(nz,nx)),5);
+        {   debug("Bump! tried to move to "+to_heading_str(xz_to_heading(nx-gx,nz-gz))+" "+to_str(nx)+" "+to_str(nz)+" = "+to_str(check_coords(nz,nx)),5);
         }
     }
     Clickables["place"].clear_all();
@@ -185,10 +184,10 @@ void keypress(int i)
    { if(i == KEY_P) status = PLAY;
      if(i == KEY_M) { mode = mode+1; mode = mode%6; }
      if(i == KEY_V) { delete(Player); Player=new Character(1); }
-     if(i == KEY_W) z=1;
-     if(i == KEY_S) z=-1;
-     if(i == KEY_A) x=1;
-     if(i == KEY_D) x=-1;
+     if(i == KEY_W) z=-1;
+     if(i == KEY_S) z=1;
+     if(i == KEY_A) x=-1;
+     if(i == KEY_D) x=1;
      if(i == KEY_R) y=1;
      if(i == KEY_F) y-=1;
      if(i == KEY_H) { FOV+=1; init_camera(STB,FOV,1.33f); }
@@ -198,8 +197,9 @@ void keypress(int i)
      if(i == KEY_O) light_power+=1;
      if(i == KEY_L) light_power-=1;
      if(i == KEY_T) {if(TRANSPARENT) TRANSPARENT =0; else TRANSPARENT=1;}
-     if(i == KEY_E) {h=-1;}
-     if(i == KEY_Q) {h=1;}
+     if(i == KEY_E) {h=1;}
+     if(i == KEY_Q) {h=-1;}
+     if(i == KEY_L) { debug(" cliping :"+to_str(game_bmp->clip)); }
      if(i == KEY_N)
      { Class *cl=Classes->GetTemplate(Player->classname);
        cl->NextLevel(Player);
@@ -218,8 +218,8 @@ void keypress(int i)
  * convert string to bool
  */
 bool to_bool(string s)
-{  if(s=="false" || s=="False") return false;
-   if(s=="true" || s=="True") return true;
+{  if(s=="false" || s=="False" || s=="no-clip" || s=="solid") return false;
+   if(s=="true" || s=="True" || s=="clip" || s=="trans") return true;
    else
    { char buf[30];
      sprintf(buf,"Unclear argument %s, making False\n",s.c_str());
@@ -256,10 +256,20 @@ string to_str(bool b)
 
 */
 
-int to_heading(int xfront, int zfront)
-{   if(xfront<0) return HEAD_NORTH;
-    if(xfront>0) return HEAD_SOUTH;
-    if(zfront<0) return HEAD_WEST;
+bool heading_to_xz(int h,int *x,int *z)
+{   switch(h)
+    {   case HEAD_EAST : *x = 1; *z = 0; return true;
+        case HEAD_NORTH : *x = 0; *z = -1; return true;
+        case HEAD_WEST : *x = -1; *z = 0; return true;
+        case HEAD_SOUTH : *x = 0; *z = 1; return true;
+    }
+    return false;
+}
+
+int xz_to_heading(int xfront, int zfront)
+{   if(zfront<0) return HEAD_NORTH;
+    if(zfront>0) return HEAD_SOUTH;
+    if(xfront<0) return HEAD_WEST;
     return HEAD_EAST;
 
 }

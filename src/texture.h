@@ -12,14 +12,14 @@
 
 #define TRIGGER_ENTER 5
 #define TRIGGER_LEAVE 6
-#define TRIGGER_NORTH 1
-#define TRIGGER_EAST 0
-#define TRIGGER_SOUTH 3
-#define TRIGGER_WEST 2
-#define BLOCKER_NORTH 9
-#define BLOCKER_EAST 8
-#define BLOCKER_SOUTH 11
-#define BLOCKER_WEST 10
+#define TRIGGER_NORTH 0
+#define TRIGGER_EAST 1
+#define TRIGGER_SOUTH 2
+#define TRIGGER_WEST 3
+#define BLOCKER_NORTH 8
+#define BLOCKER_EAST 9
+#define BLOCKER_SOUTH 10
+#define BLOCKER_WEST 11
 
 #define ANIMATOR_TOGGLE 1
 #define ANIMATOR_ON 2
@@ -41,7 +41,7 @@ typedef struct {
 typedef struct {
 		float x,y,z,w,h;
 		int type;
-		bool transparent;
+		bool transparent,clip;
 		TEXTURE * texture;
 		ANIMATOR * animator;
 } TEXTURED_ELEMENT;
@@ -72,6 +72,7 @@ TEXTURED_ELEMENT * load_element(string s);
 TEXTURED_ELEMENT * create_element(string type, float x, float y, float z, float w, float h, string transparent, int texture, int animator);
 ANIMATOR * load_animator(string s);
 ANIMATOR * create_animator(int speed, int offset, int frames, int w, int h);
+float get_movator_dif(ANIMATOR * a,int t);
 TILE * load_tile(string s);
 TILE * create_tile();
 int tile_add_element(TILE * til,string type,int element);

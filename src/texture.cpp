@@ -66,7 +66,7 @@ TEXTURE * load_texture(string s)
     return text;
 }
 
-TEXTURED_ELEMENT * create_element(string type, float x, float y, float z, float w, float h, string transparent, int texture, int animator)
+TEXTURED_ELEMENT * create_element(string type, float x, float y, float z, float w, float h, string transparent, int texture, int animator, string clip)
 {	//char buf[60];
 	TEXTURED_ELEMENT * ele = new(TEXTURED_ELEMENT);
 	unsigned short int typ;
@@ -76,6 +76,7 @@ TEXTURED_ELEMENT * create_element(string type, float x, float y, float z, float 
    ele->w = w;
    ele->h = h;
    ele->transparent = to_bool(transparent);
+   ele->clip = to_bool(clip);
    if(texture>=Textures.len())
    { debug("Referencing undefined texture "+to_str(texture),10);
    	 ele->texture = Textures[0];
@@ -97,14 +98,14 @@ TEXTURED_ELEMENT * create_element(string type, float x, float y, float z, float 
 }
 
 TEXTURED_ELEMENT * load_element(string s)
-{	char type[32], transparent[32];
+{	char type[32], transparent[32], clip[32];
 	float x,y,z,w,h;
 	int texture,animator;
-	if(sscanf(s.c_str(),"%s %f %f %f %f %f %s %d %d",type,&x,&y,&z,&w,&h,transparent,&texture,&animator)<9)
+	if(sscanf(s.c_str(),"%s %f %f %f %f %f %s %d %d %s",type,&x,&y,&z,&w,&h,transparent,&texture,&animator,clip)<10)
 	{ debug("Not enough parameters for textured element.",10);
 	  exit(1);
 	}
-	return create_element(type,x,y,z,w,h,transparent,texture,animator);
+	return create_element(type,x,y,z,w,h,transparent,texture,animator,clip);
 }
 
 unsigned short int animator_type_resolve(string type)
@@ -141,6 +142,20 @@ ANIMATOR * load_animator(string s)
 	  exit(1);
 	}
 	return create_animator(animator_type_resolve(buf), speed, offset, frames, w, h);
+}
+
+float get_movator_dif(ANIMATOR * a, int t)
+{   float ydif=0;
+    if(a->on && (t-a->start)*a->speed/100000 >= a->frames)
+    {   a->on=0;
+        a->offset=!a->offset;
+    }
+    if(a->on)
+    {   if(a->offset==0) ydif=(float)(t-a->start)*a->speed/100000;
+        else ydif=a->frames-(float)(t-a->start)*a->speed/100000;
+    }
+    else ydif=a->offset*a->frames;
+    return ydif;
 }
 
 int tile_add_element(TILE * til, string type, int element)

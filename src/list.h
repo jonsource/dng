@@ -46,7 +46,7 @@ void List<T>::add(T * item)
 		alloc_size=alloc_size?(alloc_size*2):4;
 		debug(" ... to: "+to_str(alloc_size),2);
 	}
-debug("Adding item as #"+to_str(max_item+1));
+debug("Adding item as #"+to_str(max_item+1),2);
 items[max_item]=item;
 dappend(" - item added",1);
 max_item++;
@@ -65,7 +65,7 @@ int List<T>::len()
 
 template <class T>
 void List<T>::clear_all()
-{	debug("Clearing list :"+to_str(max_item)+" items!");
+{	debug("Clearing list :"+to_str(max_item)+" items!",2);
     delete []items;
     items=NULL;
 	max_item=0;

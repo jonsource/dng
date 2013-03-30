@@ -13,10 +13,10 @@ using namespace std;
 #define PLAY     2
 #define PAUSE    -1
 
-#define HEAD_NORTH  1
-#define HEAD_EAST   0
-#define HEAD_SOUTH  3
-#define HEAD_WEST   2
+#define HEAD_NORTH  0
+#define HEAD_EAST   1
+#define HEAD_SOUTH  2
+#define HEAD_WEST   3
 
 void game_load();
 void game_unload();
@@ -36,7 +36,8 @@ string to_str(int i);
 string to_str(float f);
 string to_str(bool b);
 string to_heading_str(int h);
-int to_heading(int x, int z);
+int xz_to_heading(int x, int z);
+bool heading_to_xz(int h, int *x, int *z);
 void dappend(string s, int lvl);
 void dappend(string s);
 int mstime();

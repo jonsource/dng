@@ -110,7 +110,8 @@ int load_map(string fname)
 					j=0;
 					debug("str2 "+str2);
 					while(sscanf(str2.c_str(),"%d,",&tile) && j<MAP_SIZE)
-					{	game_map[i][j++]=tile;
+					{	game_map[j][i]=tile;
+                        j++;
 					 	debug("Read tile ["+to_str(i)+","+to_str(j)+"]="+to_str(tile),1);
 					  	found=str2.find_first_of(",");
 					  	str2=str2.substr(found+1);
