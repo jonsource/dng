@@ -7,6 +7,7 @@
 
 #include "texture.h"
 #include "graphic.h"
+#include "game_map.h"
 #include <string.h>
 #include <stdio.h>
 
@@ -277,19 +278,23 @@ unsigned short int trigger_type_resolve(string type)
 }
 
 TRIGGER * load_trigger(string s)
-{	char buf[30];
+{	char buf[32],buf2[32];
     int xpos;
     int zpos;
     int w1,h1,w2,h2,anim;
-	if(sscanf(s.c_str(),"%s %d %d %d %d %d %d %d",buf,&xpos,&zpos,&w1,&h1,&w2,&h2,&anim)<8)
+    TRIGGER * ret;
+
+    int params=0;
+	if((params=sscanf(s.c_str(),"%s %d %d %d %d %d %d %d %s",buf,&xpos,&zpos,&w1,&h1,&w2,&h2,&anim,buf2))<8)
 	{ debug("Not enough parameters loading trigger: "+s,10);
 	  exit(1);
 	}
-	TRIGGER * ret = new TRIGGER(trigger_type_resolve(buf),xpos,zpos,w1,h1,w2,h2,anim);
+	if(params==8) ret = new TRIGGER(trigger_type_resolve(buf),xpos,zpos,w1,h1,w2,h2,anim);
+	ret = new TRIGGER(trigger_type_resolve(buf),xpos,zpos,w1,h1,w2,h2,anim,buf2);
 	return ret;
 }
 
-TRIGGER::TRIGGER(int type, int xpos, int zpos, int w1, int h1, int w2, int h2,int animator)
+TRIGGER::TRIGGER(int type, int xpos, int zpos, int w1, int h1, int w2, int h2,int animator, string action)
 {   this->type=type;
     this->xpos=xpos;
     this->zpos=zpos;
@@ -305,14 +310,36 @@ TRIGGER::TRIGGER(int type, int xpos, int zpos, int w1, int h1, int w2, int h2,in
         }
     }
     else this->animator=NULL;
+    if(action=="") this->action=NULL;
+    else this->action = new string(action);
+}
+
+TRIGGER::TRIGGER(int type, int xpos, int zpos, int w1, int h1, int w2, int h2,int animator)
+{   TRIGGER(type,xpos,zpos,w1,h1,w2,h2,animator,"");
 }
 
 void TRIGGER::fire()
-{   if(this->animator!=NULL)
-    {   this->animator->on=!this->animator->on;
-        this->animator->start=tmsec;
-        debug("animator toggle "+to_str(this->animator->on)+" "+to_str(this->animator->start));
+{   ANIMATOR * a = this->animator;
+    if(a!=NULL)
+    {   if(a->type==MOVATOR_Y)
+        {   if(!a->on)
+            {   a->on=1;
+                a->start=tmsec;
+            }
+        }
+        else
+        {   a->on=!a->on;
+            a->start=tmsec;
+            debug("animator toggle "+to_str(a->on)+" "+to_str(a->start));
+        }
     }
     debug("Trigger at "+to_str(this->xpos)+" "+to_str(this->zpos)+" fired!");
-
+    if(this->action!=NULL) dappend(" action: "+*this->action);
+    STR_LIST * tokens = tokenize(*this->action,"/");
+    debug("tokens("+to_str(tokens->len())+"):");
+    for(int i=0; i<tokens->len(); i++)
+        dappend(" "+to_str(i)+"("+*(*tokens)[i]);
+    if(tokens->len()==2 && *(*tokens)[0]=="change_map")
+    {   change_map(*(*tokens)[1],this->w1,this->h1);
+    }
 }

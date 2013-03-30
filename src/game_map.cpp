@@ -204,7 +204,7 @@ void change_map(string fname, int x, int z)
     debug("elements :"+to_str(Elements.len()));
     debug("tiles :"+to_str(Tiles.len()));
     debug("triggers :"+to_str(Triggers.len()));
-    player_move_subr(3,0,2,0,true);
+    player_move_subr(x,0,z,-1,true);
 }
 
 int load_int(string str)

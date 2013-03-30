@@ -10,12 +10,14 @@
 
 #include "game.h"
 
-#define TRIGGER_ENTER 5
-#define TRIGGER_LEAVE 6
 #define TRIGGER_NORTH 0
 #define TRIGGER_EAST 1
 #define TRIGGER_SOUTH 2
 #define TRIGGER_WEST 3
+
+#define TRIGGER_ENTER 5
+#define TRIGGER_LEAVE 6
+
 #define BLOCKER_NORTH 8
 #define BLOCKER_EAST 9
 #define BLOCKER_SOUTH 10
@@ -63,8 +65,10 @@ class TRIGGER
         int type;
         int w1,h1,w2,h2;
         ANIMATOR * animator;
-        TRIGGER(int xpos, int zpos, int type, int w1, int h1, int w2, int h2, int animator);
+        TRIGGER(int type, int xpos, int zpos, int w1, int h1, int w2, int h2, int animator);
+        TRIGGER(int type, int xpos, int zpos, int w1, int h1, int w2, int h2, int animator, string action);
         void fire();
+        string * action;
 };
 
 TEXTURE * load_texture(string s);

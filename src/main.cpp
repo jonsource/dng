@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <allegro.h>
 #include "game.h"
+#include "game_lib.h"
 #include "graphic.h"
 #include "chat.h"
 #include "game_map.h"
@@ -26,7 +27,6 @@ int fps;
 unsigned short int keyb_ignore;
 BITMAP *game_bmp=NULL,*first=NULL,*second=NULL;
 int status,mode;
-FILE *dbg=NULL;
 extern float STB;
 extern int FOV;
 
@@ -70,8 +70,7 @@ void init()
 	//set initial game mode - development only
 	mode = 1;
 	//initialiye debugging
-	dbg = fopen("dng0a.log","w");
-	debug("*** NEW RUN ***");
+	init_debug("dng0a.log");
 
 	//lock variables for timer
 	LOCK_VARIABLE(game_time);
@@ -112,7 +111,7 @@ void deinit()
 { 	remove_int(fps_proc);
 	remove_int(game_timer);
 	unload_graphics();
-	fclose(dbg);
+	deinit_debug();
 }
 
 /**
@@ -126,10 +125,11 @@ int interpret(int a)
 int main(int argc, char *argv[])
 {
     int mb,lastmb;
+
 	//chat_main();
 	//return 0;
 	init();
-	game_load();
+    game_load();
 	if(quit) { return 1;}
 
 	/* main loop */

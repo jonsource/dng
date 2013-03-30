@@ -1,5 +1,4 @@
 #include <allegro.h>
-#include <time.h>
 #include "stdio.h"
 #include "game.h"
 #include "load_classes.h"
@@ -11,7 +10,6 @@ extern int keyb_ignore,mode;
 extern int status;
 extern ClassTemplates *Classes;
 extern List<TILE> Tiles;
-extern FILE *dbg;
 extern int fps, tmsec;
 extern BITMAP * game_bmp;
 Character *Player;
@@ -19,11 +17,9 @@ int gy=0,gz=2,gx=3,gh=0;
 int light_power=128;
 extern int FOV;
 extern double STB;
-int DEBUG_LVL_MAIN = 4;
-int DEBUG_LVL = DEBUG_LVL_MAIN;
 int TRANSPARENT = 0;
-
-char chbuf[256];
+extern int DEBUG_LVL_MAIN;
+extern int DEBUG_LVL;
 
 extern CLICKABLE_MAP Clickables;
 extern List<TRIGGER> Triggers;
@@ -39,7 +35,7 @@ void game_load()
 	Classes = new ClassTemplates();
 	Player = new Character(1);
 	load_graphics();
-	change_map("map1.map",0,0);
+	change_map("map1.map",3,2);
 	debug("done game_load");
 }
 
@@ -119,6 +115,8 @@ void player_move_subr(int x, int y, int z, int h, bool force)
             gy+=y;
             if(check_coords(nx,nz)==3) can_pass = false;
 
+            /* apply leave triggers and blockers */
+
             List<CLICKABLE> clklist;
             CLICKABLE * clk;
 
@@ -131,7 +129,6 @@ void player_move_subr(int x, int y, int z, int h, bool force)
                 if(clk->callback->type-8==xz_to_heading(nx-gx,nz-gz) && ((int)(get_movator_dif(clk->callback->animator,tmsec)*100))<clk->w1) can_pass=false;
             }
 
-
             if(can_pass)
             {
                 debug("Move to "+to_heading_str(xz_to_heading(nx-gx,nz-gz))+" "+to_str(nx)+" "+to_str(nz)+" = "+to_str(check_coords(nz,nx)),5);
@@ -142,35 +139,51 @@ void player_move_subr(int x, int y, int z, int h, bool force)
             {   debug("Bump! tried to move to "+to_heading_str(xz_to_heading(nx-gx,nz-gz))+" "+to_str(nx)+" "+to_str(nz)+" = "+to_str(check_coords(nz,nx)),5);
             }
         }
+
+            /* clear old triggers */
+        Clickables["place"].clear_all();
+        Clickables["leave"].clear_all();
+        Clickables["enter"].clear_all();
+
+        /* apply local clickable triggers */
+        for(int i=0; i<Triggers.len(); i++)
+        {   TRIGGER * t;
+            t=Triggers[i];
+            debug("["+to_str(gx)+","+to_str(gz)+"] Trigger "+to_str(t->xpos)+" "+to_str(t->zpos),3);
+                /* correct coordinates and (TYPE_ENTER or correct heading) */
+            if(t->xpos==gx && t->zpos==gz && (t->type==TRIGGER_ENTER || t->type==gh || t->type>=8 ))
+            {   debug("Trigger encountered. "+to_str(t->type));
+                CLICKABLE * clk = new CLICKABLE;
+                clk->h1=t->h1;
+                clk->w1=t->w1;
+                clk->h2=t->h2;
+                clk->w2=t->w2;
+                clk->callback = t;
+                if(t->type<TRIGGER_WEST) Clickables["place"].add(clk);
+                else if(t->type==TRIGGER_LEAVE || (t->type>=BLOCKER_NORTH && t->type<=BLOCKER_WEST)) Clickables["leave"].add(clk);
+                else if(t->type==TRIGGER_ENTER) Clickables["enter"].add(clk);
+            }
+        }
+
+        /* apply enter triggers */
+
+        List<CLICKABLE> clklist=Clickables["enter"];
+        CLICKABLE * clk = new CLICKABLE;
+        for(int i=0; i<clklist.len(); i++)
+        {   clk=clklist[i];
+            debug("enter trigger "+*clk->callback->action,5);
+            clk->callback->fire();
+        }
+
     }
     else
     {   /* FORCED MOVEMENT - map change, teleport etc.. */
+        if(h!=-1)
         gh=h;
         gx=x;
         gz=z;
         gy=y;
     }
-
-    Clickables["place"].clear_all();
-    Clickables["leave"].clear_all();
-    for(int i=0; i<Triggers.len(); i++)
-    {   TRIGGER * t;
-        t=Triggers[i];
-        debug("["+to_str(gx)+","+to_str(gz)+"] Trigger "+to_str(t->xpos)+" "+to_str(t->zpos),3);
-            /* correct coordinates and (TYPE_ENTER or correct heading) */
-        if(t->xpos==gx && t->zpos==gz && (t->type==TRIGGER_ENTER || t->type==gh || t->type>=8 ))
-        {   debug("Trigger encountered. "+to_str(t->type));
-            CLICKABLE * clk = new CLICKABLE;
-            clk->h1=t->h1;
-            clk->w1=t->w1;
-            clk->h2=t->h2;
-            clk->w2=t->w2;
-            clk->callback = t;
-            if(t->type<8) Clickables["place"].add(clk);
-            else Clickables["leave"].add(clk);
-        }
-    }
-    //draw_triggers(gx,gz,gh);
 }
 
 void mouse_click(int mw, int mh)
@@ -230,141 +243,6 @@ void keypress(int i)
    if(status == PAUSE)
    { if(i == KEY_SPACE) { status = PLAY; } }
    keyb_ignore = 10;
-}
-
-/**
- * convert string to bool
- */
-bool to_bool(string s)
-{  if(s=="false" || s=="False" || s=="solid") return false;
-   if(s=="true" || s=="True" || s=="trans") return true;
-   if(s.find("no-")==0) return false;
-   else
-   { debug("Unclear argument "+s+", defaulting to True",9);
-     return true;
-   }
-}
-
-/**
- * convert integer to string
- */
-string to_str(int i)
-{	sprintf(chbuf,"%d",i);
-	return chbuf;
-}
-
-/**
- * convert float to string
- */
-string to_str(float f)
-{	sprintf(chbuf,"%.2f",f);
-	return chbuf;
-}
-
-/**
- * convert double to string
- */
-string to_str(double f)
-{	sprintf(chbuf,"%.2f",f);
-	return chbuf;
-}
-
-/**
- * convert bool to string
- */
-string to_str(bool b)
-{	if(b) return "true";
-	return "false";
-}
-
-/**
-
-*/
-
-bool heading_to_xz(int h,int *x,int *z)
-{   switch(h)
-    {   case HEAD_EAST : *x = 1; *z = 0; return true;
-        case HEAD_NORTH : *x = 0; *z = -1; return true;
-        case HEAD_WEST : *x = -1; *z = 0; return true;
-        case HEAD_SOUTH : *x = 0; *z = 1; return true;
-    }
-    return false;
-}
-
-int xz_to_heading(int xfront, int zfront)
-{   if(zfront<0) return HEAD_NORTH;
-    if(zfront>0) return HEAD_SOUTH;
-    if(xfront<0) return HEAD_WEST;
-    return HEAD_EAST;
-
-}
-
-string to_heading_str(int h)
-{   if(h==HEAD_NORTH) return "north";
-    if(h==HEAD_EAST) return "east";
-    if(h==HEAD_SOUTH) return "south";
-    if(h==HEAD_WEST) return "west";
-    return "unknown";
-}
-
-/**
- * get current time in miliseconds based on processor clock
- */
-int mstime()
-{	return clock()/(float)CLOCKS_PER_SEC*100;
-}
-
-/**
- * write debug information to log
- * lvl - level of importance, the higher the more important
- */
-void debug(string s, int lvl)
-{
-	if(lvl<DEBUG_LVL) return;
-	s="\n"+to_str((int)mstime())+" "+s;
-	printf(s.c_str());
-	fprintf(dbg,s.c_str());
-	fflush(dbg);
-}
-/**
- * write debug information to log with default lvl
- */
-void debug(string s)
-{ debug(s,4);
-}
-
-/**
- * append debug information (omits current time stamp)
- */
-void dappend(string s, int lvl)
-{ 	if(lvl<DEBUG_LVL) return;
-    printf(s.c_str());
-	fprintf(dbg,s.c_str());
-	fflush(dbg);
-}
-
-/**
- * append debug information (omits current time stamp), with default lvl
- */
-void dappend(string s)
-{ 	dappend(s,4);
-}
-
-/**
- * set what lvl of importance is needed to be logged, 0 for everything, 10 for production version
- * may be used to temporarily increase logging in parts of code
- */
-void set_debug_lvl(int lvl)
-{
-	DEBUG_LVL=lvl;
-}
-
-/**
- * reset debug level to main lvl
- */
-void reset_debug_lvl()
-{
-	DEBUG_LVL=DEBUG_LVL_MAIN;
 }
 
 void game_unload()
