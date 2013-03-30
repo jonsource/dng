@@ -38,7 +38,7 @@ void game_load()
 	Classes = new ClassTemplates();
 	Player = new Character(1);
 	load_graphics();
-	load_map("map1.map");
+	change_map("map1.map",0,0);
 	debug("done game_load");
 	FOV=40;
 	STB=-0.85;
@@ -199,7 +199,7 @@ void keypress(int i)
      if(i == KEY_T) {if(TRANSPARENT) TRANSPARENT =0; else TRANSPARENT=1;}
      if(i == KEY_E) {h=1;}
      if(i == KEY_Q) {h=-1;}
-     if(i == KEY_L) { debug(" cliping :"+to_str(game_bmp->clip)); }
+     if(i == KEY_L) { change_map("map2.map",0,0); }
      if(i == KEY_N)
      { Class *cl=Classes->GetTemplate(Player->classname);
        cl->NextLevel(Player);

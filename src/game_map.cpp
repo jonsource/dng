@@ -10,6 +10,7 @@
 #include "texture.h"
 #include <string>
 #include "list.h"
+#include "interface.h"
 
 using namespace std;
 
@@ -25,6 +26,7 @@ extern List<ANIMATOR> Animators;
 extern List<TILE> Tiles;
 extern List<LIGHT_SOURCE> Lightsources;
 extern List<TRIGGER> Triggers;
+extern CLICKABLE_MAP Clickables;
 
 string get_line(FILE * f)
 {	string ret="";
@@ -139,5 +141,22 @@ int load_map(string fname)
 	return 1;
 }
 
-
+void change_map(string fname, int x, int z)
+{   Textures.clear_all();
+    Lightsources.clear_all();
+    Animators.clear_all();
+    Elements.clear_all();
+    Tiles.clear_all();
+    Triggers.clear_all();
+    Clickables.clear();
+    load_map(fname);
+    //player_move(3,0,2,0);
+    debug("Map changed to :"+fname);
+    debug("textures :"+to_str(Textures.len()));
+    debug("lightsources :"+to_str(Lightsources.len()));
+    debug("animators :"+to_str(Animators.len()));
+    debug("elements :"+to_str(Elements.len()));
+    debug("tiles :"+to_str(Tiles.len()));
+    debug("triggers :"+to_str(Triggers.len()));
+}
 

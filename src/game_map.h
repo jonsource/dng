@@ -12,5 +12,6 @@
 #include <stdio.h>
 
 int load_map(string fname);
+void change_map(string fname, int x, int z);
 
 #endif /* MAP_H_ */

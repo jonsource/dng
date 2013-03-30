@@ -31,6 +31,7 @@ void set_debug_lvl(int lvl);
 void reset_debug_lvl();
 bool to_bool(string s);
 void mouse_click(int mw, int mh);
+void player_move(int x, int y, int z, int h);
 
 string to_str(int i);
 string to_str(float f);

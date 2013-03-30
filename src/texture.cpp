@@ -130,6 +130,7 @@ ANIMATOR * create_animator(int type, int speed, int offset, int frames, int w, i
 	ani->frame=create_bitmap(w,h);
 	ani->type=type;
 	if(type==ANIMATOR_ON) ani->on=1;
+	else ani->on=0;
 	ani->start=0;
   return ani;
 }
