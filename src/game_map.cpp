@@ -68,7 +68,7 @@ int load_map(string fname)
 	}
 	while(!feof(f))
 	{ 	str1=get_line(f);
-        debug(to_str((int)str1.length()));
+
         if(str1.length()==0) continue;
         if(str1.find("#")==0) continue;
 		if(str1.find(":")==0) // : at the beginning of new line
@@ -150,7 +150,7 @@ void change_map(string fname, int x, int z)
     Triggers.clear_all();
     Clickables.clear();
     load_map(fname);
-    //player_move(3,0,2,0);
+
     debug("Map changed to :"+fname);
     debug("textures :"+to_str(Textures.len()));
     debug("lightsources :"+to_str(Lightsources.len()));
@@ -158,5 +158,6 @@ void change_map(string fname, int x, int z)
     debug("elements :"+to_str(Elements.len()));
     debug("tiles :"+to_str(Tiles.len()));
     debug("triggers :"+to_str(Triggers.len()));
+    player_move_subr(3,0,2,0,true);
 }
 

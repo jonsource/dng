@@ -89,50 +89,69 @@ void game_draw()
 }
 
 void player_move(int x, int y, int z, int h)
+{   player_move_subr(x,y,z,h,false);
+
+}
+
+void player_move_subr(int x, int y, int z, int h, bool force)
 {	int nz,nx;
     int can_pass=true;
 
-    /* change heading */
-	if(h!=0)
-    {   gh+=h;
-        if(gh<0) gh=3;
-        if(gh>3) gh=0;
-        debug("Change heading to "+to_str(gh),5);
-    }
-    /* change position */
-    else
-	{   switch(gh)
-        { case HEAD_NORTH: nz=gz+z; nx=gx+x; break;
-        case HEAD_EAST: nz=gz+x; nx=gx-z; break;
-        case HEAD_SOUTH: nz=gz-z; nx=gx-x; break;
-        case HEAD_WEST: nz=gz-x; nx=gx+z; break;
+
+    if(!force)
+    {
+        /* NORMAL MOVEMENT */
+
+        /* change heading */
+        if(h!=0)
+        {   gh+=h;
+            if(gh<0) gh=3;
+            if(gh>3) gh=0;
+            debug("Change heading to "+to_str(gh),5);
         }
-        gy+=y;
-        if(check_coords(nx,nz)==3) can_pass = false;
-
-        List<CLICKABLE> clklist;
-        CLICKABLE * clk;
-
-        clklist=Clickables["leave"];
-
-        for(int i=0; i<clklist.len(); i++)
-        {   clk=clklist[i];
-            debug("leave trigger "+to_heading_str(clk->callback->type-8),5);
-            //clk->callback->fire();
-            if(clk->callback->type-8==xz_to_heading(nx-gx,nz-gz) && ((int)(get_movator_dif(clk->callback->animator,tmsec)*100))<clk->w1) can_pass=false;
-        }
-
-
-        if(can_pass)
-        {
-            debug("Move to "+to_heading_str(xz_to_heading(nx-gx,nz-gz))+" "+to_str(nx)+" "+to_str(nz)+" = "+to_str(check_coords(nz,nx)),5);
-            gz=nz; gx=nx;
-
-        }
+        /* change position */
         else
-        {   debug("Bump! tried to move to "+to_heading_str(xz_to_heading(nx-gx,nz-gz))+" "+to_str(nx)+" "+to_str(nz)+" = "+to_str(check_coords(nz,nx)),5);
+        {   switch(gh)
+            { case HEAD_NORTH: nz=gz+z; nx=gx+x; break;
+            case HEAD_EAST: nz=gz+x; nx=gx-z; break;
+            case HEAD_SOUTH: nz=gz-z; nx=gx-x; break;
+            case HEAD_WEST: nz=gz-x; nx=gx+z; break;
+            }
+            gy+=y;
+            if(check_coords(nx,nz)==3) can_pass = false;
+
+            List<CLICKABLE> clklist;
+            CLICKABLE * clk;
+
+            clklist=Clickables["leave"];
+
+            for(int i=0; i<clklist.len(); i++)
+            {   clk=clklist[i];
+                debug("leave trigger "+to_heading_str(clk->callback->type-8),5);
+                //clk->callback->fire();
+                if(clk->callback->type-8==xz_to_heading(nx-gx,nz-gz) && ((int)(get_movator_dif(clk->callback->animator,tmsec)*100))<clk->w1) can_pass=false;
+            }
+
+
+            if(can_pass)
+            {
+                debug("Move to "+to_heading_str(xz_to_heading(nx-gx,nz-gz))+" "+to_str(nx)+" "+to_str(nz)+" = "+to_str(check_coords(nz,nx)),5);
+                gz=nz; gx=nx;
+
+            }
+            else
+            {   debug("Bump! tried to move to "+to_heading_str(xz_to_heading(nx-gx,nz-gz))+" "+to_str(nx)+" "+to_str(nz)+" = "+to_str(check_coords(nz,nx)),5);
+            }
         }
     }
+    else
+    {   /* FORCED MOVEMENT - map change, teleport etc.. */
+        gh=h;
+        gx=x;
+        gz=z;
+        gy=y;
+    }
+
     Clickables["place"].clear_all();
     Clickables["leave"].clear_all();
     for(int i=0; i<Triggers.len(); i++)
