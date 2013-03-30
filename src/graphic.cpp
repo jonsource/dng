@@ -502,7 +502,7 @@ int init_graphic()
 	}
 	debug("screen depth: "+to_str(bitmap_color_depth(game_bmp)));
 	clear(game_bmp);
-	init_camera(-0.85,40,1.33);
+	init_camera(STB,FOV,1.33);
     show_mouse(screen);
 	return 1;
 }

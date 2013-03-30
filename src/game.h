@@ -36,6 +36,7 @@ void player_move_subr(int x, int y, int z, int h, bool force);
 
 string to_str(int i);
 string to_str(float f);
+string to_str(double f);
 string to_str(bool b);
 string to_heading_str(int h);
 int xz_to_heading(int x, int z);

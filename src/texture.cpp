@@ -172,7 +172,7 @@ int tile_add_element(TILE * til, string type, int element)
 	   exit(1);
 	}
 	til->types[til->len] = typ;
-	debug("tile: "+type+":"+to_str(til->types[til->len])+" "+to_str(til->elements[til->len]->type),4);
+	debug("tile: "+type+":"+to_str(til->types[til->len])+" "+to_str(til->elements[til->len]->type),3);
 	til->len++;
 	return 1;
 };
@@ -239,7 +239,7 @@ TILE * load_tile(string s)
         debug("sub: "+sub+" "+to_str((int)sub.size()),3);
         if(sub.size()>s.size()) s="";
         else s=s.substr(sub.size());//remove read part from string
-        dappend(" str2: "+s+".");
+        dappend(" str2: "+s+".",3);
         tile_add_element(tile,type,element);
 	}
 	debug("return",3);

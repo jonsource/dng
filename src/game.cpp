@@ -33,15 +33,14 @@ extern List<TRIGGER> Triggers;
  */
 
 void game_load()
-{	srand(time(0));
+{
+    srand(time(0));
 	status = CREATE;
 	Classes = new ClassTemplates();
 	Player = new Character(1);
 	load_graphics();
 	change_map("map1.map",0,0);
 	debug("done game_load");
-	FOV=40;
-	STB=-0.85;
 }
 
 /**
@@ -237,13 +236,12 @@ void keypress(int i)
  * convert string to bool
  */
 bool to_bool(string s)
-{  if(s=="false" || s=="False" || s=="no-clip" || s=="solid") return false;
-   if(s=="true" || s=="True" || s=="clip" || s=="trans") return true;
+{  if(s=="false" || s=="False" || s=="solid") return false;
+   if(s=="true" || s=="True" || s=="trans") return true;
+   if(s.find("no-")==0) return false;
    else
-   { char buf[30];
-     sprintf(buf,"Unclear argument %s, making False\n",s.c_str());
-     debug(buf,9);
-     return false;
+   { debug("Unclear argument "+s+", defaulting to True",9);
+     return true;
    }
 }
 
@@ -259,6 +257,14 @@ string to_str(int i)
  * convert float to string
  */
 string to_str(float f)
+{	sprintf(chbuf,"%.2f",f);
+	return chbuf;
+}
+
+/**
+ * convert double to string
+ */
+string to_str(double f)
 {	sprintf(chbuf,"%.2f",f);
 	return chbuf;
 }

@@ -66,8 +66,8 @@ static/doorside.bmp
 :animators
 ANIMATOR_OFF 100 128 8 128 128
 ANIMATOR_TOGGLE 200 64 2 64 64
-MOVATOR_Y 20 0 1 256 256
-MOVATOR_Y 20 0 1 256 256
+MOVATOR_Y 100 0 1 256 256
+MOVATOR_Y 100 0 1 256 256
 
 # ELEMENTS
 # elements are parts of a tile: floor, wall, button texture etc..

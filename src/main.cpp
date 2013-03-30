@@ -13,6 +13,7 @@
 #include "game.h"
 #include "graphic.h"
 #include "chat.h"
+#include "game_map.h"
 
 #define TIMER 20
 
@@ -26,6 +27,8 @@ unsigned short int keyb_ignore;
 BITMAP *game_bmp=NULL,*first=NULL,*second=NULL;
 int status,mode;
 FILE *dbg=NULL;
+extern float STB;
+extern int FOV;
 
 int courage, strength, constitution, intelligence, wisdom, charisma, dexterity, agility;
 int level,XP,maxHP,HP,MP;
@@ -87,7 +90,9 @@ void init()
 	install_keyboard();
 	install_mouse();
 	install_timer();
-
+    FOV=40;
+	STB=-0.85;
+	load_ini("game.ini");
 	init_graphic();
 
 	//install interrupts
