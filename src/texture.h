@@ -16,6 +16,10 @@
 #define TRIGGER_EAST 0
 #define TRIGGER_SOUTH 3
 #define TRIGGER_WEST 2
+#define BLOCKER_NORTH 9
+#define BLOCKER_EAST 8
+#define BLOCKER_SOUTH 11
+#define BLOCKER_WEST 10
 
 #define ANIMATOR_TOGGLE 1
 #define ANIMATOR_ON 2

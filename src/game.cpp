@@ -91,8 +91,7 @@ void game_draw()
 
 void player_move(int x, int y, int z, int h)
 {	int nz,nx;
-
-    Clickables["place"].clear_all();
+    int can_pass=true;
 
     /* change heading */
 	if(h!=0)
@@ -110,22 +109,39 @@ void player_move(int x, int y, int z, int h)
         case HEAD_WEST: nz=gz-z; nx=gx-x; break;
         }
         gy+=y;
-        if(check_coords(nx,nz)!=3)
-        {	gz=nz; gx=nx;
-            debug("Move to "+to_str(gx)+" "+to_str(gz)+" = "+to_str(check_coords(nz,nx)),5);
+        if(check_coords(nx,nz)==3) can_pass = false;
+
+        List<CLICKABLE> clklist;
+        CLICKABLE * clk;
+
+        clklist=Clickables["leave"];
+
+        for(int i=0; i<clklist.len(); i++)
+        {   clk=clklist[i];
+            debug("leave trigger "+to_heading_str(clk->callback->type-8),5);
+            //clk->callback->fire();
+            if(clk->callback->type-8==to_heading(nx-gx,nz-gz) && clk->callback->animator->offset==0) can_pass=false;
+        }
+
+
+        if(can_pass)
+        {
+            debug("Move to "+to_heading_str(to_heading(nx-gx,nz-gz))+" "+to_str(nx)+" "+to_str(nz)+" = "+to_str(check_coords(nz,nx)),5);
+            gz=nz; gx=nx;
+
         }
         else
         {   debug("Bump! tried to move to "+to_str(nx)+" "+to_str(nz)+" = "+to_str(check_coords(nz,nx)),5);
         }
-	}
-
-
+    }
+    Clickables["place"].clear_all();
+    Clickables["leave"].clear_all();
     for(int i=0; i<Triggers.len(); i++)
     {   TRIGGER * t;
         t=Triggers[i];
-        debug("["+to_str(gx)+","+to_str(gz)+"] Trigger "+to_str(t->xpos)+" "+to_str(t->zpos),4);
-        /* correct coordinates and (TYPE_ENTER or correct heading) */
-        if(t->xpos==gx && t->zpos==gz && (t->type==TRIGGER_ENTER || t->type==gh))
+        debug("["+to_str(gx)+","+to_str(gz)+"] Trigger "+to_str(t->xpos)+" "+to_str(t->zpos),3);
+            /* correct coordinates and (TYPE_ENTER or correct heading) */
+        if(t->xpos==gx && t->zpos==gz && (t->type==TRIGGER_ENTER || t->type==gh || t->type>=8 ))
         {   debug("Trigger encountered. "+to_str(t->type));
             CLICKABLE * clk = new CLICKABLE;
             clk->h1=t->h1;
@@ -133,12 +149,12 @@ void player_move(int x, int y, int z, int h)
             clk->h2=t->h2;
             clk->w2=t->w2;
             clk->callback = t;
-            Clickables["place"].add(clk);
+            if(t->type<8) Clickables["place"].add(clk);
+            else Clickables["leave"].add(clk);
         }
     }
     //draw_triggers(gx,gz,gh);
 }
-
 
 void mouse_click(int mw, int mh)
 {   List<CLICKABLE> clklist;
@@ -147,7 +163,8 @@ void mouse_click(int mw, int mh)
 
     CLICKABLE_MAP_ITERATOR it;
     for(it = Clickables.begin(); it!=Clickables.end(); it++)
-    {   clklist=Clickables[it->first];
+    {   if(it->first=="leave") continue;
+        clklist=Clickables[it->first];
 
         for(int i=0; i<clklist.len(); i++)
         {   clk=clklist[i];
@@ -233,6 +250,26 @@ string to_str(float f)
 string to_str(bool b)
 {	if(b) return "true";
 	return "false";
+}
+
+/**
+
+*/
+
+int to_heading(int xfront, int zfront)
+{   if(xfront<0) return HEAD_NORTH;
+    if(xfront>0) return HEAD_SOUTH;
+    if(zfront<0) return HEAD_WEST;
+    return HEAD_EAST;
+
+}
+
+string to_heading_str(int h)
+{   if(h==HEAD_NORTH) return "north";
+    if(h==HEAD_EAST) return "east";
+    if(h==HEAD_SOUTH) return "south";
+    if(h==HEAD_WEST) return "west";
+    return "unknown";
 }
 
 /**

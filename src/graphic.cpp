@@ -298,7 +298,7 @@ BITMAP * far_texture(TEXTURED_ELEMENT * txt, int far)
                 }
             }
             if(a->on)
-            {   frame_no=((tmsec-a->start)/a->speed)%a->frames;
+            {   frame_no=(((tmsec-a->start)/a->speed)+1)%a->frames;
                 //debug("  frame no:"+to_str(frame_no));
             }
             blit(txt->texture->close,a->frame,0,frame_no*a->offset,0,0,a->frame->w,a->frame->h);
