@@ -7,9 +7,7 @@ BITMAP * sky1[4];
 BITMAP * api=NULL;
 BITMAP * CURSOR;
 RGB pal[256];
-int FOV;
-double STB;
-double ASPECT;
+VIEW_SETTINGS view_settings;
 extern BITMAP *game_bmp,* first,* second;
 extern int fps, tmsec;
 extern int TRANSPARENT;
@@ -22,8 +20,48 @@ extern unsigned short int MAP_SIZE;
 extern List<LIGHT_SOURCE> Lightsources;
 extern List<TRIGGER> Triggers;
 extern CLICKABLE_MAP Clickables;
-
+bool blender_set;
 CAMERA * cam=NULL;
+RGB * fade_color;
+
+int init_graphic()
+{	int depth = 32;
+
+    fade_color = new RGB;
+    fade_color->r=255;
+    fade_color->g=0;
+    fade_color->b=0;
+	set_color_depth(depth);
+	if(set_gfx_mode(GFX_AUTODETECT_WINDOWED, 640, 480, 0, 0) < 0)
+	{ 	debug("Select video mode failed!",10);
+		return 0;
+	}
+	/* set up the viewport region */
+	int viewport_w = 640;
+	int viewport_h = 320;
+	int x = 0;
+	int y=20;
+	set_projection_viewport(x-1, y-1, viewport_w+1, viewport_h+1);
+	set_alpha_blender();
+	set_trans_blender(0,0,0,128);
+	first=create_bitmap(SCREEN_W, SCREEN_H);
+	second=create_bitmap(SCREEN_W, SCREEN_H);
+	game_bmp = first;
+	//rect(game_bmp, x, y, x+w-1, y+h-1, makecol(255, 0, 0));
+	set_clip_rect(first, x, y, x+viewport_w, y+viewport_h);
+	set_clip_rect(second, x, y, x+viewport_w, y+viewport_h);
+	set_clip_state(first,0);
+	set_clip_state(second,0);
+	if(game_bmp==NULL)
+	{  debug("Couldn't acquire screen!");
+	   return 0;
+	}
+	debug("screen depth: "+to_str(bitmap_color_depth(game_bmp)));
+	clear(game_bmp);
+	init_camera(&view_settings);
+//    show_mouse(screen);
+	return 1;
+}
 
 /**
  * square of distance of two coordinates
@@ -93,11 +131,6 @@ int load_graphics()
       if(!api) debug("Missing api_mask texture!\n",4);
       debug("done load graphics\n",10);
 
-    LIGHT_SOURCE * ls = new(LIGHT_SOURCE);
-    ls->x=4;
-    ls->z=6;
-    ls->power = 256;
-    ls->dim = 200;
     return 1;
 }
 
@@ -129,10 +162,10 @@ void update_camera(CAMERA * cam)
    heading_to_xz(cam->heading,&cam->xfront,&cam->zfront);
 
    if(cam->xfront==0) cam->xpos=cam->dolly_xpos;
-   	  else cam->xpos=cam->dolly_xpos+((cam->xfront>0)?cam->stepback:-cam->stepback);
+   	  else cam->xpos=cam->dolly_xpos+((cam->xfront>0)?cam->step_back:-cam->step_back);
    if(cam->zfront==0) cam->zpos=cam->dolly_zpos;  //ano zfront a ypos tu maj byt takhle
-      else cam->zpos=cam->dolly_zpos+((cam->zfront>0)?cam->stepback:-cam->stepback);
-   cam->ypos=cam->dolly_ypos;
+      else cam->zpos=cam->dolly_zpos+((cam->zfront>0)?cam->step_back:-cam->step_back);
+   cam->ypos=cam->dolly_ypos+cam->view_height;
    cam->yfront=0;
    /* rotate the up vector around the in-front vector by the roll angle */
    get_vector_rotation_matrix_f(&cam->roller, cam->xfront, cam->yfront, cam->zfront,
@@ -162,6 +195,7 @@ void render_element(int type, TEXTURED_ELEMENT * element, BITMAP *bmp, int x, in
    if(TRANSPARENT && element->transparent)
    {	polytype = POLYTYPE_ATEX_MASK_TRANS;
    		set_alpha_blender();
+   		//blender_set=false;
    }
    else
    {	switch(type)
@@ -172,7 +206,11 @@ void render_element(int type, TEXTURED_ELEMENT * element, BITMAP *bmp, int x, in
    	   		case TILE_STATIC: polytype = POLYTYPE_ATEX_MASK_LIT; break; //no need to account for perspective with front tiles
    	   		default: polytype = POLYTYPE_PTEX_MASK_LIT; break;
    	   	}
-   		set_trans_blender(100,100,150,1);
+   		/*if(!blender_set)
+        {   set_trans_blender(fade_color.r,fade_color.g,fade_color.b,1);
+            blender_set=true;
+        }*/
+        set_trans_blender(fade_color->r,fade_color->g,fade_color->b,1);
    }
 
    for (c=0; c<4; c++)
@@ -234,7 +272,7 @@ void render_element(int type, TEXTURED_ELEMENT * element, BITMAP *bmp, int x, in
       else if (v[c]->y > v[c]->z)
 	 flags[c] |= 8;
 
-      if (v[c]->z < -cam->stepback+0.05)
+      if (v[c]->z < -cam->step_back+0.05)
 	 flags[c] |= 16;
    }
    /* quit if all vertices are off the same edge of the screen */
@@ -244,7 +282,7 @@ void render_element(int type, TEXTURED_ELEMENT * element, BITMAP *bmp, int x, in
    /* no clipping elements are clipped to fit in the viewport */
    if (!element->clip || (flags[0] | flags[1] | flags[2] | flags[3])) {
       /* clip if any vertices are off the edge of the screen */
-      vc = clip3d_f(polytype, -cam->stepback-0.05, 0, 4, (AL_CONST V3D_f **)v,
+      vc = clip3d_f(polytype, -cam->step_back-0.05, 0, 4, (AL_CONST V3D_f **)v,
 		    vout, vtmp, out);
 
       if (vc <= 0)
@@ -388,7 +426,7 @@ void make_linesight(int x, int z, CAMERA * cam)
 /**
  * init camera, or reset the values afteer changes to FOV, aspoct and stepback
  */
-void init_camera(float stepback,float fov, float aspect)
+void init_camera(VIEW_SETTINGS * view_settings)
 {	if(cam==NULL) cam=new CAMERA;
 	if(cam==NULL)
 	{	debug("Couldn't init camera",10);
@@ -396,9 +434,10 @@ void init_camera(float stepback,float fov, float aspect)
 	}
 	cam->pitch=0;
 	cam->roll=0;
-	cam->fov=fov;
-	cam->stepback=stepback;
-	cam->aspect = aspect;
+	cam->fov=view_settings->fov;
+	cam->step_back=view_settings->step_back;
+	cam->aspect = view_settings->aspect;
+	cam->view_height = view_settings->view_height;
 	debug("Camera init",10);
 }
 
@@ -463,7 +502,7 @@ void draw_view(int xpos, int ypos, int zpos, int heading)
    //textprintf_ex(bmp, font, 0, 72, makecol(0, 0, 0), -1,
 	//	 "Z position: %.2f (z/Z changes)", (float)cam.zpos);
    textprintf_ex(game_bmp, font, 0, 80, makecol(0, 0, 0), -1,
-		 "Heading: %d %s Stepback: %.2f", cam->heading,to_heading_str(cam->heading).c_str(),cam->stepback);
+		 "Heading: %d %s Stepback: %.2f", cam->heading,to_heading_str(cam->heading).c_str(),cam->step_back);
    textprintf_ex(game_bmp, font, 0, 88, makecol(0, 0, 0), -1,
 		 "Pitch: %.2f deg (pgup/pgdn changes)", cam->pitch);
    textprintf_ex(game_bmp, font, 0, 96, makecol(0, 0, 0), -1,
@@ -477,41 +516,6 @@ void draw_view(int xpos, int ypos, int zpos, int heading)
 
 
     masked_blit(CURSOR,game_bmp,0,0,mouse_x,mouse_y,CURSOR->w,CURSOR->h);
-}
-
-int init_graphic()
-{	int depth = 32;
-
-	set_color_depth(depth);
-	if(set_gfx_mode(GFX_AUTODETECT_WINDOWED, 640, 480, 0, 0) < 0)
-	{ 	debug("Select video mode failed!",10);
-		return 0;
-	}
-	/* set up the viewport region */
-	int viewport_w = 640;
-	int viewport_h = 320;
-	int x = 0;
-	int y=20;
-	set_projection_viewport(x-1, y-1, viewport_w+1, viewport_h+1);
-	set_alpha_blender();
-	set_trans_blender(0,0,0,128);
-	first=create_bitmap(SCREEN_W, SCREEN_H);
-	second=create_bitmap(SCREEN_W, SCREEN_H);
-	game_bmp = first;
-	//rect(game_bmp, x, y, x+w-1, y+h-1, makecol(255, 0, 0));
-	set_clip_rect(first, x, y, x+viewport_w, y+viewport_h);
-	set_clip_rect(second, x, y, x+viewport_w, y+viewport_h);
-	set_clip_state(first,0);
-	set_clip_state(second,0);
-	if(game_bmp==NULL)
-	{  debug("Couldn't acquire screen!");
-	   return 0;
-	}
-	debug("screen depth: "+to_str(bitmap_color_depth(game_bmp)));
-	clear(game_bmp);
-	init_camera(STB,FOV,ASPECT);
-//    show_mouse(screen);
-	return 1;
 }
 
 void draw_triggers(int x, int z, int heagind)

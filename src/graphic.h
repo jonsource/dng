@@ -32,12 +32,18 @@ typedef struct {
 		float pitch, roll;
 		float aspect;                 /* aspect ratio */
 		int heading;				/* camera heading - to count infront vector*/
-		double stepback; 					/* camera stepback */
+		double step_back; 					/* camera stepback */
+		double view_height;
 		MATRIX_f camera, roller;
 } CAMERA;
 
+typedef struct {
+        double aspect, view_height, step_back;
+        int fov;
+} VIEW_SETTINGS;
+
 int init_graphic();
-void init_camera(float stepback,float fov, float aspect);
+void init_camera(VIEW_SETTINGS * view_settings);
 int load_graphics();
 void unload_graphics();
 void draw_view(int x, int y,int z, int heading);

@@ -27,8 +27,7 @@ int fps;
 unsigned short int keyb_ignore;
 BITMAP *game_bmp=NULL,*first=NULL,*second=NULL;
 int status,mode;
-extern double STB,ASPECT;
-extern int FOV;
+extern List<TEXTURE> Textures;
 
 int courage, strength, constitution, intelligence, wisdom, charisma, dexterity, agility;
 int level,XP,maxHP,HP,MP;
@@ -89,10 +88,7 @@ void init()
 	install_keyboard();
 	install_mouse();
 	install_timer();
-    FOV=40;
-	STB=-0.85;
-	ASPECT=1;
-	load_ini("game.ini");
+    load_ini("game.ini");
 	init_graphic();
 
 	//install interrupts
@@ -131,6 +127,7 @@ int main(int argc, char *argv[])
 	//return 0;
 	init();
     game_load();
+
 	if(quit) { return 1;}
 
 	/* main loop */

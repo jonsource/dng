@@ -68,8 +68,7 @@ TEXTURE * load_texture(string s)
 }
 
 TEXTURED_ELEMENT * create_element(string type, float x, float y, float z, float w, float h, string transparent, int texture, int animator, string clip)
-{	//char buf[60];
-	TEXTURED_ELEMENT * ele = new(TEXTURED_ELEMENT);
+{	TEXTURED_ELEMENT * ele = new(TEXTURED_ELEMENT);
 	unsigned short int typ;
    ele->x = x;
    ele->y = y;
@@ -103,7 +102,7 @@ TEXTURED_ELEMENT * load_element(string s)
 	float x,y,z,w,h;
 	int texture,animator;
 	if(sscanf(s.c_str(),"%s %f %f %f %f %f %s %d %d %s",type,&x,&y,&z,&w,&h,transparent,&texture,&animator,clip)<10)
-	{ debug("Not enough parameters for textured element.",10);
+	{ debug("Not enough parameters for textured element: "+s,10);
 	  exit(1);
 	}
 	return create_element(type,x,y,z,w,h,transparent,texture,animator,clip);
@@ -181,10 +180,10 @@ int tile_add_element(TILE * til, string type, int element)
 TILE * create_tile()
 {  TILE * til = new(TILE);
    til->len=0;
-   til->types = (short unsigned int *) malloc(MAX_TILE_ELE*sizeof(short unsigned int));
-   til->elements = (TEXTURED_ELEMENT **) malloc(MAX_TILE_ELE*sizeof(TEXTURED_ELEMENT *));
+   til->types = new short unsigned int [MAX_TILE_ELE];
+   til->elements = new TEXTURED_ELEMENT * [MAX_TILE_ELE];
    for(int i=0; i<MAX_TILE_ELE; i++)
-	   til->elements[i]=(TEXTURED_ELEMENT *) malloc(sizeof(TEXTURED_ELEMENT));
+	   til->elements[i]= new TEXTURED_ELEMENT;
    return til;
 }
 
@@ -345,4 +344,6 @@ void TRIGGER::fire()
     if(tokens->len()==2 && *(*tokens)[0]=="change_map")
     {   change_map(*(*tokens)[1],this->w1,this->h1);
     }
+    tokens->clear_all();
+    delete tokens;
 }

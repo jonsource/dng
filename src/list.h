@@ -16,9 +16,9 @@
 template <class T>
 class List
 {
+public:
 	T ** items;
 	int max_item,alloc_size;
-public:
 	List(void);
 	//void add(void * item);
 	void add(T * item);
@@ -66,6 +66,10 @@ int List<T>::len()
 template <class T>
 void List<T>::clear_all()
 {	//debug("Clearing list :"+to_str(max_item)+" items!",2);
+    for(int i=0; i<this->len(); i++)
+    {
+        delete this->items[i];
+    }
     delete []items;
     items=NULL;
 	max_item=0;

@@ -8,6 +8,7 @@
 #include "game_map.h"
 #include "game.h"
 #include "game_lib.h"
+#include "graphic.h"
 #include "texture.h"
 #include <string>
 #include "list.h"
@@ -28,8 +29,8 @@ extern List<TILE> Tiles;
 extern List<LIGHT_SOURCE> Lightsources;
 extern List<TRIGGER> Triggers;
 extern CLICKABLE_MAP Clickables;
-extern int FOV;
-extern double STB, ASPECT;
+extern VIEW_SETTINGS view_settings;
+extern RGB * fade_color;
 
 string get_line(FILE * f)
 {	string ret="";
@@ -56,6 +57,28 @@ unsigned short int load_block(FILE *f, string block, List<T> * l, T * (*loader)(
 			} //next part of definitions
 			l->add(loader(str2));
 			count ++;
+		}
+	}
+	return count;
+}
+
+template<class T>
+unsigned short int load_multivar(FILE *f, string block, T ** l, T * (*loader)(string), string * str1)
+{	string str2;
+	unsigned short int count = 0;
+	if(str1->compare(":"+block)==0)
+	{ 	debug("Loading "+block);
+		while(!feof(f))
+		{ 	str2=get_line(f);
+            if(str2.length()==0) continue;
+            if(str2.find("#")==0) continue;
+			if(str2.find(":")==0)
+			{	debug("Done loading "+block);
+				str1[0] = str2; break;
+			} //next part of definitions
+			*l=loader(str2);
+			count ++;
+			break;
 		}
 	}
 	return count;
@@ -111,14 +134,45 @@ int load_ini(string fname)
             {   reset_debug_lvl();
                 debug("Debug level: "+to_str(DEBUG_LVL_MAIN)+" (0 - all, 10 - none)",10);
             }
-            load_variable(f,"field-of-view",&FOV,load_int, &str1);
-            load_variable(f,"stepback",&STB,load_double, &str1);
-            load_variable(f,"aspect",&ASPECT,load_double, &str1);
+            load_variable(f,"field-of-view",&view_settings.fov,load_int, &str1);
+            load_variable(f,"stepback",&view_settings.step_back,load_double, &str1);
+            load_variable(f,"aspect",&view_settings.aspect,load_double, &str1);
+            load_variable(f,"view_height",&view_settings.view_height,load_double, &str1);
 
             if(str1.compare(":end")==0)
 			{ 	debug("End of "+fname+"\n"); break; }
 		}
 	}
+	return 1;
+}
+
+int load_area(string fname)
+{	string str1, str2;
+	FILE *f=fopen(fname.c_str(),"r");
+	if(!f)
+	{	debug("Area "+fname+" not found!\n",10);
+		exit(0);
+	}
+	while(!feof(f))
+	{ 	str1=get_line(f);
+
+        if(str1.length()==0) continue;
+        if(str1.find("#")==0) continue;
+		if(str1.find(":")==0) // : at the beginning of new line
+		{				// is new block
+
+            load_multivar(f,"fade_color",&fade_color, load_color, &str1);
+
+			load_block(f,"textures",&Textures, load_texture, &str1);
+			load_block(f,"animators", &Animators, load_animator, &str1);
+			load_block(f,"elements", &Elements, load_element, &str1);
+			load_block(f,"tiles", &Tiles, load_tile, &str1);
+
+			if(str1.compare(":end")==0)
+			{ 	debug("End of "+fname+"\n"); break; }
+		}
+	}
+
 	return 1;
 }
 
@@ -140,11 +194,12 @@ int load_map(string fname)
 
 		    if(load_variable(f,"mapsize",&MAP_SIZE,load_int, &str1))
             {   delete []game_map;
-                game_map = (int **) malloc(MAP_SIZE*sizeof(int *));
-                linesight = (int **) malloc(MAP_SIZE*sizeof(int *));
+                delete []linesight;
+                game_map = new int * [MAP_SIZE];
+                linesight = new int * [MAP_SIZE];
                 for(int i=0; i<MAP_SIZE; i++)
-                {	game_map[i]= (int*) malloc(MAP_SIZE*sizeof(int));
-                    linesight[i]= (int*) malloc(MAP_SIZE*sizeof(int));
+                {	game_map[i]= new int [MAP_SIZE];
+                    linesight[i]= new int [MAP_SIZE];
                     for(int j=0; j<MAP_SIZE; j++)
                     { game_map[i][j]=0;
                       linesight[i][j]=0;
@@ -174,39 +229,65 @@ int load_map(string fname)
 				}
 			}
 
-			load_block(f,"textures",&Textures, load_texture, &str1);
 			load_block(f,"lightsources", &Lightsources, load_lightsource, &str1);
-			load_block(f,"animators", &Animators, load_animator, &str1);
-			load_block(f,"elements", &Elements, load_element, &str1);
-			load_block(f,"tiles", &Tiles, load_tile, &str1);
 			load_block(f,"triggers", &Triggers, load_trigger, &str1);
 
 			if(str1.compare(":end")==0)
 			{ 	debug("End of "+fname+"\n"); break; }
 		}
 	}
-
 	return 1;
 }
 
-void change_map(string fname, int x, int z)
-{   Textures.clear_all();
-    Lightsources.clear_all();
+void unload_area()
+{   for(int i=0; i<Textures.len(); i++)
+    {   destroy_bitmap(Textures.items[i]->close);
+        destroy_bitmap(Textures.items[i]->medium);
+        destroy_bitmap(Textures.items[i]->far);
+    }
+    Textures.clear_all();
+
+    for(int i=0; i<Animators.len(); i++)
+    {   destroy_bitmap(Animators.items[i]->frame);
+    }
     Animators.clear_all();
-    Elements.clear_all();
+
+    for(int i=0; i<Tiles.len(); i++)
+    {   delete[] Tiles.items[i]->elements;
+        delete[] Tiles.items[i]->types;
+    }
     Tiles.clear_all();
+
+    Elements.clear_all();
+}
+
+void unload_map()
+{   Lightsources.clear_all();
     Triggers.clear_all();
     Clickables.clear();
+}
+
+void change_map(string fname, int x, int z)
+{   unload_map();
     load_map(fname);
 
     debug("Map changed to :"+fname);
-    debug("textures :"+to_str(Textures.len()));
     debug("lightsources :"+to_str(Lightsources.len()));
+    debug("triggers :"+to_str(Triggers.len()));
+    player_move_subr(x,0,z,-1,true);
+}
+
+void change_area(string aname, string mname, int x, int z)
+{   unload_area();
+    load_area(aname);
+
+    debug("Area changed to :"+aname);
+    debug("textures :"+to_str(Textures.len()));
     debug("animators :"+to_str(Animators.len()));
     debug("elements :"+to_str(Elements.len()));
     debug("tiles :"+to_str(Tiles.len()));
-    debug("triggers :"+to_str(Triggers.len()));
-    player_move_subr(x,0,z,-1,true);
+
+    change_map(mname,x,z);
 }
 
 int load_int(string str)
@@ -242,3 +323,15 @@ bool load_bool(string str)
 
 }
 
+RGB * load_color(string str)
+{	RGB * ret = new RGB;
+    int r,g,b;
+    if(sscanf(str.c_str(),"%d %d %d",&r,&g,&b)<3)
+	{ debug("Not enough parameters for color: "+str,10);
+	  exit(1);
+	}
+	ret->r=(char)r;
+	ret->g=(char)g;
+	ret->b=(char)b;
+	return ret;
+}

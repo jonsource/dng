@@ -21,6 +21,7 @@ extern double STB, ASPECT;
 int TRANSPARENT = 0;
 extern int DEBUG_LVL_MAIN;
 extern int DEBUG_LVL;
+extern VIEW_SETTINGS view_settings;
 
 extern CLICKABLE_MAP Clickables;
 extern List<TRIGGER> Triggers;
@@ -36,7 +37,7 @@ void game_load()
 	Classes = new ClassTemplates();
 	Player = new Character(1);
 	load_graphics();
-	change_map("map1.map",3,2);
+	change_area("area1.area","map1.map",3,2);
 	debug("done game_load");
 }
 
@@ -251,16 +252,16 @@ void keypress(int i)
      if(i == KEY_D) x=1;
      if(i == KEY_R) y=1;
      if(i == KEY_F) y-=1;
-     if(i == KEY_H) { FOV+=1; init_camera(STB,FOV,ASPECT); }
-     if(i == KEY_J) { FOV-=1; init_camera(STB,FOV,ASPECT); }
-     if(i == KEY_I) { STB+=0.1; init_camera(STB,FOV,ASPECT); }
-     if(i == KEY_K) { STB-=0.1; init_camera(STB,FOV,ASPECT); }
+     if(i == KEY_H) { view_settings.fov+=1; init_camera(&view_settings); }
+     if(i == KEY_J) { view_settings.fov-=1; init_camera(&view_settings); }
+     if(i == KEY_I) { view_settings.step_back+=0.1; init_camera(&view_settings); }
+     if(i == KEY_K) { view_settings.step_back-=0.1; init_camera(&view_settings); }
      if(i == KEY_O) light_power+=1;
      if(i == KEY_L) light_power-=1;
      if(i == KEY_T) {if(TRANSPARENT) TRANSPARENT =0; else TRANSPARENT=1;}
      if(i == KEY_E) {h=1;}
      if(i == KEY_Q) {h=-1;}
-     if(i == KEY_L) { change_map("map2.map",0,0); }
+     if(i == KEY_M) { change_map("map2.map",0,0); }
      if(i == KEY_N)
      { Class *cl=Classes->GetTemplate(Player->classname);
        cl->NextLevel(Player);
