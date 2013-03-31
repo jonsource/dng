@@ -27,7 +27,7 @@ int fps;
 unsigned short int keyb_ignore;
 BITMAP *game_bmp=NULL,*first=NULL,*second=NULL;
 int status,mode;
-extern float STB;
+extern double STB,ASPECT;
 extern int FOV;
 
 int courage, strength, constitution, intelligence, wisdom, charisma, dexterity, agility;
@@ -91,6 +91,7 @@ void init()
 	install_timer();
     FOV=40;
 	STB=-0.85;
+	ASPECT=1;
 	load_ini("game.ini");
 	init_graphic();
 

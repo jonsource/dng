@@ -29,7 +29,7 @@ extern List<LIGHT_SOURCE> Lightsources;
 extern List<TRIGGER> Triggers;
 extern CLICKABLE_MAP Clickables;
 extern int FOV;
-extern double STB;
+extern double STB, ASPECT;
 
 string get_line(FILE * f)
 {	string ret="";
@@ -113,6 +113,7 @@ int load_ini(string fname)
             }
             load_variable(f,"field-of-view",&FOV,load_int, &str1);
             load_variable(f,"stepback",&STB,load_double, &str1);
+            load_variable(f,"aspect",&ASPECT,load_double, &str1);
 
             if(str1.compare(":end")==0)
 			{ 	debug("End of "+fname+"\n"); break; }

@@ -17,7 +17,7 @@ Character *Player;
 int gy=0,gz=2,gx=3,gh=0;
 int light_power=128;
 extern int FOV;
-extern double STB;
+extern double STB, ASPECT;
 int TRANSPARENT = 0;
 extern int DEBUG_LVL_MAIN;
 extern int DEBUG_LVL;
@@ -78,10 +78,10 @@ void game_draw()
   delete pass;*/
 //  release_bitmap(bmp);
   debug("begin game_draw",2);
-    scare_mouse();
+//    scare_mouse();
   draw_view(gx,gy,gz,gh);
   draw_triggers(gx,gz,gh);
-    unscare_mouse();
+//    unscare_mouse();
 }
 
 void player_move(int x, int y, int z, int h)
@@ -251,10 +251,10 @@ void keypress(int i)
      if(i == KEY_D) x=1;
      if(i == KEY_R) y=1;
      if(i == KEY_F) y-=1;
-     if(i == KEY_H) { FOV+=1; init_camera(STB,FOV,1.33f); }
-     if(i == KEY_J) { FOV-=1; init_camera(STB,FOV,1.33f); }
-     if(i == KEY_I) { STB+=0.1; init_camera(STB,FOV,1.33f); }
-     if(i == KEY_K) { STB-=0.1; init_camera(STB,FOV,1.33f); }
+     if(i == KEY_H) { FOV+=1; init_camera(STB,FOV,ASPECT); }
+     if(i == KEY_J) { FOV-=1; init_camera(STB,FOV,ASPECT); }
+     if(i == KEY_I) { STB+=0.1; init_camera(STB,FOV,ASPECT); }
+     if(i == KEY_K) { STB-=0.1; init_camera(STB,FOV,ASPECT); }
      if(i == KEY_O) light_power+=1;
      if(i == KEY_L) light_power-=1;
      if(i == KEY_T) {if(TRANSPARENT) TRANSPARENT =0; else TRANSPARENT=1;}

@@ -5,9 +5,11 @@
 
 BITMAP * sky1[4];
 BITMAP * api=NULL;
+BITMAP * CURSOR;
 RGB pal[256];
 int FOV;
 double STB;
+double ASPECT;
 extern BITMAP *game_bmp,* first,* second;
 extern int fps, tmsec;
 extern int TRANSPARENT;
@@ -70,6 +72,9 @@ int see_coords(int x, int y)
 int load_graphics()
 {   string s;
     PALETTE pal;
+
+    CURSOR = load_bmp("data/images/api/cursor.bmp",pal);
+      //set_mouse_sprite(load_bmp("data/images/api/cursor.bmp",pal));
 
           s="data/images/sky1/skylarge1.bmp";
       sky1[0] = load_bmp(s.c_str(), pal);
@@ -470,6 +475,8 @@ void draw_view(int xpos, int ypos, int zpos, int heading)
    textprintf_ex(game_bmp, font, 0, 120, makecol(0, 0, 0), -1,
 		 "Frames per second: %d", fps);
 
+
+    masked_blit(CURSOR,game_bmp,0,0,mouse_x,mouse_y,CURSOR->w,CURSOR->h);
 }
 
 int init_graphic()
@@ -502,8 +509,8 @@ int init_graphic()
 	}
 	debug("screen depth: "+to_str(bitmap_color_depth(game_bmp)));
 	clear(game_bmp);
-	init_camera(STB,FOV,1.33);
-    show_mouse(screen);
+	init_camera(STB,FOV,ASPECT);
+//    show_mouse(screen);
 	return 1;
 }
 
