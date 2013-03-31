@@ -49,5 +49,6 @@ BLOCKER_SOUTH 5 3 65 0 0 0 2 none
 BLOCKER_ENTER 5 5 65 0 0 0 3 none
 #BLOCKER_NORTH 5 6 65 0 0 0 3 none
 TRIGGER_ENTER 3 5 3 5 0 0 -1 change_map/map2.map
+TRIGGER_ENTER 2 3 19 3 0 0 -1 change_area/area2.area/map-2-1.map
 :end
 

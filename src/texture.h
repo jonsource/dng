@@ -38,7 +38,7 @@ typedef struct {
 } TEXTURE;
 
 typedef struct {
-  unsigned short int type,speed,offset,frames,on;
+  unsigned short int type,speed,offset,_offset,frames,on;
   int start;
   BITMAP *frame;
 } ANIMATOR;

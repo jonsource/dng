@@ -126,6 +126,7 @@ ANIMATOR * create_animator(int type, int speed, int offset, int frames, int w, i
 { ANIMATOR * ani = new(ANIMATOR);
 	ani->speed=speed;
 	ani->offset=offset;
+	ani->_offset=offset;
 	ani->frames=frames;
 	ani->frame=create_bitmap(w,h);
 	ani->type=type;
@@ -341,9 +342,17 @@ void TRIGGER::fire()
     debug("tokens("+to_str(tokens->len())+"):");
     for(int i=0; i<tokens->len(); i++)
         dappend(" "+to_str(i)+"("+*(*tokens)[i]);
+
+    /* change map within area */
     if(tokens->len()==2 && *(*tokens)[0]=="change_map")
     {   change_map(*(*tokens)[1],this->w1,this->h1);
     }
+
+    /* change area and map */
+    if(tokens->len()==3 && *(*tokens)[0]=="change_area")
+    {   change_area(*(*tokens)[1],*(*tokens)[2],this->w1,this->h1);
+    }
+
     tokens->clear_all();
     delete tokens;
 }

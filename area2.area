@@ -1,0 +1,59 @@
+# TEXTURES
+# textures are loaded from /data/images/DIR/NAME.EXE files
+# first NAME_close.EXT file is read, then NAME_middle.EXT and NAME_far.EXT files are loaded
+# if _middle, or _far files are missing, they are replaced by resizing _close file
+
+# FADE_COLOR
+# color to which everything fades in the distance, usually black for underground
+:fade_color
+200 200 200
+
+:textures
+# 0
+floor/floor1.bmp
+floor/meadow2.bmp
+static/mist1.tga
+static/tree2.bmp
+static/tree3.bmp
+static/tree4.bmp
+static/tree5.bmp
+
+# ANIMATORS or efectors
+# ANIMATOR miliseconds per frame, frame offset, number of frames, frame width, frame height
+# MOVATOR speed-1/100 units per second, starting state, end state, texture width, texture height
+
+:animators
+
+# ELEMENTS
+# elements are parts of a tile: floor, wall, button texture etc..
+
+:elements
+#meadow floor 0
+TILE_FLOOR 0 0 0 1 1 no-trans 0 -1 clip
+TILE_FLOOR 0 0 0 1 1 no-trans 1 -1 clip
+
+#forrest trees 1-6
+TILE_STATIC 0.0 0 0.5 1 2 false 3 -1 clip
+TILE_STATIC 0.3 0 0.4 1 2 false 4 -1 clip
+TILE_STATIC 0.1 0 0.3 1 2 false 5 -1 clip
+TILE_STATIC 0.5 0 0.2 1 2 false 6 -1 clip
+TILE_STATIC 0.4 0 0.1 1 2 false 4 -1 clip
+TILE_STATIC 0.7 0 0.5 1 2 false 5 -1 clip
+
+#mist
+TILE_STATIC 0 0.2 0 1 1 trans 2 -1 no-clip
+
+# TILES
+# tiles make up the map, a tile has many elements (floor, walls ..etc)
+
+:tiles
+#1
+TILE_FLOOR 0 
+TILE_FLOOR 1
+TILE_FLOOR 0 TILE_STATIC 2
+TILE_FLOOR 0 TILE_STATIC 3
+TILE_FLOOR 0 TILE_STATIC 4
+TILE_FLOOR 0 TILE_STATIC 5 TILE_STATIC 5
+TILE_FLOOR 0 TILE_STATIC 6 TILE_STATIC 3
+TILE_FLOOR 0 TILE_STATIC 7 TILE_STATIC 4 TILE_STATIC 2
+TILE_FLOOR 0 TILE_STATIC 5 TILE_STATIC 3

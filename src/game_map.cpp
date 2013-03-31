@@ -274,6 +274,12 @@ void change_map(string fname, int x, int z)
     debug("Map changed to :"+fname);
     debug("lightsources :"+to_str(Lightsources.len()));
     debug("triggers :"+to_str(Triggers.len()));
+
+    /* reset animators */
+    for(int i=0;i<Animators.len(); i++)
+    {   Animators[i]->offset=Animators[i]->_offset;
+
+    }
     player_move_subr(x,0,z,-1,true);
 }
 

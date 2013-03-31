@@ -9,6 +9,7 @@
 *.cbp
 *.depend
 *.layout
+*.layout.save
 
 # Logs
 ######
