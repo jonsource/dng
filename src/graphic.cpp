@@ -164,7 +164,7 @@ void render_element(int type, TEXTURED_ELEMENT * element, BITMAP *bmp, int x, in
    	   		case TILE_CEILING:
    	   		case TILE_SIDE: polytype = POLYTYPE_PTEX_LIT; break;
    	   		case TILE_FRONT:
-   	   		case TILE_STATIC: polytype = POLYTYPE_ATEX_LIT; break; //no need to account for perspective with front tiles
+   	   		case TILE_STATIC: polytype = POLYTYPE_ATEX_MASK_LIT; break; //no need to account for perspective with front tiles
    	   		default: polytype = POLYTYPE_PTEX_MASK_LIT; break;
    	   	}
    		set_trans_blender(100,100,150,1);

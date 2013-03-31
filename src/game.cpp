@@ -1,6 +1,7 @@
 #include <allegro.h>
 #include "stdio.h"
 #include "game.h"
+#include "game_lib.h"
 #include "load_classes.h"
 #include "graphic.h"
 #include "game_map.h"

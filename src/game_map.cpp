@@ -7,6 +7,7 @@
 
 #include "game_map.h"
 #include "game.h"
+#include "game_lib.h"
 #include "texture.h"
 #include <string>
 #include "list.h"
