@@ -88,6 +88,42 @@ void player_move(int x, int y, int z, int h)
 
 }
 
+bool can_leave(int x, int z, int dir)
+{   /* apply leave triggers and blockers */
+
+    List<CLICKABLE> clklist;
+    CLICKABLE * clk;
+
+    clklist=Clickables["leave"];
+
+    for(int i=0; i<clklist.len(); i++)
+    {   clk=clklist[i];
+        debug("leave trigger "+to_heading_str(clk->callback->type-8),5);
+        /* correct heading && moving blockation is in position to block */
+        if(clk->callback->type - BLOCKER_TO_HEADING == dir && ((int)(get_movator_dif(clk->callback->animator,tmsec)*100))<clk->w1) return false;
+    }
+    return true;
+}
+
+bool can_enter(int x, int z, int dir)
+{
+    if(check_coords(x,z)==3) return false;
+    /* search for entry blockers */
+    for(int i=0; i<Triggers.len(); i++)
+    {   TRIGGER * t;
+        t=Triggers[i];
+        if(t->type<BLOCKER_NORTH || t->type>BLOCKER_ENTER) continue; // not a blocker, skipping
+        debug("["+to_str(x)+","+to_str(z)+"] Trigger "+to_str(t->xpos)+" "+to_str(t->zpos),3);
+        /* correct coordinates and (BLOCKER_ENTER or correct heading) */
+        if(t->xpos==x && t->zpos==z && (t->type==BLOCKER_ENTER || t->type-BLOCKER_TO_HEADING==dir))
+        {   debug("Blocker encountered. "+to_str(t->type));
+            /* moving blockation is in position to block */
+            if((int)(get_movator_dif(t->animator,tmsec)*100)<t->w1) return false;
+        }
+    }
+    return true;
+}
+
 void player_move_subr(int x, int y, int z, int h, bool force)
 {	int nz,nx;
     int can_pass=true;
@@ -107,28 +143,21 @@ void player_move_subr(int x, int y, int z, int h, bool force)
         /* change position */
         else
         {   switch(gh)
-            { case HEAD_NORTH: nz=gz+z; nx=gx+x; break;
-            case HEAD_EAST: nz=gz+x; nx=gx-z; break;
-            case HEAD_SOUTH: nz=gz-z; nx=gx-x; break;
-            case HEAD_WEST: nz=gz-x; nx=gx+z; break;
+            {   case HEAD_NORTH: nz=gz+z; nx=gx+x; break;
+                case HEAD_EAST: nz=gz+x; nx=gx-z; break;
+                case HEAD_SOUTH: nz=gz-z; nx=gx-x; break;
+                case HEAD_WEST: nz=gz-x; nx=gx+z; break;
             }
             gy+=y;
-            if(check_coords(nx,nz)==3) can_pass = false;
 
-            /* apply leave triggers and blockers */
-
-            List<CLICKABLE> clklist;
-            CLICKABLE * clk;
-
-            clklist=Clickables["leave"];
-
-            for(int i=0; i<clklist.len(); i++)
-            {   clk=clklist[i];
-                debug("leave trigger "+to_heading_str(clk->callback->type-8),5);
-                //clk->callback->fire();
-                if(clk->callback->type-8==xz_to_heading(nx-gx,nz-gz) && ((int)(get_movator_dif(clk->callback->animator,tmsec)*100))<clk->w1) can_pass=false;
+            if(!can_leave(gx,gz,xz_to_heading(nx-gx,nz-gz))) // new - old: leaving IN direction
+            {   debug("Blocked on leave.",4);
+                can_pass=false;
             }
-
+            if(!can_enter(nx,nz,xz_to_heading(gx-nx,gz-nz))) // old - new: entering FROM direction
+            {   debug("Blocked on entry.",4);
+                can_pass=false;
+            }
             if(can_pass)
             {
                 debug("Move to "+to_heading_str(xz_to_heading(nx-gx,nz-gz))+" "+to_str(nx)+" "+to_str(nz)+" = "+to_str(check_coords(nz,nx)),5);
