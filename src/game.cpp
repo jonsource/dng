@@ -25,6 +25,7 @@ extern VIEW_SETTINGS view_settings;
 
 extern CLICKABLE_MAP Clickables;
 extern List<TRIGGER> Triggers;
+extern int * Impassable;
 
 /**
  * initialize and load game
@@ -108,8 +109,9 @@ bool can_leave(int x, int z, int dir)
 }
 
 bool can_enter(int x, int z, int dir)
-{
-    if(check_coords(x,z)==3) return false;
+{   int t=check_coords(x,z);
+    for(int i=0; i<10; i++)
+    {   if(t==Impassable[i]) return false; }
     /* search for entry blockers */
     for(int i=0; i<Triggers.len(); i++)
     {   TRIGGER * t;

@@ -24,5 +24,6 @@ float load_float(string str);
 double load_double(string str);
 bool load_bool(string str);
 RGB * load_color(string str);
+int * load_impassable(string str);
 
 #endif /* MAP_H_ */

@@ -31,6 +31,7 @@ extern List<TRIGGER> Triggers;
 extern CLICKABLE_MAP Clickables;
 extern VIEW_SETTINGS view_settings;
 extern RGB * fade_color;
+int * Impassable;
 
 string get_line(FILE * f)
 {	string ret="";
@@ -162,6 +163,7 @@ int load_area(string fname)
 		{				// is new block
 
             load_multivar(f,"fade_color",&fade_color, load_color, &str1);
+            load_multivar(f,"impassable",&Impassable, load_impassable, &str1);
 
 			load_block(f,"textures",&Textures, load_texture, &str1);
 			load_block(f,"animators", &Animators, load_animator, &str1);
@@ -259,6 +261,9 @@ void unload_area()
     Tiles.clear_all();
 
     Elements.clear_all();
+
+    delete fade_color;
+    delete[] Impassable;
 }
 
 void unload_map()
@@ -339,5 +344,14 @@ RGB * load_color(string str)
 	ret->r=(char)r;
 	ret->g=(char)g;
 	ret->b=(char)b;
+	return ret;
+}
+
+int * load_impassable(string str)
+{	int * ret = new int[10];
+    if(sscanf(str.c_str(),"%d %d %d %d %d %d %d %d %d %d",&ret[0],&ret[1],&ret[2],&ret[3],&ret[4],&ret[5],&ret[6],&ret[7],&ret[8],&ret[9])<10)
+	{ debug("Not enough parameters for impassable: "+str,10);
+	  exit(1);
+	}
 	return ret;
 }

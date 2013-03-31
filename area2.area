@@ -8,10 +8,15 @@
 :fade_color
 200 200 200
 
+# IMPASSABLE
+# up to 10 different impassable tiles
+:impassable
+0 0 0 0 0 0 0 0 0 0
+
 :textures
 # 0
-floor/floor1.bmp
-floor/meadow2.bmp
+floor/meadow1.bmp
+floor/road1.bmp
 static/mist1.tga
 static/tree2.bmp
 static/tree3.bmp
@@ -32,7 +37,7 @@ static/tree5.bmp
 TILE_FLOOR 0 0 0 1 1 no-trans 0 -1 clip
 TILE_FLOOR 0 0 0 1 1 no-trans 1 -1 clip
 
-#forrest trees 1-6
+#forrest trees 2-7
 TILE_STATIC 0.0 0 0.5 1 2 false 3 -1 clip
 TILE_STATIC 0.3 0 0.4 1 2 false 4 -1 clip
 TILE_STATIC 0.1 0 0.3 1 2 false 5 -1 clip
@@ -48,8 +53,9 @@ TILE_STATIC 0 0.2 0 1 1 trans 2 -1 no-clip
 
 :tiles
 #1
-TILE_FLOOR 0 
-TILE_FLOOR 1
+TILE_FLOOR 1 
+TILE_FLOOR 0
+#3 - 9 trees
 TILE_FLOOR 0 TILE_STATIC 2
 TILE_FLOOR 0 TILE_STATIC 3
 TILE_FLOOR 0 TILE_STATIC 4

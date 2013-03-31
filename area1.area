@@ -8,6 +8,11 @@
 :fade_color
 0 0 0
 
+# IMPASSABLE
+# up to 10 different impassable tiles
+:impassable
+3 0 0 0 0 0 0 0 0 0
+
 :textures
 # 0
 floor/floor1.bmp
