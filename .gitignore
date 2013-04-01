@@ -18,7 +18,6 @@
 # Binaries
 ######
 *.o
-*.dll
 obj
 
 # picture sources
