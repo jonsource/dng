@@ -24,65 +24,71 @@ void make_flat_element(V3D_f **v, TEXTURED_ELEMENT * element, int x, int z, CAME
 
 void make_flat_element_subr(V3D_f **v, TEXTURED_ELEMENT * element, int x, int z, CAMERA * cam, int far, float height)
 {	BITMAP * text = far_texture(element,far);
-	int w = text->w*element->w;
-	int h = text->h*element->h;
+	int w1=0;
+	int w2 = text->w*element->w;
+	int h1 =0;
+	int h2 = text->h*element->h;
+	if(x%2) { w1=w2; w2=0; } // v-flip
+	if(z%2) { h1=h2; h2=0; } // h-flip
 	float elw=element->w/2;
 	float elh=element->h/2;
 	v[0]->x = x + 0.5 - elw;
 	v[0]->y = element->y+height;
 	v[0]->z = z + 0.5 - elh;
-	v[0]->u = 0;
-	v[0]->v = 0;
+	v[0]->u = w1;
+	v[0]->v = h1;
 
 	v[1]->x = x + 0.5 + elw;
 	v[1]->y = element->y+height;
 	v[1]->z = z + 0.5 - elh;
-	v[1]->u = w;
-	v[1]->v = 0;
+	v[1]->u = w2;
+	v[1]->v = h1;
 
 	v[2]->x = x + 0.5 + elw;
 	v[2]->y = element->y+height;
 	v[2]->z = z + 0.5 + elh;
-	v[2]->u = w;
-	v[2]->v = h;
+	v[2]->u = w2;
+	v[2]->v = h2;
 
 	v[3]->x = x + 0.5 - elw;
 	v[3]->y = element->y+height;
 	v[3]->z = z + 0.5 + elh;
-	v[3]->u = 0;
-	v[3]->v = h;
+	v[3]->u = w1;
+	v[3]->v = h2;
 
 }
 
 void make_front_element(V3D_f **v, TEXTURED_ELEMENT * element, int x, int z, CAMERA * cam, int far)
 {  BITMAP * text = far_texture(element,far);
-   int w = text->w*element->w;
+   int w1 = 0;
+   int w2 = text->w*element->w;
    int h = text->h*element->h;
+   if(x%2 == z%2) { w1=w2; w2=0; } // v-flip
    int dif;
    if(cam->xfront==0)  //xfront je nula
    { if(cam->zfront<0) dif=1; else dif = 0;
      v[0]->x = x+0;
      v[0]->y = element->y;
      v[0]->z = z+dif;
-     v[0]->u = w;
+     v[0]->u = w2;
      v[0]->v = h;
 
      v[1]->x = x + 1;
      v[1]->y = element->y;
      v[1]->z = z+dif;
-     v[1]->u = 0;
+     v[1]->u = w1;
      v[1]->v = h;
 
      v[2]->x = x + 1;
      v[2]->y = element->y+element->h;
      v[2]->z = z+dif;
-     v[2]->u = 0;
+     v[2]->u = w1;
      v[2]->v = 0;
 
      v[3]->x = x + 0;
      v[3]->y = element->y+element->h;
      v[3]->z = z+dif;
-     v[3]->u = w;
+     v[3]->u = w2;
      v[3]->v = 0;
    }
    else
@@ -91,25 +97,25 @@ void make_front_element(V3D_f **v, TEXTURED_ELEMENT * element, int x, int z, CAM
    v[0]->x = x+dif;
    v[0]->y = element->y;
    v[0]->z = z+0;
-   v[0]->u = w;
+   v[0]->u = w2;
    v[0]->v = h;
 
    v[1]->x = x+dif;
    v[1]->y = element->y;
    v[1]->z = z + 1;
-   v[1]->u = 0;
+   v[1]->u = w1;
    v[1]->v = h;
 
    v[2]->x = x+dif;
    v[2]->y = element->y+element->h;
    v[2]->z = z + 1;
-   v[2]->u = 0;
+   v[2]->u = w1;
    v[2]->v = 0;
 
    v[3]->x = x+dif;
    v[3]->y = element->y+element->h;
    v[3]->z = z + 0;
-   v[3]->u = w;
+   v[3]->u = w2;
    v[3]->v = 0;
    }
 
@@ -117,33 +123,35 @@ void make_front_element(V3D_f **v, TEXTURED_ELEMENT * element, int x, int z, CAM
 
 void make_side_element(V3D_f **v,TEXTURED_ELEMENT * element, int x, int z, CAMERA * cam, int far)
 {  BITMAP * text = far_texture(element,far);
-   int w = text->w*element->w;
+   int w1 = 0;
+   int w2 = text->w*element->w;
    int h = text->h*element->h;
+   if(x%2 == z%2) { w1=w2; w2=0; } // v-flip
    int dif=0;
    if(cam->zfront==0)  //zfront je nula
    { if(cam->zpos > z) dif=1; else dif=0;
      v[0]->x = x;
      v[0]->y = element->y;
      v[0]->z = z+dif;
-     v[0]->u = w;
+     v[0]->u = w2;
      v[0]->v = h;
 
      v[1]->x = x + 1;
      v[1]->y = element->y;
      v[1]->z = z+dif;
-     v[1]->u = 0;
+     v[1]->u = w1;
      v[1]->v = h;
 
      v[2]->x = x + 1;
      v[2]->y = element->y+element->h;
      v[2]->z = z+dif;
-     v[2]->u = 0;
+     v[2]->u = w1;
      v[2]->v = 0;
 
      v[3]->x = x + 0;
      v[3]->y = element->y+element->h;
      v[3]->z = z+dif;
-     v[3]->u = w;
+     v[3]->u = w2;
      v[3]->v = 0;
    }
    else
@@ -152,25 +160,25 @@ void make_side_element(V3D_f **v,TEXTURED_ELEMENT * element, int x, int z, CAMER
    v[0]->x = x+dif;
    v[0]->y = element->y;
    v[0]->z = z+0;
-   v[0]->u = w;
+   v[0]->u = w2;
    v[0]->v = h;
 
    v[1]->x = x+dif;
    v[1]->y = element->y;
    v[1]->z = z + 1;
-   v[1]->u = 0;
+   v[1]->u = w1;
    v[1]->v = h;
 
    v[2]->x = x+dif;
    v[2]->y = element->y+element->h;
    v[2]->z = z + 1;
-   v[2]->u = 0;
+   v[2]->u = w1;
    v[2]->v = 0;
 
    v[3]->x = x+dif;
    v[3]->y = element->y+element->h;
    v[3]->z = z + 0;
-   v[3]->u = w;
+   v[3]->u = w2;
    v[3]->v = 0;
    }
 
