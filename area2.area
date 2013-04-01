@@ -6,7 +6,7 @@
 # FADE_COLOR
 # color to which everything fades in the distance, usually black for underground
 :fade_color
-200 200 200
+160 184 195
 
 # IMPASSABLE
 # up to 10 different impassable tiles

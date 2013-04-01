@@ -27,3 +27,4 @@ obj
 *.xcf
 *.orig
 *.out
+*.layout.save

@@ -58,7 +58,8 @@ typedef struct {
 } TILE;
 
 typedef struct
-{	int x, z, power,dim;
+{	int power,dim;
+    float x,z;
 } LIGHT_SOURCE;
 
 class TRIGGER
@@ -85,7 +86,7 @@ TILE * create_tile();
 int tile_add_element(TILE * til,string type,int element);
 unsigned short int tile_type_resolve(string type);
 LIGHT_SOURCE * load_lightsource(string s);
-LIGHT_SOURCE * create_lightsource(int power, int dim, int x, int z);
+LIGHT_SOURCE * create_lightsource(int power, int dim, float x, float z);
 TRIGGER * load_trigger(string s);
 
 #endif /* TEXTURE_H_ */

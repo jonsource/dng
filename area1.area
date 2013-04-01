@@ -17,7 +17,7 @@
 # 0
 floor/floor1.bmp
 wall/wall1.bmp
-static/explosion.bmp
+static/flame1.bmp
 static/tree2.bmp
 static/mist1.tga
 # 5
@@ -25,7 +25,7 @@ static/button1.bmp
 static/doorframe.bmp
 static/door.bmp
 static/doorside.bmp
-floor/meadow2.bmp
+floor/meadow1.bmp
 #10
 static/tree3.bmp
 static/tree4.bmp
@@ -36,7 +36,7 @@ static/tree5.bmp
 # MOVATOR speed-1/100 units per second, starting state, end state, texture width, texture height
 
 :animators
-ANIMATOR_OFF 100 128 8 128 128
+ANIMATOR_OFF 100 64 4 64 128
 ANIMATOR_TOGGLE 200 64 2 64 64
 MOVATOR_Y 100 0 1 256 256
 MOVATOR_Y 100 0 1 256 256
@@ -88,6 +88,10 @@ TILE_STATIC 0.5 0 0.2 1 2 false 10 -1 clip
 TILE_STATIC 0.4 0 0.1 1 2 false 11 -1 clip
 TILE_STATIC 0.7 0 0.5 1 2 false 12 -1 clip
 
+#torch flame
+TILE_STATIC 0.5 0.5 0 0.25 0.5 false 2 0 clip
+TILE_STATIC 0.5 0.5 0 0.25 0.5 false 2 0 clip
+
 
 # TILES
 # tiles make up the map, a tile has many elements (floor, walls ..etc)
@@ -99,9 +103,9 @@ TILE_FLOOR 0 TILE_STATIC 3 TILE_CEILING 1
 TILE_SIDE 2 TILE_FRONT 1 
 TILE_FLOOR 0 TILE_CEILING 1 
 TILE_FLOOR 0 TILE_STATIC_NS 4 TILE_CEILING 1 
-TILE_FLOOR 0 TILE_STATIC 5 TILE_STATIC 3 
+TILE_FLOOR 0 TILE_STATIC_NS_X 22 TILE_STATIC_EW_X 23 TILE_CEILING 1
 TILE_FLOOR 0 TILE_STATIC_NS 6 TILE_CEILING 1 
-TILE_FLOOR 0 TILE_STATIC 7 TILE_STATIC 3 
+TILE_FLOOR 0 TILE_STATIC 3 TILE_CEILING 1 
 TILE_FLOOR 0 TILE_CEILING 1 TILE_STATIC_NS 9 TILE_STATIC_NS 8 
 #10
 TILE_FLOOR 0 TILE_CEILING 1 TILE_STATIC_NS 11 TILE_STATIC_NS 10 TILE_STATIC_EW_X 12 TILE_STATIC_EW_X 13 TILE_STATIC_NS 14 
@@ -112,3 +116,5 @@ TILE_FLOOR 15 TILE_STATIC 18
 TILE_FLOOR 15 TILE_STATIC 19 TILE_STATIC 20
 TILE_FLOOR 15 TILE_STATIC 20 TILE_STATIC 18
 TILE_FLOOR 15 TILE_STATIC 21 TILE_STATIC 17 TILE_STATIC 16
+
+:end

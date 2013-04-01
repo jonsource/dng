@@ -209,7 +209,7 @@ unsigned short int tile_type_resolve(string type)
 	return typ;
 }
 
-LIGHT_SOURCE * create_lightsource(int power, int dim, int x, int z)
+LIGHT_SOURCE * create_lightsource(int power, int dim, float x, float z)
 {	LIGHT_SOURCE * ls;
 	ls=new(LIGHT_SOURCE);
 	ls->power=power;
@@ -220,9 +220,10 @@ LIGHT_SOURCE * create_lightsource(int power, int dim, int x, int z)
 }
 
 LIGHT_SOURCE * load_lightsource(string s)
-{	int power, dim, x, z;
-	if(sscanf(s.c_str(),"%d %d %d %d",&power,&dim,&x,&z)<4)
-	{ debug("Not enough parameters for lightsource.",10);
+{	int power, dim;
+    float x,z;
+	if(sscanf(s.c_str(),"%d %d %f %f",&power,&dim,&x,&z)<4)
+	{ debug("Not enough parameters for lightsource :"+s,10);
 	  exit(1);
 	}
 	return create_lightsource(power,dim,x,z);

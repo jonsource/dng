@@ -22,6 +22,7 @@ int TRANSPARENT = 0;
 extern int DEBUG_LVL_MAIN;
 extern int DEBUG_LVL;
 extern VIEW_SETTINGS view_settings;
+int INFO = 0;
 
 extern CLICKABLE_MAP Clickables;
 extern List<TRIGGER> Triggers;
@@ -82,7 +83,7 @@ void game_draw()
   debug("begin game_draw",2);
 //    scare_mouse();
   draw_view(gx,gy,gz,gh);
-  draw_triggers(gx,gz,gh);
+  if(INFO>0) draw_triggers(gx,gz,gh);
 //    unscare_mouse();
 }
 
@@ -263,7 +264,7 @@ void keypress(int i)
      if(i == KEY_T) {if(TRANSPARENT) TRANSPARENT =0; else TRANSPARENT=1;}
      if(i == KEY_E) {h=1;}
      if(i == KEY_Q) {h=-1;}
-     if(i == KEY_M) { change_map("map2.map",0,0); }
+     if(i == KEY_M) { INFO=(++INFO)%3; }
      if(i == KEY_N)
      { Class *cl=Classes->GetTemplate(Player->classname);
        cl->NextLevel(Player);

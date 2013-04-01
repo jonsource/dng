@@ -20,6 +20,7 @@ extern unsigned short int MAP_SIZE;
 extern List<LIGHT_SOURCE> Lightsources;
 extern List<TRIGGER> Triggers;
 extern CLICKABLE_MAP Clickables;
+extern int INFO;
 bool blender_set;
 CAMERA * cam=NULL;
 RGB * fade_color;
@@ -66,7 +67,7 @@ int init_graphic()
 /**
  * square of distance of two coordinates
  */
-float dist2(int x,int z,int xx, int zz)
+float dist2(float x,float z,float xx, float zz)
 { return ((x-xx)*(x-xx))+((z-zz)*(z-zz));
 
 }
@@ -74,7 +75,7 @@ float dist2(int x,int z,int xx, int zz)
 /**
  * square of distance of coordinates to camera
  */
-float dist(int x,int z,CAMERA * cam)
+float dist(float x,float z,CAMERA * cam)
 { return dist2(x,z,cam->dolly_xpos,cam->dolly_zpos);
 
 }
@@ -241,12 +242,14 @@ void render_element(int type, TEXTURED_ELEMENT * element, BITMAP *bmp, int x, in
    /* apply lighting to vertices, used to render lit textures */
    int ls;
    for (c=0; c<4; c++)
-   {  	ls=light_power-sqrt(dist2(v[c]->x,v[c]->z,cam->dolly_xpos,cam->dolly_zpos))*30;
-
+   {  	/* apply players light */
+        ls=light_power-sqrt(dist2(v[c]->x,v[c]->z,cam->dolly_xpos,cam->dolly_zpos))*30;
    	    v[c]->c=ls>0?ls:0;
 	    //v[c]->c=0;
+	    /* apply lightsources */
    	    for(int i=0; i<Lightsources.len(); i++)
-   	    { ls=Lightsources[i]->power-sqrt(dist2(v[c]->x,v[c]->z,Lightsources[i]->x+0.5,Lightsources[i]->z+0.5))*Lightsources[i]->dim;
+   	    { ls=Lightsources[i]->power-sqrt(dist2(v[c]->x,v[c]->z,Lightsources[i]->x,Lightsources[i]->z))*Lightsources[i]->dim;
+   	      //if(i==0) debug("lightsource :"+to_str(Lightsources[i]->x)+" "+to_str(Lightsources[i]->z)+", v :"+to_str(v[c]->x)+" "+to_str(v[c]->z)+" "+to_str(sqrt(dist2(v[c]->x,v[c]->z,Lightsources[i]->x,Lightsources[i]->z)))+" ");
    	      v[c]->c+=ls>0?ls:0;
    	    }
         if(v[c]->c<0) v[c]->c=0;
@@ -338,7 +341,7 @@ BITMAP * far_texture(TEXTURED_ELEMENT * txt, int far)
             {   frame_no=(((tmsec-a->start)/a->speed)+1)%a->frames;
                 //debug("  frame no:"+to_str(frame_no));
             }
-            blit(txt->texture->close,a->frame,0,frame_no*a->offset,0,0,a->frame->w,a->frame->h);
+            blit(txt->texture->close,a->frame,frame_no*a->offset,0,0,0,a->frame->w,a->frame->h);
             return a->frame;
 	    }
 
@@ -484,36 +487,38 @@ void draw_view(int xpos, int ypos, int zpos, int heading)
      }
 
 
+   if(INFO>1)
+   {
 
-    /* overlay some text */
-   set_clip_rect(game_bmp, 0, 0, game_bmp->w, game_bmp->h);
-  // textprintf_ex(bmp, font, 0,  0, makecol(0, 0, 0), -1,
-//		 "Viewport width: %d  height: %d", viewport_w,viewport_h);
-   //textprintf_ex(bmp, font, 0,  32, makecol(0, 0, 0), -1,
-		 //"Viewport height: %d (h/H changes)", viewport_h);
-   textprintf_ex(game_bmp, font, 0, 40, makecol(0, 0, 0), -1,
-		 "Field of view: %f  Aspect: %.2f Light: %d", cam->fov,cam->aspect,light_power);
-   //textprintf_ex(bmp, font, 0, 48, makecol(0, 0, 0), -1,
-		 //"Aspect ratio: %.2f (a/A changes)", cam.aspect);
-   textprintf_ex(game_bmp, font, 0, 56, makecol(0, 0, 0), -1,
-		 "Position X: %.2f(%.2f) Y: %.2f(%.2f) Z: %.2f(%.2f)", (float)cam->xpos,cam->dolly_xpos,(float)cam->ypos,cam->dolly_ypos,(float)cam->zpos,cam->dolly_zpos);
-   //textprintf_ex(bmp, font, 0, 64, makecol(0, 0, 0), -1,
-	//	 "Y position: %.2f (y/Y changes)", (float)cam.ypos);
-   //textprintf_ex(bmp, font, 0, 72, makecol(0, 0, 0), -1,
-	//	 "Z position: %.2f (z/Z changes)", (float)cam.zpos);
-   textprintf_ex(game_bmp, font, 0, 80, makecol(0, 0, 0), -1,
-		 "Heading: %d %s Stepback: %.2f", cam->heading,to_heading_str(cam->heading).c_str(),cam->step_back);
-   textprintf_ex(game_bmp, font, 0, 88, makecol(0, 0, 0), -1,
-		 "Pitch: %.2f deg (pgup/pgdn changes)", cam->pitch);
-   textprintf_ex(game_bmp, font, 0, 96, makecol(0, 0, 0), -1,
-		 "Roll: %.2f deg (r/R changes)", cam->roll);
-   textprintf_ex(game_bmp, font, 0, 104, makecol(0, 0, 0), -1,
-		 "Front vector: %d, %d, %d", cam->xfront, cam->yfront, cam->zfront);
-   textprintf_ex(game_bmp, font, 0, 112, makecol(0, 0, 0), -1,
-		 "Up vector: %.2f, %.2f, %.2f", cam->xup, cam->yup, cam->zup);
-   textprintf_ex(game_bmp, font, 0, 120, makecol(0, 0, 0), -1,
-		 "Frames per second: %d", fps);
-
+        /* overlay some text */
+       set_clip_rect(game_bmp, 0, 0, game_bmp->w, game_bmp->h);
+      // textprintf_ex(bmp, font, 0,  0, makecol(0, 0, 0), -1,
+    //		 "Viewport width: %d  height: %d", viewport_w,viewport_h);
+       //textprintf_ex(bmp, font, 0,  32, makecol(0, 0, 0), -1,
+             //"Viewport height: %d (h/H changes)", viewport_h);
+       textprintf_ex(game_bmp, font, 0, 40, makecol(0, 0, 0), -1,
+             "Field of view: %f  Aspect: %.2f Light: %d", cam->fov,cam->aspect,light_power);
+       //textprintf_ex(bmp, font, 0, 48, makecol(0, 0, 0), -1,
+             //"Aspect ratio: %.2f (a/A changes)", cam.aspect);
+       textprintf_ex(game_bmp, font, 0, 56, makecol(0, 0, 0), -1,
+             "Position X: %.2f(%.2f) Y: %.2f(%.2f) Z: %.2f(%.2f)", (float)cam->xpos,cam->dolly_xpos,(float)cam->ypos,cam->dolly_ypos,(float)cam->zpos,cam->dolly_zpos);
+       //textprintf_ex(bmp, font, 0, 64, makecol(0, 0, 0), -1,
+        //	 "Y position: %.2f (y/Y changes)", (float)cam.ypos);
+       //textprintf_ex(bmp, font, 0, 72, makecol(0, 0, 0), -1,
+        //	 "Z position: %.2f (z/Z changes)", (float)cam.zpos);
+       textprintf_ex(game_bmp, font, 0, 80, makecol(0, 0, 0), -1,
+             "Heading: %d %s Stepback: %.2f", cam->heading,to_heading_str(cam->heading).c_str(),cam->step_back);
+       textprintf_ex(game_bmp, font, 0, 88, makecol(0, 0, 0), -1,
+             "Pitch: %.2f deg (pgup/pgdn changes)", cam->pitch);
+       textprintf_ex(game_bmp, font, 0, 96, makecol(0, 0, 0), -1,
+             "Roll: %.2f deg (r/R changes)", cam->roll);
+       textprintf_ex(game_bmp, font, 0, 104, makecol(0, 0, 0), -1,
+             "Front vector: %d, %d, %d", cam->xfront, cam->yfront, cam->zfront);
+       textprintf_ex(game_bmp, font, 0, 112, makecol(0, 0, 0), -1,
+             "Up vector: %.2f, %.2f, %.2f", cam->xup, cam->yup, cam->zup);
+       textprintf_ex(game_bmp, font, 0, 120, makecol(0, 0, 0), -1,
+             "Frames per second: %d", fps);
+   }
 
     masked_blit(CURSOR,game_bmp,0,0,mouse_x,mouse_y,CURSOR->w,CURSOR->h);
 }
