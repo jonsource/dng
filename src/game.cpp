@@ -18,7 +18,7 @@ int gy=0,gz=2,gx=3,gh=0;
 int light_power=128;
 extern int FOV;
 extern double STB, ASPECT;
-int TRANSPARENT = 0;
+int TRANSPARENT = 1;
 extern int DEBUG_LVL_MAIN;
 extern int DEBUG_LVL;
 extern VIEW_SETTINGS view_settings;
@@ -199,16 +199,16 @@ void player_move_subr(int x, int y, int z, int h, bool force)
             }
         }
 
-        /* apply enter triggers */
-
-        List<CLICKABLE> clklist=Clickables["enter"];
-        CLICKABLE * clk = new CLICKABLE;
-        for(int i=0; i<clklist.len(); i++)
-        {   clk=clklist[i];
-            debug("enter trigger "+*clk->callback->action,5);
-            clk->callback->fire();
+        /* moved (not just changed heading), apply enter triggers */
+        if(x!=0 || z!=0)
+        {   List<CLICKABLE> clklist=Clickables["enter"];
+            CLICKABLE * clk = new CLICKABLE;
+            for(int i=0; i<clklist.len(); i++)
+            {   clk=clklist[i];
+                debug("enter trigger "+*clk->callback->action,5);
+                clk->callback->fire();
+            }
         }
-
     }
     else
     {   /* FORCED MOVEMENT - map change, teleport etc.. */
@@ -269,7 +269,7 @@ void keypress(int i)
      { Class *cl=Classes->GetTemplate(Player->classname);
        cl->NextLevel(Player);
      }
-     player_move(x,y,z,h);
+     if(x!=0 || y!=0 || z!=0 || h!=0) player_move(x,y,z,h);
    }
    if(status == PLAY)
    {
