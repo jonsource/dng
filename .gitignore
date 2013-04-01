@@ -19,7 +19,6 @@
 ######
 *.o
 *.dll
-*.exe
 obj
 
 # picture sources
