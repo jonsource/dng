@@ -39,7 +39,7 @@ void game_load()
 	Classes = new ClassTemplates();
 	Player = new Character(1);
 	load_graphics();
-	change_area("area1.area","map1.map",3,2);
+	change_area("area1.area","map1.map",3,3);
 	debug("done game_load");
 }
 
