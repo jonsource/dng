@@ -33,6 +33,14 @@
 
 #define MAX_TILE_ELE 10
 
+#define NO_FLIP 1
+#define V_FLIP 2
+#define H_FLIP 4
+#define VH_FLIP 6
+#define V_FLIPPING 8
+#define H_FLIPPING 16
+#define VH_FLIPPING 24
+
 typedef struct {
         BITMAP *close, *medium, *far;
 } TEXTURE;
@@ -45,7 +53,7 @@ typedef struct {
 
 typedef struct {
 		float x,y,z,w,h;
-		int type;
+		int type,flip;
 		bool transparent,clip;
 		TEXTURE * texture;
 		ANIMATOR * animator;
@@ -77,7 +85,7 @@ class TRIGGER
 
 TEXTURE * load_texture(string s);
 TEXTURED_ELEMENT * load_element(string s);
-TEXTURED_ELEMENT * create_element(string type, float x, float y, float z, float w, float h, string transparent, int texture, int animator);
+TEXTURED_ELEMENT * create_element(string type, float x, float y, float z, float w, float h, string transparent, int texture, int animator, string clip, string flip);
 ANIMATOR * load_animator(string s);
 ANIMATOR * create_animator(int speed, int offset, int frames, int w, int h);
 float get_movator_dif(ANIMATOR * a,int t);
@@ -85,6 +93,7 @@ TILE * load_tile(string s);
 TILE * create_tile();
 int tile_add_element(TILE * til,string type,int element);
 unsigned short int tile_type_resolve(string type);
+unsigned short int flip_resolve(string type);
 LIGHT_SOURCE * load_lightsource(string s);
 LIGHT_SOURCE * create_lightsource(int power, int dim, float x, float z);
 TRIGGER * load_trigger(string s);

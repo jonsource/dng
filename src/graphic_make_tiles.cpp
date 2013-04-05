@@ -28,8 +28,8 @@ void make_flat_element_subr(V3D_f **v, TEXTURED_ELEMENT * element, int x, int z,
 	int w2 = text->w*element->w;
 	int h1 =0;
 	int h2 = text->h*element->h;
-	if(x%2) { w1=w2; w2=0; } // v-flip
-	if(z%2) { h1=h2; h2=0; } // h-flip
+	if( ((element->flip & V_FLIPPING) && x%2) || (element->flip & V_FLIP)  ) { w1=w2; w2=0; } // v-flip
+	if( ((element->flip & H_FLIPPING) && z%2) || (element->flip & H_FLIP)  ) { h1=h2; h2=0; } // h-flip
 	float elw=element->w/2;
 	float elh=element->h/2;
 	v[0]->x = x + 0.5 - elw;
@@ -63,7 +63,7 @@ void make_front_element(V3D_f **v, TEXTURED_ELEMENT * element, int x, int z, CAM
    int w1 = 0;
    int w2 = text->w*element->w;
    int h = text->h*element->h;
-   if(x%2 == z%2) { w1=w2; w2=0; } // v-flip
+   if( ((element->flip & V_FLIPPING) && x%2 == z%2) || (element->flip & V_FLIP) ) { w1=w2; w2=0; } // v-flip
    int dif;
    if(cam->xfront==0)  //xfront je nula
    { if(cam->zfront<0) dif=1; else dif = 0;
@@ -126,7 +126,7 @@ void make_side_element(V3D_f **v,TEXTURED_ELEMENT * element, int x, int z, CAMER
    int w1 = 0;
    int w2 = text->w*element->w;
    int h = text->h*element->h;
-   if(x%2 == z%2) { w1=w2; w2=0; } // v-flip
+   if( ((element->flip & V_FLIPPING) && x%2 == z%2) || (element->flip & V_FLIP) ) { w1=w2; w2=0; } // v-flip
    int dif=0;
    if(cam->zfront==0)  //zfront je nula
    { if(cam->zpos > z) dif=1; else dif=0;

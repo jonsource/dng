@@ -45,52 +45,52 @@ MOVATOR_Y 100 0 1 256 256
 # elements are parts of a tile: floor, wall, button texture etc..
 
 :elements
-TILE_FLOOR 0 0 0 1 1 false 0 -1 clip
-TILE_FRONT 0 0 0 1 1 false 1 -1 clip
-TILE_SIDE 0 0 0 1 1 false 1 -1 clip
+TILE_FLOOR 0 0 0 1 1 false 0 -1 clip VH_FLIPPING
+TILE_FRONT 0 0 0 1 1 false 1 -1 clip VH_FLIPPING
+TILE_SIDE 0 0 0 1 1 false 1 -1 clip V_FLIPPING
 
 #mist
-TILE_STATIC 0.5 0.05 0.5 1.25 0.3 trans 4 -1 no-clip
+TILE_STATIC 0.5 0.05 0.5 1.25 0.3 trans 4 -1 no-clip NO_FLIP
 
-TILE_STATIC 0.5 0 0 1 1 false 2 0 clip
+TILE_STATIC 0.5 0 0 1 1 false 2 0 clip NO_FLIP
 
 #tree on side of square
-TILE_STATIC 0 0 0.5 1 2 false 3 -1 clip
+TILE_STATIC 0 0 0.5 1 2 false 3 -1 clip NO_FLIP
 
 #button in middle
-TILE_STATIC 0.5 0.30 1 0.28 0.28 false 5 1 clip
+TILE_STATIC 0.5 0.30 1 0.28 0.28 false 5 1 clip NO_FLIP
 
 #tree in the middle of square
-TILE_STATIC 0.5 0 0.5 1 2 false 3 -1 clip
+TILE_STATIC 0.5 0 0.5 1 2 false 3 -1 clip NO_FLIP
 
 #doorframe on side
-TILE_STATIC 0.5 0 1 1 1 false 6 -1 clip
-TILE_STATIC 0.5 0 1 1 1 false 7 2 clip
+TILE_STATIC 0.5 0 1 1 1 false 6 -1 clip NO_FLIP
+TILE_STATIC 0.5 0 1 1 1 false 7 2 clip NO_FLIP
 #doorframe in middle
-TILE_STATIC 0.5 0 0.5 1 1 false 6 -1 clip
-TILE_STATIC 0.5 0 0.5 1 1 false 7 3 clip
+TILE_STATIC 0.5 0 0.5 1 1 false 6 -1 clip NO_FLIP
+TILE_STATIC 0.5 0 0.5 1 1 false 7 3 clip NO_FLIP
 
 #doorsides
-TILE_STATIC 0.1 -0.03 0.5 0.1 1.04 false 8 -1 clip
-TILE_STATIC 0.9 -0.03 0.5 0.1 1.04 false 8 -1 clip
+TILE_STATIC 0.1 -0.03 0.5 0.1 1.04 false 8 -1 clip NO_FLIP
+TILE_STATIC 0.9 -0.03 0.5 0.1 1.04 false 8 -1 clip NO_FLIP
 
 #button on the side 14
-TILE_STATIC 0.1 0.3 0.5 0.28 0.28 false 5 1 clip
+TILE_STATIC 0.1 0.3 0.5 0.28 0.28 false 5 1 clip NO_FLIP
 
 #meadow floor 15
-TILE_FLOOR 0 0 0 1 1 no-trans 9 -1 clip
+TILE_FLOOR 0 0 0 1 1 no-trans 9 -1 clip NO_FLIP
 
 #forrest trees 16-21
-TILE_STATIC 0.0 0 0.5 1 2 false 10 -1 clip
-TILE_STATIC 0.3 0 0.4 1 2 false 11 -1 clip
-TILE_STATIC 0.1 0 0.3 1 2 false 12 -1 clip
-TILE_STATIC 0.5 0 0.2 1 2 false 10 -1 clip
-TILE_STATIC 0.4 0 0.1 1 2 false 11 -1 clip
-TILE_STATIC 0.7 0 0.5 1 2 false 12 -1 clip
+TILE_STATIC 0.0 0 0.5 1 2 false 10 -1 clip NO_FLIP
+TILE_STATIC 0.3 0 0.4 1 2 false 11 -1 clip NO_FLIP
+TILE_STATIC 0.1 0 0.3 1 2 false 12 -1 clip NO_FLIP
+TILE_STATIC 0.5 0 0.2 1 2 false 10 -1 clip NO_FLIP
+TILE_STATIC 0.4 0 0.1 1 2 false 11 -1 clip NO_FLIP
+TILE_STATIC 0.7 0 0.5 1 2 false 12 -1 clip NO_FLIP
 
 #torch flame
-TILE_STATIC 0.5 0.5 0 0.25 0.5 false 2 0 clip
-TILE_STATIC 0.5 0.5 0 0.25 0.5 false 2 0 clip
+TILE_STATIC 0.5 0.5 0 0.25 0.5 false 2 0 clip NO_FLIP
+TILE_STATIC 0.5 0.5 0 0.25 0.5 false 2 0 clip NO_FLIP
 
 
 # TILES

@@ -67,7 +67,7 @@ TEXTURE * load_texture(string s)
     return text;
 }
 
-TEXTURED_ELEMENT * create_element(string type, float x, float y, float z, float w, float h, string transparent, int texture, int animator, string clip)
+TEXTURED_ELEMENT * create_element(string type, float x, float y, float z, float w, float h, string transparent, int texture, int animator, string clip, string flip)
 {	TEXTURED_ELEMENT * ele = new(TEXTURED_ELEMENT);
 	unsigned short int typ;
    ele->x = x;
@@ -93,19 +93,20 @@ TEXTURED_ELEMENT * create_element(string type, float x, float y, float z, float 
    else ele->animator = NULL;
    typ=tile_type_resolve(type);
    ele->type=typ;
+   ele->flip=flip_resolve(flip);
    //debug("Element "+type);
    return ele;
 }
 
 TEXTURED_ELEMENT * load_element(string s)
-{	char type[32], transparent[32], clip[32];
+{	char type[32], transparent[32], clip[16], flip[16];
 	float x,y,z,w,h;
 	int texture,animator;
-	if(sscanf(s.c_str(),"%s %f %f %f %f %f %s %d %d %s",type,&x,&y,&z,&w,&h,transparent,&texture,&animator,clip)<10)
+	if(sscanf(s.c_str(),"%s %f %f %f %f %f %s %d %d %s %s",type,&x,&y,&z,&w,&h,transparent,&texture,&animator,clip,flip)<11)
 	{ debug("Not enough parameters for textured element: "+s,10);
 	  exit(1);
 	}
-	return create_element(type,x,y,z,w,h,transparent,texture,animator,clip);
+	return create_element(type,x,y,z,w,h,transparent,texture,animator,clip,flip);
 }
 
 unsigned short int animator_type_resolve(string type)
@@ -204,6 +205,24 @@ unsigned short int tile_type_resolve(string type)
 	if(!type_ok)
 	{
 		debug("Unknown element type "+type,10);
+		exit(1);
+	}
+	return typ;
+}
+
+unsigned short int flip_resolve(string type)
+{	bool type_ok=false;
+	unsigned short int typ;
+	if(type.compare("NO_FLIP")==0) {typ=NO_FLIP; type_ok=true;}
+	if(type.compare("V_FLIP")==0) {typ=V_FLIP; type_ok=true;}
+	if(type.compare("H_FLIP")==0) {typ=H_FLIP; type_ok=true;}
+	if(type.compare("VH_FLIP")==0) {typ=VH_FLIP; type_ok=true;}
+	if(type.compare("V_FLIPPING")==0) {typ=V_FLIPPING; type_ok=true;}
+	if(type.compare("H_FLIPPING")==0) {typ=H_FLIPPING; type_ok=true;}
+	if(type.compare("VH_FLIPPING")==0) {typ=VH_FLIPPING; type_ok=true;}
+	if(!type_ok)
+	{
+		debug("Unknown flip type "+type,10);
 		exit(1);
 	}
 	return typ;
