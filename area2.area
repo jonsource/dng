@@ -38,32 +38,32 @@ static/tree5.bmp
 # elements are parts of a tile: floor, wall, button texture etc..
 
 :elements
-#meadow floor 2, road 1, xcross 3, turn 4-7, tcross 8-11, end 12-15
+#meadow floor 0, road 1, xcross 2, turn 4-7, tcross 8-11, end 12-15
 TILE_FLOOR 0 0 0 1 1 no-trans 0 -1 clip VH_FLIPPING
 TILE_FLOOR 0 0 0 1 1 no-trans 1 -1 clip VH_FLIPPING
-TILE_FLOOR 0 0 0 1 1 no-trans 2 -1 clip VH_FLIPPING
+TILE_FLOOR 0 0 0 1 1 no-trans 1 -1 clip VH_FLIPPING_90
 TILE_FLOOR 0 0 0 1 1 no-trans 3 -1 clip NO_FLIP
 TILE_FLOOR 0 0 0 1 1 no-trans 3 -1 clip V_FLIP
 TILE_FLOOR 0 0 0 1 1 no-trans 3 -1 clip VH_FLIP
 TILE_FLOOR 0 0 0 1 1 no-trans 3 -1 clip H_FLIP
 TILE_FLOOR 0 0 0 1 1 no-trans 4 -1 clip NO_FLIP
 TILE_FLOOR 0 0 0 1 1 no-trans 4 -1 clip V_FLIP
-TILE_FLOOR 0 0 0 1 1 no-trans 4 -1 clip VH_FLIP
-TILE_FLOOR 0 0 0 1 1 no-trans 4 -1 clip H_FLIP
+TILE_FLOOR 0 0 0 1 1 no-trans 4 -1 clip TURN_90
+TILE_FLOOR 0 0 0 1 1 no-trans 4 -1 clip TURN_270
 TILE_FLOOR 0 0 0 1 1 no-trans 5 -1 clip NO_FLIP
 TILE_FLOOR 0 0 0 1 1 no-trans 5 -1 clip V_FLIP
-TILE_FLOOR 0 0 0 1 1 no-trans 5 -1 clip VH_FLIP
-TILE_FLOOR 0 0 0 1 1 no-trans 5 -1 clip H_FLIP
+TILE_FLOOR 0 0 0 1 1 no-trans 5 -1 clip TURN_90
+TILE_FLOOR 0 0 0 1 1 no-trans 5 -1 clip TURN_270
 
-#forrest trees 16-21
+#forrest trees 15-20
 TILE_STATIC 0.0 0 0.5 1 2 false 7 -1 clip NO_FLIP
 TILE_STATIC 0.3 0 0.4 1 2 false 8 -1 clip NO_FLIP
 TILE_STATIC 0.1 0 0.3 1 2 false 9 -1 clip NO_FLIP
 TILE_STATIC 0.5 0 0.2 1 2 false 10 -1 clip NO_FLIP
 TILE_STATIC 0.4 0 0.1 1 2 false 8 -1 clip NO_FLIP
-TILE_STATIC 0.7 0 0.5 1 2 false 10 -1 clip NO_FLIP
+TILE_STATIC 0.7 0 0.5 1 2 false 9 -1 clip NO_FLIP
 
-#mist 22
+#mist 21
 TILE_STATIC 0 0.2 0 1 1 trans 6 -1 no-clip NO_FLIP
 
 # TILES
@@ -92,6 +92,10 @@ TILE_FLOOR 0 TILE_STATIC 21
 TILE_FLOOR 0 TILE_STATIC 16
 TILE_FLOOR 0 TILE_STATIC 17
 TILE_FLOOR 0 TILE_STATIC 18 TILE_STATIC 17
-TILE_FLOOR 0 TILE_STATIC 19 TILE_STATIC 21
-TILE_FLOOR 0 TILE_STATIC 20 TILE_STATIC 16 TILE_STATIC 17
-TILE_FLOOR 0 TILE_STATIC 17 TILE_STATIC 21
+TILE_FLOOR 0 TILE_STATIC 20 TILE_STATIC 19
+TILE_FLOOR 0 TILE_STATIC 16 TILE_STATIC 18 TILE_STATIC 19
+TILE_FLOOR 0 TILE_STATIC 20 TILE_STATIC 17
+
+#23 experiment
+TILE_FLOOR 20
+TILE_FLOOR 20

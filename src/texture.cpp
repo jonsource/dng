@@ -217,9 +217,14 @@ unsigned short int flip_resolve(string type)
 	if(type.compare("V_FLIP")==0) {typ=V_FLIP; type_ok=true;}
 	if(type.compare("H_FLIP")==0) {typ=H_FLIP; type_ok=true;}
 	if(type.compare("VH_FLIP")==0) {typ=VH_FLIP; type_ok=true;}
+	if(type.compare("TURN_90")==0) {typ=TURN_90; type_ok=true;}
+	if(type.compare("TURN_270")==0) {typ=TURN_270; type_ok=true;}
 	if(type.compare("V_FLIPPING")==0) {typ=V_FLIPPING; type_ok=true;}
 	if(type.compare("H_FLIPPING")==0) {typ=H_FLIPPING; type_ok=true;}
 	if(type.compare("VH_FLIPPING")==0) {typ=VH_FLIPPING; type_ok=true;}
+	if(type.compare("V_FLIPPING_90")==0) {typ=V_FLIPPING_90; type_ok=true;}
+	if(type.compare("H_FLIPPING_90")==0) {typ=H_FLIPPING_90; type_ok=true;}
+	if(type.compare("VH_FLIPPING_90")==0) {typ=VH_FLIPPING_90; type_ok=true;}
 	if(!type_ok)
 	{
 		debug("Unknown flip type "+type,10);

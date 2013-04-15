@@ -30,31 +30,37 @@ void make_flat_element_subr(V3D_f **v, TEXTURED_ELEMENT * element, int x, int z,
 	int h2 = text->h*element->h;
 	if( ((element->flip & V_FLIPPING) && x%2) || (element->flip & V_FLIP)  ) { w1=w2; w2=0; } // v-flip
 	if( ((element->flip & H_FLIPPING) && z%2) || (element->flip & H_FLIP)  ) { h1=h2; h2=0; } // h-flip
+
 	float elw=element->w/2;
 	float elh=element->h/2;
 	v[0]->x = x + 0.5 - elw;
 	v[0]->y = element->y+height;
 	v[0]->z = z + 0.5 - elh;
-	v[0]->u = w1;
+	if( (element->flip & TURN_90)  ) v[0]->u = w2; // rotate 90 degrees
+	else v[0]->u = w1;
 	v[0]->v = h1;
+
 
 	v[1]->x = x + 0.5 + elw;
 	v[1]->y = element->y+height;
 	v[1]->z = z + 0.5 - elh;
 	v[1]->u = w2;
-	v[1]->v = h1;
+	if( (element->flip & TURN_90)  ) v[1]->v = h2; // rotate 90 degrees
+	else v[1]->v = h1;
 
 	v[2]->x = x + 0.5 + elw;
 	v[2]->y = element->y+height;
 	v[2]->z = z + 0.5 + elh;
-	v[2]->u = w2;
+	if( (element->flip & TURN_90)  ) v[2]->u = w1; // rotate 90 degrees
+	else v[2]->u = w2;
 	v[2]->v = h2;
 
 	v[3]->x = x + 0.5 - elw;
 	v[3]->y = element->y+height;
 	v[3]->z = z + 0.5 + elh;
 	v[3]->u = w1;
-	v[3]->v = h2;
+	if( (element->flip & TURN_90)  ) v[3]->v = h1; // rotate 90 degrees
+	else v[3]->v = h2;
 
 }
 

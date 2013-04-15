@@ -37,9 +37,14 @@
 #define V_FLIP 2
 #define H_FLIP 4
 #define VH_FLIP 6
+#define TURN_90 32
+#define TURN_270 34
 #define V_FLIPPING 8
 #define H_FLIPPING 16
 #define VH_FLIPPING 24
+#define V_FLIPPING_90 40
+#define H_FLIPPING_90 48
+#define VH_FLIPPING_90 56
 
 typedef struct {
         BITMAP *close, *medium, *far;
