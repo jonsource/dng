@@ -15,6 +15,7 @@
 #include "graphic.h"
 #include "chat.h"
 #include "game_map.h"
+#include "edittext.h"
 
 #define TIMER 20
 
@@ -27,6 +28,7 @@ int fps;
 unsigned short int keyb_ignore;
 BITMAP *game_bmp=NULL,*first=NULL,*second=NULL;
 int status,mode;
+extern int INFO;
 extern List<TEXTURE> Textures;
 
 int courage, strength, constitution, intelligence, wisdom, charisma, dexterity, agility;
@@ -85,9 +87,11 @@ void init()
 	LOCK_FUNCTION(fps_proc);
 	LOCK_FUNCTION(game_timer);
 	allegro_init();
-	install_keyboard();
-	install_mouse();
 	install_timer();
+	install_keyboard();
+	set_keyboard_rate(150,50);
+	install_mouse();
+
     load_ini("game.ini");
 	init_graphic();
 
@@ -171,6 +175,12 @@ int main(int argc, char *argv[])
 		}
 
 	//    game_interpret();
+        if(INFO==1)
+        {
+            if(keypressed()) text_input();
+
+        }
+        else
 		if(!keyb_ignore)
 		{ 	if(key[KEY_F]) keypress(KEY_F);
 			if(key[KEY_W]) keypress(KEY_W);
@@ -195,6 +205,7 @@ int main(int argc, char *argv[])
 			if(key[KEY_N]) keypress(KEY_N);
 			if(key[KEY_T]) keypress(KEY_T);
 			if(key[KEY_SPACE]) keypress(KEY_SPACE);
+
 		}
 		if(key[KEY_ESC]) quit=1;
 	}

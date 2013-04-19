@@ -2,6 +2,7 @@
 #include <string.h>
 #include <math.h>
 #include "interface.h"
+#include "edittext.h"
 
 BITMAP * sky1[4];
 BITMAP * api=NULL;
@@ -518,7 +519,9 @@ void draw_view(int xpos, int ypos, int zpos, int heading)
              "Up vector: %.2f, %.2f, %.2f", cam->xup, cam->yup, cam->zup);
        textprintf_ex(game_bmp, font, 0, 120, makecol(0, 0, 0), -1,
              "Frames per second: %d", fps);
-   }
+    }
+
+    if(INFO==1) text_output(game_bmp);
 
     masked_blit(CURSOR,game_bmp,0,0,mouse_x,mouse_y,CURSOR->w,CURSOR->h);
 }

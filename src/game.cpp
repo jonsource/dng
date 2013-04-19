@@ -7,7 +7,7 @@
 #include "game_map.h"
 #include "interface.h"
 
-extern int keyb_ignore,mode;
+extern int keyb_ignore;
 extern int status;
 extern ClassTemplates *Classes;
 extern List<TILE> Tiles;
@@ -245,9 +245,10 @@ void mouse_click(int mw, int mh)
  */
 void keypress(int i)
 {  int x=0,z=0,y=0,h=0;
+
    if(status == CREATE)
    { if(i == KEY_P) status = PLAY;
-     if(i == KEY_M) { mode = mode+1; mode = mode%6; }
+     //if(key[KEY_M]) { mode = mode+1; mode = mode%6; }
      if(i == KEY_V) { delete(Player); Player=new Character(1); }
      if(i == KEY_W) z=-1;
      if(i == KEY_S) z=1;
@@ -264,7 +265,9 @@ void keypress(int i)
      if(i == KEY_T) {if(TRANSPARENT) TRANSPARENT =0; else TRANSPARENT=1;}
      if(i == KEY_E) {h=1;}
      if(i == KEY_Q) {h=-1;}
-     if(i == KEY_M) { INFO=(++INFO)%3; }
+     if(i == KEY_M) { clear_keybuf();
+                      INFO=(++INFO)%3;
+                    }
      if(i == KEY_N)
      { Class *cl=Classes->GetTemplate(Player->classname);
        cl->NextLevel(Player);
