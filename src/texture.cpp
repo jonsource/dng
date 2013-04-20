@@ -272,15 +272,6 @@ TILE * load_tile(string s)
 	return tile;
 }
 
-/*
-TRIGGER * create_trigger(int speed, int offset, int frames, int w, int h)
-{ ANIMATOR * ani = new(ANIMATOR);
-	ani->speed=speed;
-	ani->offset=offset;
-	ani->frames=frames;
-	ani->frame=create_bitmap(w,h);
-  return ani;
-}*/
 unsigned short int trigger_type_resolve(string type)
 {	bool type_ok=false;
 	unsigned short int typ;
@@ -303,6 +294,28 @@ unsigned short int trigger_type_resolve(string type)
 		exit(1);
 	}
 	return typ;
+}
+
+string TRIGGER::type_string()
+{	switch(this->type)
+    {
+        case TRIGGER_NORTH: return "TRIGGER_NORTH";
+        case TRIGGER_EAST: return "TRIGGER_EAST";
+        case TRIGGER_SOUTH: return "TRIGGER_SOUTH";
+        case TRIGGER_WEST: return "TRIGGER_WEST";
+
+        case TRIGGER_ENTER: return "TRIGGER_ENTER";
+        case TRIGGER_LEAVE: return "TRIGGER_LEAVE";
+
+        case BLOCKER_NORTH: return "BLOCKER_NORTH";
+        case BLOCKER_EAST: return "BLOCKER_EAST";
+        case BLOCKER_SOUTH: return "BLOCKER_SOUTH";
+        case BLOCKER_WEST: return "BLOCKER_WEST";
+        case BLOCKER_ENTER: return "BLOCKER_ENTER";
+    }
+    debug("Unknown trigger type number: "+to_str(type),10);
+	exit(1);
+	return "";
 }
 
 TRIGGER * load_trigger(string s)
@@ -330,6 +343,7 @@ TRIGGER::TRIGGER(int type, int xpos, int zpos, int w1, int h1, int w2, int h2,in
     this->w1=w1;
     this->h2=h2;
     this->w2=w2;
+    this->animator_nr=animator;
     if(animator>-1)
     {   if(animator<Animators.len())	this->animator = Animators[animator];
         else
@@ -344,6 +358,20 @@ TRIGGER::TRIGGER(int type, int xpos, int zpos, int w1, int h1, int w2, int h2,in
 
 TRIGGER::TRIGGER(int type, int xpos, int zpos, int w1, int h1, int w2, int h2,int animator)
 {   TRIGGER(type,xpos,zpos,w1,h1,w2,h2,animator,"");
+}
+
+string TRIGGER::serialize()
+{   string ret="";
+    ret+=this->type_string();
+    ret+=" "+to_str(this->xpos);
+    ret+=" "+to_str(this->zpos);
+    ret+=" "+to_str(this->w1);
+    ret+=" "+to_str(this->h1);
+    ret+=" "+to_str(this->w2);
+    ret+=" "+to_str(this->h2);
+    ret+=" "+to_str(this->animator_nr);
+    ret+=" "+*this->action;
+    return ret;
 }
 
 void TRIGGER::fire()

@@ -150,6 +150,10 @@ void reset_debug_lvl()
 	DEBUG_LVL=DEBUG_LVL_MAIN;
 }
 
+/**
+    explode given string s using sep as separator
+*/
+
 STR_LIST * tokenize(string s, string sep)
 {   STR_LIST * ret= new STR_LIST;
     string * str;

@@ -249,29 +249,45 @@ void keypress(int i)
    if(status == CREATE)
    { if(i == KEY_P) status = PLAY;
      //if(key[KEY_M]) { mode = mode+1; mode = mode%6; }
-     if(i == KEY_V) { delete(Player); Player=new Character(1); }
+
+    /* movement controls */
      if(i == KEY_W) z=-1;
      if(i == KEY_S) z=1;
      if(i == KEY_A) x=-1;
      if(i == KEY_D) x=1;
-     if(i == KEY_R) y=1;
-     if(i == KEY_F) y-=1;
-     if(i == KEY_H) { view_settings.fov+=1; init_camera(&view_settings); }
-     if(i == KEY_J) { view_settings.fov-=1; init_camera(&view_settings); }
-     if(i == KEY_I) { view_settings.step_back+=0.1; init_camera(&view_settings); }
-     if(i == KEY_K) { view_settings.step_back-=0.1; init_camera(&view_settings); }
-     if(i == KEY_O) light_power+=1;
-     if(i == KEY_L) light_power-=1;
-     if(i == KEY_T) {if(TRANSPARENT) TRANSPARENT =0; else TRANSPARENT=1;}
      if(i == KEY_E) {h=1;}
      if(i == KEY_Q) {h=-1;}
-     if(i == KEY_M) { clear_keybuf();
-                      INFO=(++INFO)%3;
+    /* optional and debugging movement controls */
+     if(i == KEY_R) y=1;
+     if(i == KEY_F) y=-1;
+
+    if(INFO==2)
+    {   /* development camera controls */
+         if(i == KEY_H) { view_settings.fov+=1; init_camera(&view_settings); }
+         if(i == KEY_J) { view_settings.fov-=1; init_camera(&view_settings); }
+         if(i == KEY_I) { view_settings.step_back+=0.1; init_camera(&view_settings); }
+         if(i == KEY_K) { view_settings.step_back-=0.1; init_camera(&view_settings); }
+
+        /* development light setting controls */
+         if(i == KEY_O) light_power+=1;
+         if(i == KEY_L) light_power-=1;
+    }
+
+    if(i == KEY_ESC) { INFO = 0;}
+
+    if(i == KEY_F1) {  if(INFO!=2) INFO=2;
+                       else INFO=0;
+                    }
+
+     if(i == KEY_F2) {  clear_keybuf();
+                        INFO=1;
                     }
      if(i == KEY_N)
      { Class *cl=Classes->GetTemplate(Player->classname);
        cl->NextLevel(Player);
      }
+     if(i == KEY_V) { delete(Player); Player=new Character(1); }
+
      if(x!=0 || y!=0 || z!=0 || h!=0) player_move(x,y,z,h);
    }
    if(status == PLAY)
@@ -280,6 +296,56 @@ void keypress(int i)
    if(status == PAUSE)
    { if(i == KEY_SPACE) { status = PLAY; } }
    keyb_ignore = 10;
+}
+
+int _interpret_1int(STR_LIST * l, string command, int * val, int minval, int maxval)
+{   int v=minval-1;
+    if(l->len()==1)
+    {   printf("%s = %d\n",command.c_str(),*val);
+        return *val;
+    }
+    else
+    {
+        string h=*(*l)[1];
+        sscanf(h.c_str(),"%d",&v);
+        if(v<minval || v>maxval) printf("Invalid parameter to %s [%d-%d]\n",command.c_str(),minval,maxval);
+        else
+        {   *val = v;
+            printf("%s = %d\n",command.c_str(),*val);
+        }
+    }
+    return v;
+}
+
+void text_interpret(string s)
+{   STR_LIST * l=tokenize(s," ");
+    if(l->len()<1) return;
+    if(*(*l)[0]=="exit")
+    {   INFO=(++INFO)%3;
+        return;
+    }
+    if(*(*l)[0]=="transparent") _interpret_1int(l,"transparent",&TRANSPARENT,0,1);
+    if(*(*l)[0]=="light_power") _interpret_1int(l,"light_power",&light_power,0,255);
+    if(*(*l)[0]=="Trigger")
+    {   int v;
+        if(l->len()==1)
+        {   printf("Provide a number [0-%d] to print info on that trigger.\n",Triggers.len()-1);
+            return;
+        }
+        else
+        {   string h=*(*l)[1];
+            sscanf(h.c_str(),"%d",&v);
+            if(v<0 || v>=Triggers.len()) printf("Invalid parameter to Trigger [0-%d]\n",Triggers.len()-1);
+            else
+            {   printf("%s\n",Triggers[v]->serialize().c_str());
+            }
+        }
+    }
+    if(*(*l)[0]=="Triggers")
+    {   for(int v=0; v<Triggers.len(); v++)
+        {   printf("%s\n",Triggers[v]->serialize().c_str());
+        }
+    }
 }
 
 void game_unload()

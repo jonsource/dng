@@ -24,7 +24,7 @@
 #define BLOCKER_EAST 9
 #define BLOCKER_SOUTH 10
 #define BLOCKER_WEST 11
-#define BLOCKER_ENTER 11
+#define BLOCKER_ENTER 12
 
 #define ANIMATOR_TOGGLE 1
 #define ANIMATOR_ON 2
@@ -81,10 +81,13 @@ class TRIGGER
         int zpos;
         int type;
         int w1,h1,w2,h2;
+        int animator_nr;
         ANIMATOR * animator;
         TRIGGER(int type, int xpos, int zpos, int w1, int h1, int w2, int h2, int animator);
         TRIGGER(int type, int xpos, int zpos, int w1, int h1, int w2, int h2, int animator, string action);
         void fire();
+        string serialize();
+        string type_string();
         string * action;
 };
 

@@ -6,15 +6,20 @@ Author: crbarry@mts.net
 
 #include <allegro.h>
 #include <string>
+#include "game.h"
 #include "edittext.h"
 
 using namespace std;
 
 #define WHITE makecol(255, 255, 255)
+#define MAX_HISTORY 10
 
-string  edittext;                         // an empty string for editting
+string historytext[MAX_HISTORY];
+string edittext;                         // an empty string for editting
 string::iterator iter = edittext.begin(); // string iterator
 int caret  = 0;                       // tracks the text caret
+int history = -1;
+int history_full = -1;
 bool insert = true;                    // true if text should be inserted
 
    // the game loop
@@ -58,11 +63,43 @@ void text_input()
         case KEY_LEFT:
                   if(iter != edittext.begin()) caret--, iter--;
                break;
+        case KEY_HOME:
+                  iter = edittext.begin();
+                  caret = 0;
+               break;
+        case KEY_END:
+                  iter = edittext.end();
+                  caret = edittext.length();
+               break;
+        case KEY_UP:
+                  if(history+1 < MAX_HISTORY && history < history_full)
+                  {     history++;
+                        edittext = historytext[history];
+                        iter = edittext.end();
+                        caret = edittext.length();
+                  }
+                  else
+                  {     history=-1;
+                        edittext.clear();
+                        iter = edittext.begin();
+                  }
+                  caret = 0;
+
+               break;
         case KEY_INSERT:
                   insert = !insert;
                break;
         case KEY_ENTER:
+                  text_interpret(edittext);
+                  if(edittext!=historytext[0]) // add to history, if different from last command
+                  {     if(history_full+1<MAX_HISTORY) history_full++;
+                        for(int i=MAX_HISTORY-1; i>0; i--)
+                        {     historytext[i]=historytext[i-1];
+                        }
+                        historytext[0] = edittext;
+                  }
                   caret = 0;
+                  history = -1;
                   iter = edittext.begin();
                   edittext.clear();
                break;
