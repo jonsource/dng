@@ -175,7 +175,11 @@ ANIMATOR::ANIMATOR(int type, int speed, int offset, int frames, int w, int h, in
 }
 
 string ANIMATOR::serialize()
-{   return this->type_string()+" "+to_str(speed)+" "+to_str(offset)+" "+to_str(frames)+" "+to_str(w)+" "+to_str(h)+" "+to_str(on)+" "+to_str(start);
+{   return this->type_string()+" "+to_str(speed)+" "+to_str(_offset)+" "+to_str(frames)+" "+to_str(w)+" "+to_str(h)+" "+to_str(on)+" "+to_str(start);
+}
+
+string ANIMATOR::save_string()
+{   return to_str(offset)+" "+to_str(on)+" "+to_str(start);
 }
 
 ANIMATOR * load_animator(string s)
@@ -186,6 +190,19 @@ ANIMATOR * load_animator(string s)
 	  exit(1);
 	}
 	return new ANIMATOR(ANIMATOR::type_resolve(buf), speed, offset, frames, w, h);
+}
+
+int load_animator_save(ANIMATOR * animator, string s)
+{	int offset, on, start;
+	if(sscanf(s.c_str(),"%d %d %d",&offset,&on,&start)<3)
+	{ debug("Not enough parameters for animator save.",10);
+	  exit(1);
+	  return 0;
+	}
+	animator->start=start;
+	animator->on=on;
+	animator->offset=offset;
+	return 1;
 }
 
 float get_movator_dif(ANIMATOR * a, int t)

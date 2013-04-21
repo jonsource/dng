@@ -26,6 +26,7 @@ public:
 	T* operator[](const int index);
 	int len();
 	std::string serialize();
+	std::string save_string();
 };
 
 template <class T>
@@ -34,6 +35,16 @@ std::string List<T>::serialize()
     for(int i=0; i<this->len(); i++)
     {
         s+=this->items[i]->serialize()+"\n";
+    }
+    return s;
+}
+
+template <class T>
+std::string List<T>::save_string()
+{   std::string s="";
+    for(int i=0; i<this->len(); i++)
+    {
+        s+=this->items[i]->save_string()+"\n";
     }
     return s;
 }

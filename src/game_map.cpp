@@ -35,7 +35,7 @@ string get_line(FILE * f)
 }
 
 template<class T>
-unsigned short int load_block(FILE *f, string block, List<T> * l, T * (*loader)(string), string * str1)
+int load_block(FILE *f, string block, List<T> * l, T * (*loader)(string), string * str1)
 {	string str2;
 	unsigned short int count = 0;
 	if(str1->compare(":"+block)==0)
@@ -56,7 +56,29 @@ unsigned short int load_block(FILE *f, string block, List<T> * l, T * (*loader)(
 }
 
 template<class T>
-unsigned short int load_multivar(FILE *f, string block, T ** l, T * (*loader)(string), string * str1)
+int load_block_save(FILE *f, string block, List<T> * l, int (*loader)(T *, string), string * str1)
+{	string str2;
+	int count = 0;
+	if(str1->compare(":"+block)==0)
+	{ 	debug("Loading "+block+" save");
+		while(!feof(f))
+		{ 	str2=get_line(f);
+            if(str2.length()==0) continue;
+            if(str2.find("#")==0) continue;
+			if(str2.find(":")==0)
+			{	debug("Done loading "+block+" save");
+				str1[0] = str2; break;
+			} //next part of definitions
+			loader((*l)[count],str2);
+			count ++;
+		}
+	}
+	if(count<l->len()) debug("Not enough entries for members of "+block+". Save Corrupt!",10);
+	return count;
+}
+
+template<class T>
+int load_multivar(FILE *f, string block, T ** l, T * (*loader)(string), string * str1)
 {	string str2;
 	unsigned short int count = 0;
 	if(str1->compare(":"+block)==0)
@@ -78,7 +100,7 @@ unsigned short int load_multivar(FILE *f, string block, T ** l, T * (*loader)(st
 }
 
 template<class T>
-unsigned short int load_variable_subr(FILE *f, string block, T * var, T (*loader)(string), string * str1, bool report)
+int load_variable_subr(FILE *f, string block, T * var, T (*loader)(string), string * str1, bool report)
 {   string str2;
     unsigned short int count = 0;
     if(str1->compare(":"+block)==0)
@@ -104,7 +126,7 @@ unsigned short int load_variable_subr(FILE *f, string block, T * var, T (*loader
 }
 
 template<class T>
-unsigned short int load_variable(FILE *f, string block, T * var, T (*loader)(string), string * str1)
+int load_variable(FILE *f, string block, T * var, T (*loader)(string), string * str1)
 {   return load_variable_subr(f,block,var,loader,str1,true);
 }
 
@@ -170,7 +192,7 @@ int load_area(string fname)
 	return 1;
 }
 
-int load_map(string fname)
+int load_map_base(string fname)
 {	string str1, str2;
 	int tile;
 	FILE *f=fopen(fname.c_str(),"r");
@@ -230,11 +252,81 @@ int load_map(string fname)
 			{ 	debug("End of "+fname+"\n"); break; }
 		}
 	}
+    Game->map_name=fname;
 	return 1;
 }
 
+int load_map_save(string fname)
+{	string str1, str2;
+	int tile;
+	FILE *f=fopen(fname.c_str(),"r");
+	if(!f)
+	{	debug("Map save "+fname+" not found!\n",10);
+		exit(0);
+	}
+	while(!feof(f))
+	{ 	str1=get_line(f);
+
+        if(str1.length()==0) continue;
+        if(str1.find("#")==0) continue;
+		if(str1.find(":")==0) // : at the beginning of new line
+		{				// is new block
+
+		    if(str1.compare(":map")==0)
+			{	int i=0,j,found;
+				while(!feof(f) && i<Game->MAP_SIZE)
+				{	str2=get_line(f);
+					j=0;
+					debug("str2 "+str2);
+					while(sscanf(str2.c_str(),"%d,",&tile) && j<Game->MAP_SIZE)
+					{	Game->game_map[j][i]=tile;
+                        j++;
+					 	debug("Read tile ["+to_str(i)+","+to_str(j)+"]="+to_str(tile),1);
+					  	found=str2.find_first_of(",");
+					  	str2=str2.substr(found+1);
+					}
+					i++;
+				}
+				if(i==Game->MAP_SIZE && j==Game->MAP_SIZE)
+				{	debug("Map read successfully");
+
+				}
+			}
+
+			/*load_block(f,"lightsources", &Game->Lightsources, load_lightsource, &str1);
+			load_block(f,"triggers", &Game->Triggers, load_trigger, &str1);*/
+			load_block_save(f,"animators", &Game->Animators, load_animator_save, &str1);
+
+			if(str1.compare(":end")==0)
+			{ 	debug("End of "+fname+"\n"); break; }
+		}
+	}
+	return 1;
+}
+
+int load_map(string fname)
+{   string sav="save/"+fname;
+    load_map_base(fname);
+    //reset animators
+    for(int i=0;i<Game->Animators.len(); i++)
+    {   Game->Animators[i]->offset=Game->Animators[i]->_offset;
+
+    }
+    debug("Looking for "+sav);
+    FILE *f=fopen(sav.c_str(),"r");
+    if(f)
+    {
+        fclose(f);
+        dappend(" ... found");
+        load_map_save(sav);
+
+    }
+    return 1;
+}
+
 void unload_area()
-{   for(int i=0; i<Game->Textures.len(); i++)
+{   unload_map();
+    for(int i=0; i<Game->Textures.len(); i++)
     {   destroy_bitmap(Game->Textures.items[i]->close);
         destroy_bitmap(Game->Textures.items[i]->medium);
         destroy_bitmap(Game->Textures.items[i]->far);
@@ -258,8 +350,27 @@ void unload_area()
     delete[] Game->Impassable;
 }
 
+int save_map()
+{   FILE *f;
+    string sav="save/"+Game->map_name;
+    f = fopen(sav.c_str(),"w");
+    if(!f)
+	{	debug("Couldn't write map save "+sav+"!\n",10);
+		exit(0);
+	}
+	debug("Saving map "+sav+".",5);
+	fprintf(f,":animators\n");
+    fprintf(f,Game->Animators.save_string().c_str());
+    fprintf(f,":end\n");
+    fclose(f);
+    return 1;
+}
+
 void unload_map()
-{   Game->Lightsources.clear_all();
+{   debug("Game map name to save: "+Game->map_name,4);
+    if(Game->map_name.length()) save_map();
+    Game->map_name.clear();
+    Game->Lightsources.clear_all();
     Game->Triggers.clear_all();
     Game->Clickables.clear();
 }
@@ -273,10 +384,6 @@ void change_map(string fname, int x, int z)
     debug("triggers :"+to_str(Game->Triggers.len()));
 
     /* reset animators */
-    for(int i=0;i<Game->Animators.len(); i++)
-    {   Game->Animators[i]->offset=Game->Animators[i]->_offset;
-
-    }
     player_move_subr(x,0,z,-1,true);
 }
 

@@ -79,6 +79,7 @@ class ANIMATOR
         ANIMATOR(int type, int speed, int offset, int frames, int w, int h);
         ANIMATOR(int type, int speed, int offset, int frames, int w, int h, int on, int start);
         string serialize();
+        string save_string();
         string type_string();
         static unsigned short int type_resolve(string s);
 };
@@ -169,6 +170,7 @@ class GAME
         int light_power;
         int INFO;
         GAME();
+        string map_name;
 };
 
 extern GAME * Game;
@@ -177,6 +179,7 @@ TEXTURE * load_texture(string s);
 TEXTURED_ELEMENT * load_element(string s);
 //TEXTURED_ELEMENT * create_element(string type, float x, float y, float z, float w, float h, string transparent, int texture, int animator, string clip, string flip);
 ANIMATOR * load_animator(string s);
+int load_animator_save(ANIMATOR * animator, string s);
 //ANIMATOR * create_animator(int speed, int offset, int frames, int w, int h);
 float get_movator_dif(ANIMATOR * a,int t);
 TILE * load_tile(string s);
