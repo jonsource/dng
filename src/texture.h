@@ -141,17 +141,17 @@ class TRIGGER
 
 TEXTURE * load_texture(string s);
 TEXTURED_ELEMENT * load_element(string s);
-TEXTURED_ELEMENT * create_element(string type, float x, float y, float z, float w, float h, string transparent, int texture, int animator, string clip, string flip);
+//TEXTURED_ELEMENT * create_element(string type, float x, float y, float z, float w, float h, string transparent, int texture, int animator, string clip, string flip);
 ANIMATOR * load_animator(string s);
-ANIMATOR * create_animator(int speed, int offset, int frames, int w, int h);
+//ANIMATOR * create_animator(int speed, int offset, int frames, int w, int h);
 float get_movator_dif(ANIMATOR * a,int t);
 TILE * load_tile(string s);
-TILE * create_tile();
+//TILE * create_tile();
 int tile_add_element(TILE * til,string type,int element);
 unsigned short int tile_type_resolve(string type);
 unsigned short int flip_resolve(string type);
 LIGHT_SOURCE * load_lightsource(string s);
-LIGHT_SOURCE * create_lightsource(int power, int dim, float x, float z);
+//LIGHT_SOURCE * create_lightsource(int power, int dim, float x, float z);
 TRIGGER * load_trigger(string s);
 string clip_to_str(bool clip);
 string flip_to_str(int type);
