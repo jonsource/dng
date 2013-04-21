@@ -28,8 +28,6 @@ int fps;
 unsigned short int keyb_ignore;
 BITMAP *game_bmp=NULL,*first=NULL,*second=NULL;
 int status,mode;
-extern int INFO;
-extern List<TEXTURE> Textures;
 
 int courage, strength, constitution, intelligence, wisdom, charisma, dexterity, agility;
 int level,XP,maxHP,HP,MP;
@@ -175,7 +173,7 @@ int main(int argc, char *argv[])
 		}
 
 	//    game_interpret();
-        if(INFO==1)
+        if(Game->INFO==1)
         {
             if(keypressed()) text_input();
             if(key[KEY_ESC]) keypress(KEY_ESC);

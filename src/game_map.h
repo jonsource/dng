@@ -9,6 +9,9 @@
 #define MAP_H_
 
 #include "game.h"
+#include "texture.h"
+#include "interface.h"
+#include "graphic.h"
 #include <stdio.h>
 
 int load_map(string fname);

@@ -21,7 +21,7 @@ int **game_map;
 int **linesight;
 
 extern char chbuf[256];
-extern int DEBUG_LVL_MAIN;
+/*extern int DEBUG_LVL_MAIN;
 extern List<TEXTURE> Textures;
 extern List<TEXTURED_ELEMENT> Elements;
 extern List<ANIMATOR> Animators;
@@ -30,8 +30,13 @@ extern List<LIGHT_SOURCE> Lightsources;
 extern List<TRIGGER> Triggers;
 extern CLICKABLE_MAP Clickables;
 extern VIEW_SETTINGS view_settings;
-extern RGB * fade_color;
+extern RGB * fade_color;*/
 int * Impassable;
+
+GAME::GAME()
+{
+
+}
 
 string get_line(FILE * f)
 {	string ret="";
@@ -131,14 +136,14 @@ int load_ini(string fname)
 		if(str1.find(":")==0) // : at the beginning of new line
 		{				// is new block
 
-		    if(load_variable_subr(f,"debuglevel",&DEBUG_LVL_MAIN,load_int,&str1,false))
+		    if(load_variable_subr(f,"debuglevel",&Game->DEBUG_LVL_MAIN,load_int,&str1,false))
             {   reset_debug_lvl();
-                debug("Debug level: "+to_str(DEBUG_LVL_MAIN)+" (0 - all, 10 - none)",10);
+                debug("Debug level: "+to_str(Game->DEBUG_LVL_MAIN)+" (0 - all, 10 - none)",10);
             }
-            load_variable(f,"field-of-view",&view_settings.fov,load_int, &str1);
-            load_variable(f,"stepback",&view_settings.step_back,load_double, &str1);
-            load_variable(f,"aspect",&view_settings.aspect,load_double, &str1);
-            load_variable(f,"view_height",&view_settings.view_height,load_double, &str1);
+            load_variable(f,"field-of-view",&Game->view_settings.fov,load_int, &str1);
+            load_variable(f,"stepback",&Game->view_settings.step_back,load_double, &str1);
+            load_variable(f,"aspect",&Game->view_settings.aspect,load_double, &str1);
+            load_variable(f,"view_height",&Game->view_settings.view_height,load_double, &str1);
 
             if(str1.compare(":end")==0)
 			{ 	debug("End of "+fname+"\n"); break; }
@@ -162,13 +167,13 @@ int load_area(string fname)
 		if(str1.find(":")==0) // : at the beginning of new line
 		{				// is new block
 
-            load_multivar(f,"fade_color",&fade_color, load_color, &str1);
-            load_multivar(f,"impassable",&Impassable, load_impassable, &str1);
+            load_multivar(f,"fade_color",&Game->fade_color, load_color, &str1);
+            load_multivar(f,"impassable",&Game->Impassable, load_impassable, &str1);
 
-			load_block(f,"textures",&Textures, load_texture, &str1);
-			load_block(f,"animators", &Animators, load_animator, &str1);
-			load_block(f,"elements", &Elements, load_element, &str1);
-			load_block(f,"tiles", &Tiles, load_tile, &str1);
+			load_block(f,"textures",&Game->Textures, load_texture, &str1);
+			load_block(f,"animators", &Game->Animators, load_animator, &str1);
+			load_block(f,"elements", &Game->Elements, load_element, &str1);
+			load_block(f,"tiles", &Game->Tiles, load_tile, &str1);
 
 			if(str1.compare(":end")==0)
 			{ 	debug("End of "+fname+"\n"); break; }
@@ -231,8 +236,8 @@ int load_map(string fname)
 				}
 			}
 
-			load_block(f,"lightsources", &Lightsources, load_lightsource, &str1);
-			load_block(f,"triggers", &Triggers, load_trigger, &str1);
+			load_block(f,"lightsources", &Game->Lightsources, load_lightsource, &str1);
+			load_block(f,"triggers", &Game->Triggers, load_trigger, &str1);
 
 			if(str1.compare(":end")==0)
 			{ 	debug("End of "+fname+"\n"); break; }
@@ -242,34 +247,34 @@ int load_map(string fname)
 }
 
 void unload_area()
-{   for(int i=0; i<Textures.len(); i++)
-    {   destroy_bitmap(Textures.items[i]->close);
-        destroy_bitmap(Textures.items[i]->medium);
-        destroy_bitmap(Textures.items[i]->far);
+{   for(int i=0; i<Game->Textures.len(); i++)
+    {   destroy_bitmap(Game->Textures.items[i]->close);
+        destroy_bitmap(Game->Textures.items[i]->medium);
+        destroy_bitmap(Game->Textures.items[i]->far);
     }
-    Textures.clear_all();
+    Game->Textures.clear_all();
 
-    for(int i=0; i<Animators.len(); i++)
-    {   destroy_bitmap(Animators.items[i]->frame);
+    for(int i=0; i<Game->Animators.len(); i++)
+    {   destroy_bitmap(Game->Animators.items[i]->frame);
     }
-    Animators.clear_all();
+    Game->Animators.clear_all();
 
-    for(int i=0; i<Tiles.len(); i++)
-    {   delete[] Tiles.items[i]->elements;
-        delete[] Tiles.items[i]->types;
+    for(int i=0; i<Game->Tiles.len(); i++)
+    {   delete[] Game->Tiles.items[i]->elements;
+        delete[] Game->Tiles.items[i]->types;
     }
-    Tiles.clear_all();
+    Game->Tiles.clear_all();
 
-    Elements.clear_all();
+    Game->Elements.clear_all();
 
-    delete fade_color;
-    delete[] Impassable;
+    delete Game->fade_color;
+    delete[] Game->Impassable;
 }
 
 void unload_map()
-{   Lightsources.clear_all();
-    Triggers.clear_all();
-    Clickables.clear();
+{   Game->Lightsources.clear_all();
+    Game->Triggers.clear_all();
+    Game->Clickables.clear();
 }
 
 void change_map(string fname, int x, int z)
@@ -277,12 +282,12 @@ void change_map(string fname, int x, int z)
     load_map(fname);
 
     debug("Map changed to :"+fname);
-    debug("lightsources :"+to_str(Lightsources.len()));
-    debug("triggers :"+to_str(Triggers.len()));
+    debug("lightsources :"+to_str(Game->Lightsources.len()));
+    debug("triggers :"+to_str(Game->Triggers.len()));
 
     /* reset animators */
-    for(int i=0;i<Animators.len(); i++)
-    {   Animators[i]->offset=Animators[i]->_offset;
+    for(int i=0;i<Game->Animators.len(); i++)
+    {   Game->Animators[i]->offset=Game->Animators[i]->_offset;
 
     }
     player_move_subr(x,0,z,-1,true);
@@ -293,10 +298,10 @@ void change_area(string aname, string mname, int x, int z)
     load_area(aname);
 
     debug("Area changed to :"+aname);
-    debug("textures :"+to_str(Textures.len()));
-    debug("animators :"+to_str(Animators.len()));
-    debug("elements :"+to_str(Elements.len()));
-    debug("tiles :"+to_str(Tiles.len()));
+    debug("textures :"+to_str(Game->Textures.len()));
+    debug("animators :"+to_str(Game->Animators.len()));
+    debug("elements :"+to_str(Game->Elements.len()));
+    debug("tiles :"+to_str(Game->Tiles.len()));
 
     change_map(mname,x,z);
 }
@@ -372,17 +377,17 @@ string serialize_impassable()
 string serialize_area()
 {   string ret="";
     ret+=":fade_color\n";
-    ret+=serialize_color(fade_color);
+    ret+=serialize_color(Game->fade_color);
     ret+="\n\n:impassable\n";
     ret+=serialize_impassable();
     ret+="\n\n:textures\n";
-    ret+=Textures.serialize();
+    ret+=Game->Textures.serialize();
     ret+="\n:animators\n";
-    ret+=Animators.serialize();
+    ret+=Game->Animators.serialize();
     ret+="\n:elements\n";
-    ret+=Elements.serialize();
+    ret+=Game->Elements.serialize();
     ret+="\n:tiles\n";
-    ret+=Tiles.serialize();
+    ret+=Game->Tiles.serialize();
     ret+="\n:end\n";
     return ret;
 }
@@ -401,9 +406,9 @@ string serialize_map()
         ret+="\n";
     }
     ret+="\n:lightsources\n";
-    ret+=Lightsources.serialize();
+    ret+=Game->Lightsources.serialize();
     ret+="\n:triggers\n";
-    ret+=Triggers.serialize();
+    ret+=Game->Triggers.serialize();
     ret+="\n:end\n";
     return ret;
 }

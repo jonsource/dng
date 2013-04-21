@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="dng0b" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="dng0b" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/dng0b" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+			<Target title="Profile">
+				<Option output="dng0b" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-pg" />
+				</Compiler>
+				<Linker>
+					<Add option="-pg -lgmon" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add option="-fexceptions" />
+		</Compiler>
+		<Unit filename="src/character.cpp" />
+		<Unit filename="src/character.h" />
+		<Unit filename="src/chat.cpp" />
+		<Unit filename="src/chat.h" />
+		<Unit filename="src/edittext.cpp" />
+		<Unit filename="src/edittext.h" />
+		<Unit filename="src/game.cpp" />
+		<Unit filename="src/game.h" />
+		<Unit filename="src/game_lib.cpp" />
+		<Unit filename="src/game_lib.h" />
+		<Unit filename="src/game_map.cpp" />
+		<Unit filename="src/game_map.h" />
+		<Unit filename="src/graphic.cpp" />
+		<Unit filename="src/graphic.h" />
+		<Unit filename="src/graphic_make_tiles.cpp" />
+		<Unit filename="src/interface.cpp" />
+		<Unit filename="src/interface.h" />
+		<Unit filename="src/list.h" />
+		<Unit filename="src/load_classes.cpp" />
+		<Unit filename="src/load_classes.h" />
+		<Unit filename="src/main.cpp" />
+		<Unit filename="src/texture.cpp" />
+		<Unit filename="src/texture.h" />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

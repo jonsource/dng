@@ -8,7 +8,13 @@
 #ifndef TEXTURE_H_
 #define TEXTURE_H_
 
-#include "game.h"
+#include "allegro.h"
+#include "list.h"
+#include <map>
+//#include "game.h"
+#include <string>
+
+using namespace std;
 
 #define TRIGGER_NORTH 0
 #define TRIGGER_EAST 1
@@ -138,6 +144,43 @@ class TRIGGER
         static int type_resolve(string type);
         string * action;
 };
+
+typedef struct
+{   int w1,h1,w2,h2;
+    TRIGGER * callback;
+} CLICKABLE;
+
+typedef map < string, List<CLICKABLE> > CLICKABLE_MAP;
+typedef map < string, List<CLICKABLE> >::iterator CLICKABLE_MAP_ITERATOR;
+
+typedef struct {
+        double aspect, view_height, step_back;
+        int fov;
+} VIEW_SETTINGS;
+
+class GAME
+{   public:
+        int DEBUG_LVL_MAIN;
+        List<TEXTURE> Textures;
+        List<TEXTURED_ELEMENT> Elements;
+        List<ANIMATOR> Animators;
+        List<TILE> Tiles;
+        List<LIGHT_SOURCE> Lightsources;
+        List<TRIGGER> Triggers;
+        CLICKABLE_MAP Clickables;
+        VIEW_SETTINGS view_settings;
+        RGB * fade_color;
+        int * Impassable;
+        int TRANSPARENT;
+        unsigned short int MAP_SIZE;
+        int **game_map;
+        int **linesight;
+        int light_power;
+        int INFO;
+        GAME();
+};
+
+extern GAME * Game;
 
 TEXTURE * load_texture(string s);
 TEXTURED_ELEMENT * load_element(string s);
