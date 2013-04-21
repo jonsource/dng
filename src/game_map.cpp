@@ -8,33 +8,17 @@
 #include "game_map.h"
 #include "game.h"
 #include "game_lib.h"
-#include "graphic.h"
 #include "texture.h"
 #include <string>
-#include "list.h"
-#include "interface.h"
+#include <stdio.h>
+
 
 using namespace std;
 
-//int MAP_SIZE;
-//int **game_map;
-//int **linesight;
-
 extern char chbuf[256];
-/*extern int DEBUG_LVL_MAIN;
-extern List<TEXTURE> Textures;
-extern List<TEXTURED_ELEMENT> Elements;
-extern List<ANIMATOR> Animators;
-extern List<TILE> Tiles;
-extern List<LIGHT_SOURCE> Lightsources;
-extern List<TRIGGER> Triggers;
-extern CLICKABLE_MAP Clickables;
-extern VIEW_SETTINGS view_settings;
-extern RGB * fade_color;*/
-//int * Impassable;
 
 GAME::GAME()
-{   this->light_power=200;
+{   this->light_power=128;
     this->DEBUG_LVL=4;
     this->DEBUG_LVL_MAIN=4;
     this->INFO=0;

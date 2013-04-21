@@ -1,18 +1,7 @@
-/*
-// exclude rarely used windows stuff
-#define WIN32_LEAN_AND_MEAN
-
-//include windows headers
-#include <windows.h>
-*/
-
 //include c headers
-//#include "main.h"
 #include <stdlib.h>
-#include <allegro.h>
+#include "allegro.h"
 #include "game.h"
-#include "game_lib.h"
-#include "graphic.h"
 #include "chat.h"
 #include "game_map.h"
 #include "edittext.h"

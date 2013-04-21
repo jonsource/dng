@@ -6,19 +6,10 @@
  */
 
 #include "texture.h"
-#include "graphic.h"
 #include "game_map.h"
 #include "game_lib.h"
-#include <string.h>
+#include <string>
 #include <stdio.h>
-
-/*List<TEXTURE> Textures;
-List<TEXTURED_ELEMENT> Elements;
-List<ANIMATOR> Animators;
-List<TILE> Tiles;
-List<LIGHT_SOURCE> Lightsources;
-List<TRIGGER> Triggers;
-*/
 
 extern int tmsec;
 /**

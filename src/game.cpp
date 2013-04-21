@@ -1,11 +1,8 @@
 #include <allegro.h>
-#include "stdio.h"
-#include "game.h"
 #include "game_lib.h"
 #include "load_classes.h"
-#include "graphic.h"
 #include "game_map.h"
-#include "interface.h"
+
 
 extern int keyb_ignore;
 extern int status;
@@ -14,25 +11,6 @@ extern int fps, tmsec;
 extern BITMAP * game_bmp;
 Character *Player;
 int gy=0,gz=2,gx=3,gh=0;
-int light_power=128;
-//extern int FOV;
-//extern double STB, ASPECT;
-//int TRANSPARENT = 1;
-/*extern int DEBUG_LVL_MAIN;
-extern int DEBUG_LVL;
-extern VIEW_SETTINGS view_settings;*/
-//int INFO = 0;
-
-/*extern CLICKABLE_MAP Clickables;
-extern List<TRIGGER> Triggers;
-extern List<ANIMATOR> Animators;
-extern List<LIGHT_SOURCE> Lightsources;
-extern List<TEXTURED_ELEMENT> Elements;
-extern List<TEXTURE> Textures;
-extern List<TILE> Tiles;
-extern int * Impassable;
-extern int MAP_SIZE;
-extern int **game_map;*/
 
 GAME * Game;
 
@@ -278,8 +256,8 @@ void keypress(int i)
          if(i == KEY_K) { Game->view_settings.step_back-=0.1; init_camera(&Game->view_settings); }
 
         /* development light setting controls */
-         if(i == KEY_O) light_power+=1;
-         if(i == KEY_L) light_power-=1;
+         if(i == KEY_O) Game->light_power+=1;
+         if(i == KEY_L) Game->light_power-=1;
     }
 
     if(i == KEY_ESC) { Game->INFO = 0;}
