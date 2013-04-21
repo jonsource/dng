@@ -1,8 +1,3 @@
-# TEXTURES
-# textures are loaded from /data/images/DIR/NAME.EXE files
-# first NAME_close.EXT file is read, then NAME_middle.EXT and NAME_far.EXT files are loaded
-# if _middle, or _far files are missing, they are replaced by resizing _close file
-
 # FADE_COLOR
 # color to which everything fades in the distance, usually black for underground
 :fade_color
@@ -13,6 +8,10 @@
 :impassable
 3 0 0 0 0 0 0 0 0 0
 
+# TEXTURES
+# textures are loaded from /data/images/DIR/NAME.EXE files
+# first NAME_close.EXT file is read, then NAME_middle.EXT and NAME_far.EXT files are loaded
+# if _middle, or _far files are missing, they are replaced by resizing _close file
 :textures
 # 0
 floor/floor1.bmp

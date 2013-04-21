@@ -13,8 +13,10 @@
 
 int load_map(string fname);
 void unload_map();
+string serialize_map();
 int load_area(string fname);
 void unload_area();
+string serialize_area();
 int load_ini(string str);
 void change_map(string fname, int x, int z);
 void change_area(string aname, string mname, int x, int z);

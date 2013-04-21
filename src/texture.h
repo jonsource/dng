@@ -46,9 +46,25 @@
 #define H_FLIPPING_90 48
 #define VH_FLIPPING_90 56
 
-typedef struct {
+#define TILE_FLOOR 1
+#define TILE_CEILING 2
+#define TILE_FLAT 3
+#define TILE_FRONT 4
+#define TILE_SIDE 5
+#define TILE_STATIC 6
+#define TILE_STATIC_NS 7
+#define TILE_STATIC_EW 8
+#define TILE_STATIC_NS_X 9
+#define TILE_STATIC_EW_X 10
+
+class TEXTURE
+{
+    public:
+        string name;
         BITMAP *close, *medium, *far;
-} TEXTURE;
+        TEXTURE();
+        string serialize();
+};
 
 /*
 typedef struct {
@@ -85,11 +101,18 @@ class TEXTURED_ELEMENT
 		static int type_resolve(string s);
 };
 
-typedef struct {
-	int len;
-	TEXTURED_ELEMENT ** elements;
-	unsigned short int * types;
-} TILE;
+class TILE
+{   public:
+        int len;
+        int *element_nrs;
+        TEXTURED_ELEMENT ** elements;
+        unsigned short int * types;
+        TILE();
+        int add_element(string type, int element);
+        string serialize();
+        static string type_string(int i);
+        static unsigned short int type_resolve(string s);
+};
 
 class LIGHT_SOURCE
 {   public:
@@ -130,5 +153,8 @@ unsigned short int flip_resolve(string type);
 LIGHT_SOURCE * load_lightsource(string s);
 LIGHT_SOURCE * create_lightsource(int power, int dim, float x, float z);
 TRIGGER * load_trigger(string s);
+string clip_to_str(bool clip);
+string flip_to_str(int type);
+string trans_to_str(bool trans);
 
 #endif /* TEXTURE_H_ */

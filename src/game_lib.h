@@ -24,7 +24,7 @@ string to_str(int i);
 string to_str(float f);
 string to_str(double f);
 string to_str(bool b);
-string to_heading_str(int h);
+string heading_to_str(int h);
 int xz_to_heading(int x, int z);
 bool heading_to_xz(int h, int *x, int *z);
 int mstime();

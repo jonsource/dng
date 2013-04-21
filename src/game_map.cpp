@@ -347,6 +347,10 @@ RGB * load_color(string str)
 	return ret;
 }
 
+string serialize_color(RGB * color)
+{   return to_str(color->r)+" "+to_str(color->g)+" "+to_str(color->b);
+}
+
 int * load_impassable(string str)
 {	int * ret = new int[10];
     if(sscanf(str.c_str(),"%d %d %d %d %d %d %d %d %d %d",&ret[0],&ret[1],&ret[2],&ret[3],&ret[4],&ret[5],&ret[6],&ret[7],&ret[8],&ret[9])<10)
@@ -354,4 +358,52 @@ int * load_impassable(string str)
 	  exit(1);
 	}
 	return ret;
+}
+
+string serialize_impassable()
+{   string ret="";
+    for(int i=0; i<10; i++)
+    {   if(i>0) ret+=" ";
+        ret+=to_str(Impassable[i]);
+    }
+    return ret;
+}
+
+string serialize_area()
+{   string ret="";
+    ret+=":fade_color\n";
+    ret+=serialize_color(fade_color);
+    ret+="\n\n:impassable\n";
+    ret+=serialize_impassable();
+    ret+="\n\n:textures\n";
+    ret+=Textures.serialize();
+    ret+="\n:animators\n";
+    ret+=Animators.serialize();
+    ret+="\n:elements\n";
+    ret+=Elements.serialize();
+    ret+="\n:tiles\n";
+    ret+=Tiles.serialize();
+    ret+="\n:end\n";
+    return ret;
+}
+
+string serialize_map()
+{   char buf[8];
+    string ret="";
+    ret+="\n:mapsize\n";
+    ret+=to_str(MAP_SIZE)+"\n";
+    ret+="\n:map\n";
+    for(int i=0; i<MAP_SIZE; i++)
+    {   for(int j=0;j<MAP_SIZE; j++)
+        {   sprintf(buf,"%2d,",game_map[j][i]);
+            ret+=buf;
+        }
+        ret+="\n";
+    }
+    ret+="\n:lightsources\n";
+    ret+=Lightsources.serialize();
+    ret+="\n:triggers\n";
+    ret+=Triggers.serialize();
+    ret+="\n:end\n";
+    return ret;
 }

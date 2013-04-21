@@ -19,8 +19,8 @@ void deinit_debug()
  * convert string to bool
  */
 bool to_bool(string s)
-{  if(s=="false" || s=="False" || s=="solid") return false;
-   if(s=="true" || s=="True" || s=="trans") return true;
+{  if(s=="false" || s=="False") return false;
+   if(s=="true" || s=="True") return true;
    if(s.find("no-")==0) return false;
    else
    { debug("Unclear argument "+s+", defaulting to True",9);
@@ -82,7 +82,7 @@ int xz_to_heading(int xfront, int zfront)
 
 }
 
-string to_heading_str(int h)
+string heading_to_str(int h)
 {   if(h==HEAD_NORTH) return "north";
     if(h==HEAD_EAST) return "east";
     if(h==HEAD_SOUTH) return "south";

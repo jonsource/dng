@@ -8,17 +8,6 @@
 
 #define MAX_VIEW_DIST 20
 
-#define TILE_FLOOR 1
-#define TILE_CEILING 2
-#define TILE_FLAT 3
-#define TILE_FRONT 4
-#define TILE_SIDE 5
-#define TILE_STATIC 6
-#define TILE_STATIC_NS 7
-#define TILE_STATIC_EW 8
-#define TILE_STATIC_NS_X 9
-#define TILE_STATIC_EW_X 10
-
 #define ELEMENT_ROTATE 0
 #define ELEMENT_NS 1
 #define ELEMENT_EW 2

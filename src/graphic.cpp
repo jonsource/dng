@@ -508,7 +508,7 @@ void draw_view(int xpos, int ypos, int zpos, int heading)
        //textprintf_ex(bmp, font, 0, 72, makecol(0, 0, 0), -1,
         //	 "Z position: %.2f (z/Z changes)", (float)cam.zpos);
        textprintf_ex(game_bmp, font, 0, 80, makecol(0, 0, 0), -1,
-             "Heading: %d %s Stepback: %.2f", cam->heading,to_heading_str(cam->heading).c_str(),cam->step_back);
+             "Heading: %d %s Stepback: %.2f", cam->heading,heading_to_str(cam->heading).c_str(),cam->step_back);
        textprintf_ex(game_bmp, font, 0, 88, makecol(0, 0, 0), -1,
              "Pitch: %.2f deg (pgup/pgdn changes)", cam->pitch);
        textprintf_ex(game_bmp, font, 0, 96, makecol(0, 0, 0), -1,

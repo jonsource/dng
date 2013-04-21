@@ -25,7 +25,18 @@ public:
 	void clear_all();
 	T* operator[](const int index);
 	int len();
+	std::string serialize();
 };
+
+template <class T>
+std::string List<T>::serialize()
+{   std::string s="";
+    for(int i=0; i<this->len(); i++)
+    {
+        s+=this->items[i]->serialize()+"\n";
+    }
+    return s;
+}
 
 template <class T>
 List<T>::List(void)

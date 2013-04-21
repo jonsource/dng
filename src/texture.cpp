@@ -30,7 +30,7 @@ TEXTURE * load_texture(string s)
     string fn,cfn,ext;
     int pos;
 
-    text = new (TEXTURE);
+    text = new TEXTURE();
     fn.assign("data/images/");
 
     pos = s.rfind(".");
@@ -64,7 +64,21 @@ TEXTURE * load_texture(string s)
     	  stretch_blit(text->medium,text->far,0,0,text->medium->w,text->medium->h,0,0,text->far->w,text->far->h);
     	}
     }
+    text->name=s;
     return text;
+}
+
+TEXTURE::TEXTURE()
+{   this->close=NULL;
+    this->medium=NULL;
+    this->far=NULL;
+    this->name="none";
+
+}
+
+string TEXTURE::serialize()
+{   return this->name;
+
 }
 
 TEXTURED_ELEMENT::TEXTURED_ELEMENT(string type, float x, float y, float z, float w, float h, string transparent, int texture, int animator, string clip, string flip)
@@ -92,15 +106,14 @@ TEXTURED_ELEMENT::TEXTURED_ELEMENT(string type, float x, float y, float z, float
    }
    else this->animator = NULL;
    this->animator_nr = animator;
-   typ=tile_type_resolve(type);
+   typ=TILE::type_resolve(type);
    this->type=typ;
    this->flip=flip_resolve(flip);
    //debug("Element "+type);
 }
 
 string TEXTURED_ELEMENT::serialize()
-{   return to_str(type)+" "+to_str(x)+" "+to_str(y)+" "+to_str(z)+" "+to_str(w)+" "+to_str(h)+" "+to_str(transparent)+" "+to_str(texture_nr)+" "+to_str(animator_nr)+" "+to_str(clip)+" "+to_str(flip);
-
+{   return TILE::type_string(type)+" "+to_str(x)+" "+to_str(y)+" "+to_str(z)+" "+to_str(w)+" "+to_str(h)+" "+trans_to_str(transparent)+" "+to_str(texture_nr)+" "+to_str(animator_nr)+" "+clip_to_str(clip)+" "+flip_to_str(flip);
 }
 
 TEXTURED_ELEMENT * load_element(string s)
@@ -196,36 +209,38 @@ float get_movator_dif(ANIMATOR * a, int t)
     return ydif;
 }
 
-int tile_add_element(TILE * til, string type, int element)
+int TILE::add_element(string type, int element)
 {   unsigned short int typ;
-	if(til->len+1 >= MAX_TILE_ELE)
-	{	debug("Not enough space for further element in tile");
+	if(this->len+1 >= MAX_TILE_ELE)
+	{	debug("Not enough space for further element in tile",10);
 	    return 0;
 	}
-	typ = tile_type_resolve(type);
-	if(element<Elements.len())	til->elements[til->len] = Elements[element];
+	typ = TILE::type_resolve(type);
+	if(element<Elements.len())
+    {   this->elements[this->len] = Elements[element];
+        this->element_nrs[this->len] = element;
+    }
 	else
 	{	debug("Referencing undefined element "+to_str(element),10);
 	   exit(1);
 	}
-	til->types[til->len] = typ;
-	debug("tile: "+type+":"+to_str(til->types[til->len])+" "+to_str(til->elements[til->len]->type),3);
-	til->len++;
+	this->types[this->len] = typ;
+	debug("tile: "+type+":"+to_str(this->types[this->len])+" "+to_str(this->elements[this->len]->type),3);
+	this->len++;
 	return 1;
 };
 
-TILE * create_tile()
-{  TILE * til = new(TILE);
-   til->len=0;
-   til->types = new short unsigned int [MAX_TILE_ELE];
-   til->elements = new TEXTURED_ELEMENT * [MAX_TILE_ELE];
+TILE::TILE()
+{  this->len=0;
+   this->types = new short unsigned int [MAX_TILE_ELE];
+   this->element_nrs = new int [MAX_TILE_ELE];
+   this->elements = new TEXTURED_ELEMENT * [MAX_TILE_ELE];
    for(int i=0; i<MAX_TILE_ELE; i++)
 //	   til->elements[i]= new TEXTURED_ELEMENT;
-        til->elements[i]=NULL;
-   return til;
+        this->elements[i]=NULL;
 }
 
-unsigned short int tile_type_resolve(string type)
+unsigned short int TILE::type_resolve(string type)
 {	bool type_ok=false;
 	unsigned short int typ;
 	if(type.compare("TILE_FLOOR")==0) {typ=TILE_FLOOR; type_ok=true;}
@@ -244,6 +259,54 @@ unsigned short int tile_type_resolve(string type)
 		exit(1);
 	}
 	return typ;
+}
+
+string TILE::type_string(int type)
+{   switch(type)
+    {   case TILE_FLOOR: return "TILE_FLOOR";
+        case TILE_CEILING: return "TILE_CEILING";
+        case TILE_FLAT: return "TILE_FLAT";
+        case TILE_FRONT: return "TILE_FRONT";
+        case TILE_SIDE: return "TILE_SIDE";
+        case TILE_STATIC: return "TILE_STATIC";
+        case TILE_STATIC_NS: return "TILE_STATIC_NS";
+        case TILE_STATIC_EW: return "TILE_STATIC_EW";
+        case TILE_STATIC_NS_X: return "TILE_STATIC_NS_X";
+        case TILE_STATIC_EW_X: return "TILE_STATIC_EW_X";
+    }
+    debug("Unknown tile type number: "+to_str(type),10);
+	exit(1);
+	return "";
+
+}
+
+TILE * load_tile(string s)
+{	char type[32];
+ 	string sub;
+	int element;
+	TILE * tile;
+	tile = new TILE();
+	while(sscanf(s.c_str(),"%s %d",type,&element)==2)
+	{   sub=type;
+        sub+=" "+to_str(element)+" ";  //reconstruct read part to measure its length, add a whitespace at the end
+        debug("sub: "+sub+" "+to_str((int)sub.size()),3);
+        if(sub.size()>s.size()) s="";
+        else s=s.substr(sub.size());//remove read part from string
+        dappend(" str2: "+s+".",3);
+        tile->add_element(type,element);
+	}
+	debug("return",3);
+	return tile;
+}
+
+string TILE::serialize()
+{   string ret="";
+    for(int i=0; i < this->len; i++)
+    {   if(i>0) ret+=" ";
+        if(elements[i]!=NULL) ret+=TILE::type_string(this->types[i])+" "+to_str(this->element_nrs[i]);
+
+    }
+    return ret;
 }
 
 unsigned short int flip_resolve(string type)
@@ -269,6 +332,27 @@ unsigned short int flip_resolve(string type)
 	return typ;
 }
 
+string flip_to_str(int type)
+{   switch(type)
+    {
+        case NO_FLIP : return "NO_FLIP";
+        case V_FLIP : return "V_FLIP";
+        case H_FLIP : return "H_FLIP";
+        case VH_FLIP : return "VH_FLIP";
+        case TURN_90 : return "TURN_90";
+        case TURN_270 : return "TURN_270";
+        case V_FLIPPING : return "V_FLIPPING";
+        case H_FLIPPING : return "H_FLIPPING";
+        case VH_FLIPPING : return "VH_FLIPPING";
+        case V_FLIPPING_90 : return "V_FLIPPING_90";
+        case H_FLIPPING_90 : return "H_FLIPPING_90";
+        case VH_FLIPPING_90 : return "VH_FLIPPING_90";
+    }
+    debug("Unknown flip type number: "+to_str(type),10);
+	exit(1);
+	return "";
+}
+
 LIGHT_SOURCE::LIGHT_SOURCE(int power, int dim, float x, float z)
 {	this->power=power;
 	this->dim=dim;
@@ -288,25 +372,6 @@ LIGHT_SOURCE * load_lightsource(string s)
 	  exit(1);
 	}
 	return new LIGHT_SOURCE(power,dim,x,z);
-}
-
-TILE * load_tile(string s)
-{	char type[32];
- 	string sub;
-	int element;
-	TILE * tile;
-	tile = create_tile();
-	while(sscanf(s.c_str(),"%s %d",type,&element)==2)
-	{   sub=type;
-        sub+=" "+to_str(element)+" ";  //reconstruct read part to measure its length, add a whitespace at the end
-        debug("sub: "+sub+" "+to_str((int)sub.size()),3);
-        if(sub.size()>s.size()) s="";
-        else s=s.substr(sub.size());//remove read part from string
-        dappend(" str2: "+s+".",3);
-        tile_add_element(tile,type,element);
-	}
-	debug("return",3);
-	return tile;
 }
 
 int TRIGGER::type_resolve(string type)
@@ -445,4 +510,16 @@ void TRIGGER::fire()
 
     tokens->clear_all();
     delete tokens;
+}
+
+string clip_to_str(bool clip)
+{
+    if(clip) return "clip";
+    return "no-clip";
+}
+
+string trans_to_str(bool trans)
+{
+    if(trans) return "trans";
+    return "no-trans";
 }

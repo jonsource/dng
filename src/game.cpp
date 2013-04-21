@@ -29,7 +29,11 @@ extern List<TRIGGER> Triggers;
 extern List<ANIMATOR> Animators;
 extern List<LIGHT_SOURCE> Lightsources;
 extern List<TEXTURED_ELEMENT> Elements;
+extern List<TEXTURE> Textures;
+extern List<TILE> Tiles;
 extern int * Impassable;
+extern int MAP_SIZE;
+extern int **game_map;
 
 /**
  * initialize and load game
@@ -105,7 +109,7 @@ bool can_leave(int x, int z, int dir)
 
     for(int i=0; i<clklist.len(); i++)
     {   clk=clklist[i];
-        debug("leave trigger "+to_heading_str(clk->callback->type-8),5);
+        debug("leave trigger "+heading_to_str(clk->callback->type-8),5);
         /* correct heading && moving blockation is in position to block */
         if(clk->callback->type - BLOCKER_TO_HEADING == dir && ((int)(get_movator_dif(clk->callback->animator,tmsec)*100))<clk->w1) return false;
     }
@@ -168,12 +172,12 @@ void player_move_subr(int x, int y, int z, int h, bool force)
             }
             if(can_pass)
             {
-                debug("Move to "+to_heading_str(xz_to_heading(nx-gx,nz-gz))+" "+to_str(nx)+" "+to_str(nz)+" = "+to_str(check_coords(nz,nx)),5);
+                debug("Move to "+heading_to_str(xz_to_heading(nx-gx,nz-gz))+" "+to_str(nx)+" "+to_str(nz)+" = "+to_str(check_coords(nz,nx)),5);
                 gz=nz; gx=nx;
 
             }
             else
-            {   debug("Bump! tried to move to "+to_heading_str(xz_to_heading(nx-gx,nz-gz))+" "+to_str(nx)+" "+to_str(nz)+" = "+to_str(check_coords(nz,nx)),5);
+            {   debug("Bump! tried to move to "+heading_to_str(xz_to_heading(nx-gx,nz-gz))+" "+to_str(nx)+" "+to_str(nz)+" = "+to_str(check_coords(nz,nx)),5);
             }
         }
 
@@ -345,24 +349,28 @@ void text_interpret(string s)
         }
     }
     if(*(*l)[0]=="Triggers")
-    {   for(int v=0; v<Triggers.len(); v++)
-        {   printf("%s\n",Triggers[v]->serialize().c_str());
-        }
+    {   printf(Triggers.serialize().c_str());
     }
     if(*(*l)[0]=="Lightsources")
-    {   for(int v=0; v<Lightsources.len(); v++)
-        {   printf("%s\n",Lightsources[v]->serialize().c_str());
-        }
+    {   printf(Lightsources.serialize().c_str());
     }
     if(*(*l)[0]=="Animators")
-    {   for(int v=0; v<Animators.len(); v++)
-        {   printf("%s\n",Animators[v]->serialize().c_str());
-        }
+    {   printf(Animators.serialize().c_str());
     }
     if(*(*l)[0]=="Elements")
-    {   for(int v=0; v<Elements.len(); v++)
-        {   printf("%s\n",Elements[v]->serialize().c_str());
-        }
+    {   printf(Elements.serialize().c_str());
+    }
+    if(*(*l)[0]=="Tiles")
+    {   printf(Tiles.serialize().c_str());
+    }
+    if(*(*l)[0]=="Textures")
+    {   printf(Textures.serialize().c_str());
+    }
+    if(*(*l)[0]=="Area")
+    {  printf(serialize_area().c_str());
+    }
+    if(*(*l)[0]=="Map")
+    {   printf(serialize_map().c_str());
     }
 }
 
