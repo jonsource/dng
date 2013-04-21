@@ -42,7 +42,6 @@ GAME * Game;
 
 void game_load()
 {
-    Game = new GAME();
     srand(time(0));
 	status = CREATE;
 	Classes = new ClassTemplates();

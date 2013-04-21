@@ -66,6 +66,7 @@ END_OF_FUNCTION(fps_proc)
  */
 void init()
 {
+    Game = new GAME();
 	//set initial game mode - development only
 	mode = 1;
 	//initialiye debugging
@@ -91,6 +92,7 @@ void init()
 	install_mouse();
 
     load_ini("game.ini");
+    debug("main debug lvl: "+to_str(Game->DEBUG_LVL_MAIN));
 	init_graphic();
 
 	//install interrupts

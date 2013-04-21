@@ -160,7 +160,7 @@ typedef struct {
 
 class GAME
 {   public:
-        int DEBUG_LVL_MAIN;
+        int DEBUG_LVL_MAIN, DEBUG_LVL;
         List<TEXTURE> Textures;
         List<TEXTURED_ELEMENT> Elements;
         List<ANIMATOR> Animators;
@@ -172,7 +172,7 @@ class GAME
         RGB * fade_color;
         int * Impassable;
         int TRANSPARENT;
-        unsigned short int MAP_SIZE;
+        int MAP_SIZE;
         int **game_map;
         int **linesight;
         int light_power;

@@ -16,9 +16,9 @@
 
 using namespace std;
 
-int MAP_SIZE;
-int **game_map;
-int **linesight;
+//int MAP_SIZE;
+//int **game_map;
+//int **linesight;
 
 extern char chbuf[256];
 /*extern int DEBUG_LVL_MAIN;
@@ -31,11 +31,14 @@ extern List<TRIGGER> Triggers;
 extern CLICKABLE_MAP Clickables;
 extern VIEW_SETTINGS view_settings;
 extern RGB * fade_color;*/
-int * Impassable;
+//int * Impassable;
 
 GAME::GAME()
-{
-
+{   this->light_power=200;
+    this->DEBUG_LVL=4;
+    this->DEBUG_LVL_MAIN=4;
+    this->INFO=0;
+    this->TRANSPARENT=1;
 }
 
 string get_line(FILE * f)
@@ -199,30 +202,30 @@ int load_map(string fname)
 		if(str1.find(":")==0) // : at the beginning of new line
 		{				// is new block
 
-		    if(load_variable(f,"mapsize",&MAP_SIZE,load_int, &str1))
-            {   delete []game_map;
-                delete []linesight;
-                game_map = new int * [MAP_SIZE];
-                linesight = new int * [MAP_SIZE];
-                for(int i=0; i<MAP_SIZE; i++)
-                {	game_map[i]= new int [MAP_SIZE];
-                    linesight[i]= new int [MAP_SIZE];
-                    for(int j=0; j<MAP_SIZE; j++)
-                    { game_map[i][j]=0;
-                      linesight[i][j]=0;
+		    if(load_variable(f,"mapsize",&Game->MAP_SIZE,load_int, &str1))
+            {   delete []Game->game_map;
+                delete []Game->linesight;
+                Game->game_map = new int * [Game->MAP_SIZE];
+                Game->linesight = new int * [Game->MAP_SIZE];
+                for(int i=0; i<Game->MAP_SIZE; i++)
+                {	Game->game_map[i]= new int [Game->MAP_SIZE];
+                    Game->linesight[i]= new int [Game->MAP_SIZE];
+                    for(int j=0; j<Game->MAP_SIZE; j++)
+                    { Game->game_map[i][j]=0;
+                      Game->linesight[i][j]=0;
                     }
                 }
-                debug("Map size: "+to_str(MAP_SIZE)+" (0 - all, 10 - none)",10);
+                debug("Map size: "+to_str(Game->MAP_SIZE),10);
             }
 
 			if(str1.compare(":map")==0)
 			{	int i=0,j,found;
-				while(!feof(f) && i<MAP_SIZE)
+				while(!feof(f) && i<Game->MAP_SIZE)
 				{	str2=get_line(f);
 					j=0;
 					debug("str2 "+str2);
-					while(sscanf(str2.c_str(),"%d,",&tile) && j<MAP_SIZE)
-					{	game_map[j][i]=tile;
+					while(sscanf(str2.c_str(),"%d,",&tile) && j<Game->MAP_SIZE)
+					{	Game->game_map[j][i]=tile;
                         j++;
 					 	debug("Read tile ["+to_str(i)+","+to_str(j)+"]="+to_str(tile),1);
 					  	found=str2.find_first_of(",");
@@ -230,7 +233,7 @@ int load_map(string fname)
 					}
 					i++;
 				}
-				if(i==MAP_SIZE && j==MAP_SIZE)
+				if(i==Game->MAP_SIZE && j==Game->MAP_SIZE)
 				{	debug("Map read successfully");
 
 				}
@@ -369,7 +372,7 @@ string serialize_impassable()
 {   string ret="";
     for(int i=0; i<10; i++)
     {   if(i>0) ret+=" ";
-        ret+=to_str(Impassable[i]);
+        ret+=to_str(Game->Impassable[i]);
     }
     return ret;
 }
@@ -396,11 +399,11 @@ string serialize_map()
 {   char buf[8];
     string ret="";
     ret+="\n:mapsize\n";
-    ret+=to_str(MAP_SIZE)+"\n";
+    ret+=to_str(Game->MAP_SIZE)+"\n";
     ret+="\n:map\n";
-    for(int i=0; i<MAP_SIZE; i++)
-    {   for(int j=0;j<MAP_SIZE; j++)
-        {   sprintf(buf,"%2d,",game_map[j][i]);
+    for(int i=0; i<Game->MAP_SIZE; i++)
+    {   for(int j=0;j<Game->MAP_SIZE; j++)
+        {   sprintf(buf,"%2d,",Game->game_map[j][i]);
             ret+=buf;
         }
         ret+="\n";
