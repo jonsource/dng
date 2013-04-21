@@ -8,11 +8,10 @@
 #ifndef MAP_H_
 #define MAP_H_
 
-#include "game.h"
-#include "texture.h"
-#include "interface.h"
-#include "graphic.h"
-#include <stdio.h>
+#include "allegro.h"
+#include <string>
+
+using namespace std;
 
 int load_map(string fname);
 void unload_map();

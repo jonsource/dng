@@ -11,7 +11,6 @@
 #include "allegro.h"
 #include "list.h"
 #include <map>
-//#include "game.h"
 #include <string>
 
 using namespace std;
@@ -71,14 +70,6 @@ class TEXTURE
         TEXTURE();
         string serialize();
 };
-
-/*
-typedef struct {
-  unsigned short int type,speed,offset,_offset,frames,on;
-  int start;
-  BITMAP *frame;
-} ANIMATOR;
-*/
 
 class ANIMATOR
 {   public:

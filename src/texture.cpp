@@ -8,6 +8,7 @@
 #include "texture.h"
 #include "graphic.h"
 #include "game_map.h"
+#include "game_lib.h"
 #include <string.h>
 #include <stdio.h>
 

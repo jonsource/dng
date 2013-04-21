@@ -4,14 +4,13 @@
 #include <stdio.h>
 #include <allegro.h>
 #include <string>
-#include "game.h"
 #include "character.h"
 
 #define NO_STATS 8
 
 using namespace std;
 
-class Class 
+class Class
 { public:
     Class(FILE *f);
     ~Class();
@@ -19,7 +18,7 @@ class Class
     int Check(Character *Ch);
     void NextLevel(Character *Ch);
     string name;
-  
+
     int courage;
     int strength;
     int dexterity;
@@ -29,14 +28,14 @@ class Class
     int intelligence;
     int charisma;
     int priorities[8];
-  private:  
+  private:
     int HP_base;
     int HP_rand;
     int MP_base;
     int MP_rand;
     int SP_base;
     int SP_rand;
-    
+
 };
 
 class ClassTemplates
