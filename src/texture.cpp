@@ -11,12 +11,13 @@
 #include <string.h>
 #include <stdio.h>
 
-List<TEXTURE> Textures;
+/*List<TEXTURE> Textures;
 List<TEXTURED_ELEMENT> Elements;
 List<ANIMATOR> Animators;
 List<TILE> Tiles;
 List<LIGHT_SOURCE> Lightsources;
 List<TRIGGER> Triggers;
+*/
 
 extern int tmsec;
 /**
@@ -90,15 +91,15 @@ TEXTURED_ELEMENT::TEXTURED_ELEMENT(string type, float x, float y, float z, float
    this->h = h;
    this->transparent = to_bool(transparent);
    this->clip = to_bool(clip);
-   if(texture>=Textures.len())
+   if(texture>=Game->Textures.len())
    { debug("Referencing undefined texture "+to_str(texture),10);
-   	 this->texture = Textures[0];
+   	 this->texture = Game->Textures[0];
    }
-   else this->texture = Textures[texture];
+   else this->texture = Game->Textures[texture];
    this->texture_nr = texture;
    this->transparent = to_bool(transparent);
    if(animator>-1)
-   {   if(animator<Animators.len())	this->animator = Animators[animator];
+   {   if(animator<Game->Animators.len())	this->animator = Game->Animators[animator];
    	   else
    	   {	debug("Referencing undefined animator "+to_str(animator),10);
    	   	   exit(1);
@@ -216,8 +217,8 @@ int TILE::add_element(string type, int element)
 	    return 0;
 	}
 	typ = TILE::type_resolve(type);
-	if(element<Elements.len())
-    {   this->elements[this->len] = Elements[element];
+	if(element<Game->Elements.len())
+    {   this->elements[this->len] = Game->Elements[element];
         this->element_nrs[this->len] = element;
     }
 	else
@@ -447,7 +448,7 @@ TRIGGER::TRIGGER(int type, int xpos, int zpos, int w1, int h1, int w2, int h2,in
     this->w2=w2;
     this->animator_nr=animator;
     if(animator>-1)
-    {   if(animator<Animators.len())	this->animator = Animators[animator];
+    {   if(animator<Game->Animators.len())	this->animator = Game->Animators[animator];
         else
         {	debug("Referencing undefined animator "+to_str(animator),10);
             exit(1);

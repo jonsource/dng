@@ -1,38 +1,26 @@
 #include "graphic.h"
-#include <string.h>
 #include <math.h>
-#include "interface.h"
 #include "edittext.h"
+#include "game_lib.h"
 
 BITMAP * sky1[4];
 BITMAP * api=NULL;
 BITMAP * CURSOR;
 RGB pal[256];
-VIEW_SETTINGS view_settings;
 extern BITMAP *game_bmp,* first,* second;
 extern int fps, tmsec;
-extern int TRANSPARENT;
-extern TILE ** Tiles;
-extern int light_power;
 
-extern int **game_map;
-extern int **linesight;
-extern unsigned short int MAP_SIZE;
-extern List<LIGHT_SOURCE> Lightsources;
-extern List<TRIGGER> Triggers;
-extern CLICKABLE_MAP Clickables;
-extern int INFO;
 bool blender_set;
 CAMERA * cam=NULL;
-RGB * fade_color;
+//RGB * fade_color;
 
 int init_graphic()
 {	int depth = 32;
 
-    fade_color = new RGB;
-    fade_color->r=255;
-    fade_color->g=0;
-    fade_color->b=0;
+    Game->fade_color = new RGB;
+    Game->fade_color->r=255;
+    Game->fade_color->g=0;
+    Game->fade_color->b=0;
 	set_color_depth(depth);
 	if(set_gfx_mode(GFX_AUTODETECT_WINDOWED, 640, 480, 0, 0) < 0)
 	{ 	debug("Select video mode failed!",10);
@@ -60,7 +48,7 @@ int init_graphic()
 	}
 	debug("screen depth: "+to_str(bitmap_color_depth(game_bmp)));
 	clear(game_bmp);
-	init_camera(&view_settings);
+	init_camera(&Game->view_settings);
 //    show_mouse(screen);
 	return 1;
 }
@@ -85,15 +73,15 @@ float dist(float x,float z,CAMERA * cam)
  * check whether coordinates are on map and return them
  */
 int check_coords(int x, int y)
-{ if(x<0 || y<0 || x>=MAP_SIZE || y>=MAP_SIZE) return 0;
-  else return game_map[x][y];
+{ if(x<0 || y<0 || x>=Game->MAP_SIZE || y>=Game->MAP_SIZE) return 0;
+  else return Game->game_map[x][y];
 }
 
 /**
  * check whether coordinates are on game_map
  */
 int check_coords_subr(int x, int y)
-{ if(x<0 || y<0 || x>=MAP_SIZE || y>=MAP_SIZE) return 0;
+{ if(x<0 || y<0 || x>=Game->MAP_SIZE || y>=Game->MAP_SIZE) return 0;
   else return 1;
 }
 
@@ -102,8 +90,8 @@ int check_coords_subr(int x, int y)
  * valid only after make_linesight is called for current camera position
  */
 int see_coords(int x, int y)
-{   if(x<0 || y<0 || x>=MAP_SIZE || y>=MAP_SIZE) return 0;
-    return linesight[x][y];
+{   if(x<0 || y<0 || x>=Game->MAP_SIZE || y>=Game->MAP_SIZE) return 0;
+    return Game->linesight[x][y];
 }
 
 /**
@@ -194,7 +182,7 @@ void render_element(int type, TEXTURED_ELEMENT * element, BITMAP *bmp, int x, in
    int polytype;
 
    /* set necessary POLYTYPE, affine texture mapping is OK and faster than perspective correct mapping */
-   if(TRANSPARENT && element->transparent)
+   if(Game->TRANSPARENT && element->transparent)
    {	polytype = POLYTYPE_ATEX_MASK_TRANS;
    		set_alpha_blender();
    		//blender_set=false;
@@ -212,7 +200,7 @@ void render_element(int type, TEXTURED_ELEMENT * element, BITMAP *bmp, int x, in
         {   set_trans_blender(fade_color.r,fade_color.g,fade_color.b,1);
             blender_set=true;
         }*/
-        set_trans_blender(fade_color->r,fade_color->g,fade_color->b,1);
+        set_trans_blender(Game->fade_color->r,Game->fade_color->g,Game->fade_color->b,1);
    }
 
    for (c=0; c<4; c++)
@@ -244,12 +232,12 @@ void render_element(int type, TEXTURED_ELEMENT * element, BITMAP *bmp, int x, in
    int ls;
    for (c=0; c<4; c++)
    {  	/* apply players light */
-        ls=light_power-sqrt(dist2(v[c]->x,v[c]->z,cam->dolly_xpos,cam->dolly_zpos))*30;
+        ls=Game->light_power-sqrt(dist2(v[c]->x,v[c]->z,cam->dolly_xpos,cam->dolly_zpos))*30;
    	    v[c]->c=ls>0?ls:0;
 	    //v[c]->c=0;
 	    /* apply lightsources */
-   	    for(int i=0; i<Lightsources.len(); i++)
-   	    { ls=Lightsources[i]->power-sqrt(dist2(v[c]->x,v[c]->z,Lightsources[i]->x,Lightsources[i]->z))*Lightsources[i]->dim;
+   	    for(int i=0; i<Game->Lightsources.len(); i++)
+   	    { ls=Game->Lightsources[i]->power-sqrt(dist2(v[c]->x,v[c]->z,Game->Lightsources[i]->x,Game->Lightsources[i]->z))*Game->Lightsources[i]->dim;
    	      //if(i==0) debug("lightsource :"+to_str(Lightsources[i]->x)+" "+to_str(Lightsources[i]->z)+", v :"+to_str(v[c]->x)+" "+to_str(v[c]->z)+" "+to_str(sqrt(dist2(v[c]->x,v[c]->z,Lightsources[i]->x,Lightsources[i]->z)))+" ");
    	      v[c]->c+=ls>0?ls:0;
    	    }
@@ -385,13 +373,13 @@ void see_tile(int x, int z, CAMERA * cam)
 {	//debug("  see tile "+to_str(x)+" "+to_str(z),1);
 	int s=check_coords(x,z);
 	if(s)
-	{ if(linesight[x][z])
+	{ if(Game->linesight[x][z])
 	  { //dappend(" already seen",1);
 		return;
 	  }
-	  linesight[x][z]=s;
-	  for(int i=0;i<Tiles[s-1]->len;i++)
-		  if(Tiles[s-1]->types[i]==TILE_FRONT) { return; }
+	  Game->linesight[x][z]=s;
+	  for(int i=0;i<Game->Tiles[s-1]->len;i++)
+		  if(Game->Tiles[s-1]->types[i]==TILE_FRONT) { return; }
 
 	  if(!see_coords(x+cam->xfront,z+cam->zfront)) see_tile(x+cam->xfront,z+cam->zfront,cam);
 	  if(cam->xfront==0)
@@ -411,9 +399,9 @@ void see_tile(int x, int z, CAMERA * cam)
  */
 void make_linesight(int x, int z, CAMERA * cam)
 {	debug(" linesight "+to_str(x)+" "+to_str(z),1);
-	for(int i=0; i<MAP_SIZE; i++)
-		for(int j=0; j<MAP_SIZE; j++)
-			linesight[i][j]=0;
+	for(int i=0; i<Game->MAP_SIZE; i++)
+		for(int j=0; j<Game->MAP_SIZE; j++)
+			Game->linesight[i][j]=0;
 	//debug(" * after sight reset",1);
 	// three initial tiles
 	see_tile(x,z,cam);
@@ -480,15 +468,15 @@ void draw_view(int xpos, int ypos, int zpos, int heading)
      { fx=xpos+dx*cam->xfront+dz*cam->zfront;  // ano zfront, y je nahoru
        fz=zpos+dz*cam->xfront+dx*cam->zfront;
        if(see_coords(fx,fz))
-         render_tile(Tiles[game_map[fx][fz]-1],game_bmp, fx, fz, cam);
+         render_tile(Game->Tiles[Game->game_map[fx][fz]-1],game_bmp, fx, fz, cam);
        fx=xpos+dx*cam->xfront-dz*cam->zfront;  // ano zfront, y je nahoru
        fz=zpos-dz*cam->xfront+dx*cam->zfront;
        if(see_coords(fx,fz))
-    	 render_tile(Tiles[game_map[fx][fz]-1],game_bmp, fx, fz, cam);
+    	 render_tile(Game->Tiles[Game->game_map[fx][fz]-1],game_bmp, fx, fz, cam);
      }
 
 
-   if(INFO>1)
+   if(Game->INFO>1)
    {
 
         /* overlay some text */
@@ -498,7 +486,7 @@ void draw_view(int xpos, int ypos, int zpos, int heading)
        //textprintf_ex(bmp, font, 0,  32, makecol(0, 0, 0), -1,
              //"Viewport height: %d (h/H changes)", viewport_h);
        textprintf_ex(game_bmp, font, 0, 40, makecol(0, 0, 0), -1,
-             "Field of view: %f  Aspect: %.2f Light: %d", cam->fov,cam->aspect,light_power);
+             "Field of view: %f  Aspect: %.2f Light: %d", cam->fov,cam->aspect,Game->light_power);
        //textprintf_ex(bmp, font, 0, 48, makecol(0, 0, 0), -1,
              //"Aspect ratio: %.2f (a/A changes)", cam.aspect);
        textprintf_ex(game_bmp, font, 0, 56, makecol(0, 0, 0), -1,
@@ -521,7 +509,7 @@ void draw_view(int xpos, int ypos, int zpos, int heading)
              "Frames per second: %d", fps);
     }
 
-    if(INFO==1) text_output(game_bmp);
+    if(Game->INFO==1) text_output(game_bmp);
 
     masked_blit(CURSOR,game_bmp,0,0,mouse_x,mouse_y,CURSOR->w,CURSOR->h);
 }
@@ -529,7 +517,7 @@ void draw_view(int xpos, int ypos, int zpos, int heading)
 void draw_triggers(int x, int z, int heagind)
 {   CLICKABLE* c;
     List<CLICKABLE> clklist;
-    clklist=Clickables["place"];
+    clklist=Game->Clickables["place"];
     for(int i=0; i<clklist.len(); i++)
     {   //debug("["+to_str(x)+","+to_str(z)+"] Trigger "+to_str(Triggers[i]->xpos)+" "+to_str(Triggers[i]->zpos),4);
         c=clklist[i];

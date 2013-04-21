@@ -28,8 +28,6 @@ int fps;
 unsigned short int keyb_ignore;
 BITMAP *game_bmp=NULL,*first=NULL,*second=NULL;
 int status,mode;
-extern int INFO;
-extern List<TEXTURE> Textures;
 
 int courage, strength, constitution, intelligence, wisdom, charisma, dexterity, agility;
 int level,XP,maxHP,HP,MP;
@@ -68,6 +66,7 @@ END_OF_FUNCTION(fps_proc)
  */
 void init()
 {
+    Game = new GAME();
 	//set initial game mode - development only
 	mode = 1;
 	//initialiye debugging
@@ -93,6 +92,7 @@ void init()
 	install_mouse();
 
     load_ini("game.ini");
+    debug("main debug lvl: "+to_str(Game->DEBUG_LVL_MAIN));
 	init_graphic();
 
 	//install interrupts
@@ -175,7 +175,7 @@ int main(int argc, char *argv[])
 		}
 
 	//    game_interpret();
-        if(INFO==1)
+        if(Game->INFO==1)
         {
             if(keypressed()) text_input();
             if(key[KEY_ESC]) keypress(KEY_ESC);

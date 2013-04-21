@@ -1,11 +1,12 @@
 #include <stdio.h>
 #include <time.h>
+#include "texture.h"
 #include "game_lib.h"
 
 FILE *dbg=NULL;
 char chbuf[256];
-int DEBUG_LVL_MAIN = 4;
-int DEBUG_LVL = DEBUG_LVL_MAIN;
+/*int DEBUG_LVL_MAIN = 4;
+int DEBUG_LVL = DEBUG_LVL_MAIN;*/
 
 void init_debug(string fname)
 {   dbg = fopen(fname.c_str(),"w");
@@ -103,7 +104,7 @@ int mstime()
  */
 void debug(string s, int lvl)
 {
-	if(lvl<DEBUG_LVL) return;
+	if(lvl<Game->DEBUG_LVL) return;
 	s="\n"+to_str((int)mstime())+" "+s;
 	printf(s.c_str());
 	fprintf(dbg,s.c_str());
@@ -120,7 +121,7 @@ void debug(string s)
  * append debug information (omits current time stamp)
  */
 void dappend(string s, int lvl)
-{ 	if(lvl<DEBUG_LVL) return;
+{ 	if(lvl<Game->DEBUG_LVL) return;
     printf(s.c_str());
 	fprintf(dbg,s.c_str());
 	fflush(dbg);
@@ -139,7 +140,7 @@ void dappend(string s)
  */
 void set_debug_lvl(int lvl)
 {
-	DEBUG_LVL=lvl;
+	Game->DEBUG_LVL=lvl;
 }
 
 /**
@@ -147,7 +148,7 @@ void set_debug_lvl(int lvl)
  */
 void reset_debug_lvl()
 {
-	DEBUG_LVL=DEBUG_LVL_MAIN;
+	Game->DEBUG_LVL=Game->DEBUG_LVL_MAIN;
 }
 
 /**

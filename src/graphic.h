@@ -1,6 +1,6 @@
 #ifndef __GRAPHIC_H_
 #define __GRAPHIC_H_
-#include "game.h"
+
 #include "texture.h"
 
 #define GRID_SIZE 2
@@ -25,11 +25,6 @@ typedef struct {
 		double view_height;
 		MATRIX_f camera, roller;
 } CAMERA;
-
-typedef struct {
-        double aspect, view_height, step_back;
-        int fov;
-} VIEW_SETTINGS;
 
 int init_graphic();
 void init_camera(VIEW_SETTINGS * view_settings);

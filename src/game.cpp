@@ -10,21 +10,20 @@
 extern int keyb_ignore;
 extern int status;
 extern ClassTemplates *Classes;
-extern List<TILE> Tiles;
 extern int fps, tmsec;
 extern BITMAP * game_bmp;
 Character *Player;
 int gy=0,gz=2,gx=3,gh=0;
 int light_power=128;
-extern int FOV;
-extern double STB, ASPECT;
-int TRANSPARENT = 1;
-extern int DEBUG_LVL_MAIN;
+//extern int FOV;
+//extern double STB, ASPECT;
+//int TRANSPARENT = 1;
+/*extern int DEBUG_LVL_MAIN;
 extern int DEBUG_LVL;
-extern VIEW_SETTINGS view_settings;
-int INFO = 0;
+extern VIEW_SETTINGS view_settings;*/
+//int INFO = 0;
 
-extern CLICKABLE_MAP Clickables;
+/*extern CLICKABLE_MAP Clickables;
 extern List<TRIGGER> Triggers;
 extern List<ANIMATOR> Animators;
 extern List<LIGHT_SOURCE> Lightsources;
@@ -33,7 +32,9 @@ extern List<TEXTURE> Textures;
 extern List<TILE> Tiles;
 extern int * Impassable;
 extern int MAP_SIZE;
-extern int **game_map;
+extern int **game_map;*/
+
+GAME * Game;
 
 /**
  * initialize and load game
@@ -48,6 +49,7 @@ void game_load()
 	load_graphics();
 	change_area("area1.area","map1.map",3,3);
 	debug("done game_load");
+
 }
 
 /**
@@ -90,7 +92,7 @@ void game_draw()
   debug("begin game_draw",2);
 //    scare_mouse();
   draw_view(gx,gy,gz,gh);
-  if(INFO>0) draw_triggers(gx,gz,gh);
+  if(Game->INFO>0) draw_triggers(gx,gz,gh);
 //    unscare_mouse();
 }
 
@@ -105,7 +107,7 @@ bool can_leave(int x, int z, int dir)
     List<CLICKABLE> clklist;
     CLICKABLE * clk;
 
-    clklist=Clickables["leave"];
+    clklist=Game->Clickables["leave"];
 
     for(int i=0; i<clklist.len(); i++)
     {   clk=clklist[i];
@@ -119,11 +121,11 @@ bool can_leave(int x, int z, int dir)
 bool can_enter(int x, int z, int dir)
 {   int t=check_coords(x,z);
     for(int i=0; i<10; i++)
-    {   if(t==Impassable[i]) return false; }
+    {   if(t==Game->Impassable[i]) return false; }
     /* search for entry blockers */
-    for(int i=0; i<Triggers.len(); i++)
+    for(int i=0; i<Game->Triggers.len(); i++)
     {   TRIGGER * t;
-        t=Triggers[i];
+        t=Game->Triggers[i];
         if(t->type<BLOCKER_NORTH || t->type>BLOCKER_ENTER) continue; // not a blocker, skipping
         debug("["+to_str(x)+","+to_str(z)+"] Trigger "+to_str(t->xpos)+" "+to_str(t->zpos),3);
         /* correct coordinates and (BLOCKER_ENTER or correct heading) */
@@ -182,14 +184,14 @@ void player_move_subr(int x, int y, int z, int h, bool force)
         }
 
             /* clear old triggers */
-        Clickables["place"].clear_all();
-        Clickables["leave"].clear_all();
-        Clickables["enter"].clear_all();
+        Game->Clickables["place"].clear_all();
+        Game->Clickables["leave"].clear_all();
+        Game->Clickables["enter"].clear_all();
 
         /* apply local clickable triggers */
-        for(int i=0; i<Triggers.len(); i++)
+        for(int i=0; i<Game->Triggers.len(); i++)
         {   TRIGGER * t;
-            t=Triggers[i];
+            t=Game->Triggers[i];
             debug("["+to_str(gx)+","+to_str(gz)+"] Trigger "+to_str(t->xpos)+" "+to_str(t->zpos),3);
                 /* correct coordinates and (TYPE_ENTER or correct heading) */
             if(t->xpos==gx && t->zpos==gz && (t->type==TRIGGER_ENTER || t->type==gh || t->type>=8 ))
@@ -200,15 +202,15 @@ void player_move_subr(int x, int y, int z, int h, bool force)
                 clk->h2=t->h2;
                 clk->w2=t->w2;
                 clk->callback = t;
-                if(t->type<TRIGGER_WEST) Clickables["place"].add(clk);
-                else if(t->type==TRIGGER_LEAVE || (t->type>=BLOCKER_NORTH && t->type<=BLOCKER_WEST)) Clickables["leave"].add(clk);
-                else if(t->type==TRIGGER_ENTER) Clickables["enter"].add(clk);
+                if(t->type<TRIGGER_WEST) Game->Clickables["place"].add(clk);
+                else if(t->type==TRIGGER_LEAVE || (t->type>=BLOCKER_NORTH && t->type<=BLOCKER_WEST)) Game->Clickables["leave"].add(clk);
+                else if(t->type==TRIGGER_ENTER) Game->Clickables["enter"].add(clk);
             }
         }
 
         /* moved (not just changed heading), apply enter triggers */
         if(x!=0 || z!=0)
-        {   List<CLICKABLE> clklist=Clickables["enter"];
+        {   List<CLICKABLE> clklist=Game->Clickables["enter"];
             CLICKABLE * clk = new CLICKABLE;
             for(int i=0; i<clklist.len(); i++)
             {   clk=clklist[i];
@@ -233,9 +235,9 @@ void mouse_click(int mw, int mh)
     debug("Left mouse button "+to_str(mw)+" "+to_str(mh));
 
     CLICKABLE_MAP_ITERATOR it;
-    for(it = Clickables.begin(); it!=Clickables.end(); it++)
+    for(it = Game->Clickables.begin(); it!=Game->Clickables.end(); it++)
     {   if(it->first=="leave") continue;
-        clklist=Clickables[it->first];
+        clklist=Game->Clickables[it->first];
 
         for(int i=0; i<clklist.len(); i++)
         {   clk=clklist[i];
@@ -268,26 +270,26 @@ void keypress(int i)
      if(i == KEY_R) y=1;
      if(i == KEY_F) y=-1;
 
-    if(INFO==2)
+    if(Game->INFO==2)
     {   /* development camera controls */
-         if(i == KEY_H) { view_settings.fov+=1; init_camera(&view_settings); }
-         if(i == KEY_J) { view_settings.fov-=1; init_camera(&view_settings); }
-         if(i == KEY_I) { view_settings.step_back+=0.1; init_camera(&view_settings); }
-         if(i == KEY_K) { view_settings.step_back-=0.1; init_camera(&view_settings); }
+         if(i == KEY_H) { Game->view_settings.fov+=1; init_camera(&Game->view_settings); }
+         if(i == KEY_J) { Game->view_settings.fov-=1; init_camera(&Game->view_settings); }
+         if(i == KEY_I) { Game->view_settings.step_back+=0.1; init_camera(&Game->view_settings); }
+         if(i == KEY_K) { Game->view_settings.step_back-=0.1; init_camera(&Game->view_settings); }
 
         /* development light setting controls */
          if(i == KEY_O) light_power+=1;
          if(i == KEY_L) light_power-=1;
     }
 
-    if(i == KEY_ESC) { INFO = 0;}
+    if(i == KEY_ESC) { Game->INFO = 0;}
 
-    if(i == KEY_F1) {  if(INFO!=2) INFO=2;
-                       else INFO=0;
+    if(i == KEY_F1) {  if(Game->INFO!=2) Game->INFO=2;
+                       else Game->INFO=0;
                     }
 
      if(i == KEY_F2) {  clear_keybuf();
-                        INFO=1;
+                        Game->INFO=1;
                     }
      if(i == KEY_N)
      { Class *cl=Classes->GetTemplate(Player->classname);
@@ -328,43 +330,43 @@ void text_interpret(string s)
 {   STR_LIST * l=tokenize(s," ");
     if(l->len()<1) return;
     if(*(*l)[0]=="exit")
-    {   INFO=(++INFO)%3;
+    {   Game->INFO=(++Game->INFO)%3;
         return;
     }
-    if(*(*l)[0]=="transparent") _interpret_1int(l,"transparent",&TRANSPARENT,0,1);
-    if(*(*l)[0]=="light_power") _interpret_1int(l,"light_power",&light_power,0,255);
+    if(*(*l)[0]=="transparent") _interpret_1int(l,"transparent",&Game->TRANSPARENT,0,1);
+    if(*(*l)[0]=="light_power") _interpret_1int(l,"light_power",&Game->light_power,0,255);
     if(*(*l)[0]=="Trigger")
     {   int v;
         if(l->len()==1)
-        {   printf("Provide a number [0-%d] to print info on that trigger.\n",Triggers.len()-1);
+        {   printf("Provide a number [0-%d] to print info on that trigger.\n",Game->Triggers.len()-1);
             return;
         }
         else
         {   string h=*(*l)[1];
             sscanf(h.c_str(),"%d",&v);
-            if(v<0 || v>=Triggers.len()) printf("Invalid parameter to Trigger [0-%d]\n",Triggers.len()-1);
+            if(v<0 || v>=Game->Triggers.len()) printf("Invalid parameter to Trigger [0-%d]\n",Game->Triggers.len()-1);
             else
-            {   printf("%s\n",Triggers[v]->serialize().c_str());
+            {   printf("%s\n",Game->Triggers[v]->serialize().c_str());
             }
         }
     }
     if(*(*l)[0]=="Triggers")
-    {   printf(Triggers.serialize().c_str());
+    {   printf(Game->Triggers.serialize().c_str());
     }
     if(*(*l)[0]=="Lightsources")
-    {   printf(Lightsources.serialize().c_str());
+    {   printf(Game->Lightsources.serialize().c_str());
     }
     if(*(*l)[0]=="Animators")
-    {   printf(Animators.serialize().c_str());
+    {   printf(Game->Animators.serialize().c_str());
     }
     if(*(*l)[0]=="Elements")
-    {   printf(Elements.serialize().c_str());
+    {   printf(Game->Elements.serialize().c_str());
     }
     if(*(*l)[0]=="Tiles")
-    {   printf(Tiles.serialize().c_str());
+    {   printf(Game->Tiles.serialize().c_str());
     }
     if(*(*l)[0]=="Textures")
-    {   printf(Textures.serialize().c_str());
+    {   printf(Game->Textures.serialize().c_str());
     }
     if(*(*l)[0]=="Area")
     {  printf(serialize_area().c_str());

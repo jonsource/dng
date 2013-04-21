@@ -6,6 +6,9 @@
 #include <string>
 #include "list.h"
 #include "game_lib.h"
+#include "texture.h"
+#include "interface.h"
+#include "graphic.h"
 
 using namespace std;
 
@@ -13,6 +16,8 @@ using namespace std;
 #define CREATE   1
 #define PLAY     2
 #define PAUSE    -1
+
+class GAME;
 
 void game_load();
 void game_unload();
