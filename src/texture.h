@@ -50,19 +50,40 @@ typedef struct {
         BITMAP *close, *medium, *far;
 } TEXTURE;
 
+/*
 typedef struct {
   unsigned short int type,speed,offset,_offset,frames,on;
   int start;
   BITMAP *frame;
 } ANIMATOR;
+*/
 
-typedef struct {
+class ANIMATOR
+{   public:
+        unsigned short int type, speed, offset, _offset, frames, on;
+        int start,w,h;
+        BITMAP * frame;
+        ANIMATOR(int type, int speed, int offset, int frames, int w, int h);
+        ANIMATOR(int type, int speed, int offset, int frames, int w, int h, int on, int start);
+        string serialize();
+        string type_string();
+        static unsigned short int type_resolve(string s);
+};
+
+class TEXTURED_ELEMENT
+{   public:
 		float x,y,z,w,h;
 		int type,flip;
 		bool transparent,clip;
+		int texture_nr;
 		TEXTURE * texture;
+		int animator_nr;
 		ANIMATOR * animator;
-} TEXTURED_ELEMENT;
+		TEXTURED_ELEMENT(string type, float x, float y, float z, float w, float h, string transparent, int texture, int animator, string clip, string flip);
+		string serialize();
+		string type_string();
+		static int type_resolve(string s);
+};
 
 typedef struct {
 	int len;
@@ -70,10 +91,13 @@ typedef struct {
 	unsigned short int * types;
 } TILE;
 
-typedef struct
-{	int power,dim;
-    float x,z;
-} LIGHT_SOURCE;
+class LIGHT_SOURCE
+{   public:
+        int power,dim;
+        float x,z;
+        LIGHT_SOURCE(int power, int dim, float x, float z);
+        string serialize();
+};
 
 class TRIGGER
 {   public:
@@ -88,6 +112,7 @@ class TRIGGER
         void fire();
         string serialize();
         string type_string();
+        static int type_resolve(string type);
         string * action;
 };
 

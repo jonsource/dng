@@ -67,35 +67,40 @@ TEXTURE * load_texture(string s)
     return text;
 }
 
-TEXTURED_ELEMENT * create_element(string type, float x, float y, float z, float w, float h, string transparent, int texture, int animator, string clip, string flip)
-{	TEXTURED_ELEMENT * ele = new(TEXTURED_ELEMENT);
-	unsigned short int typ;
-   ele->x = x;
-   ele->y = y;
-   ele->z = z;
-   ele->w = w;
-   ele->h = h;
-   ele->transparent = to_bool(transparent);
-   ele->clip = to_bool(clip);
+TEXTURED_ELEMENT::TEXTURED_ELEMENT(string type, float x, float y, float z, float w, float h, string transparent, int texture, int animator, string clip, string flip)
+{   unsigned short int typ;
+   this->x = x;
+   this->y = y;
+   this->z = z;
+   this->w = w;
+   this->h = h;
+   this->transparent = to_bool(transparent);
+   this->clip = to_bool(clip);
    if(texture>=Textures.len())
    { debug("Referencing undefined texture "+to_str(texture),10);
-   	 ele->texture = Textures[0];
+   	 this->texture = Textures[0];
    }
-   else ele->texture = Textures[texture];
-   ele->transparent = to_bool(transparent);
+   else this->texture = Textures[texture];
+   this->texture_nr = texture;
+   this->transparent = to_bool(transparent);
    if(animator>-1)
-   {   if(animator<Animators.len())	ele->animator = Animators[animator];
+   {   if(animator<Animators.len())	this->animator = Animators[animator];
    	   else
    	   {	debug("Referencing undefined animator "+to_str(animator),10);
    	   	   exit(1);
    	   }
    }
-   else ele->animator = NULL;
+   else this->animator = NULL;
+   this->animator_nr = animator;
    typ=tile_type_resolve(type);
-   ele->type=typ;
-   ele->flip=flip_resolve(flip);
+   this->type=typ;
+   this->flip=flip_resolve(flip);
    //debug("Element "+type);
-   return ele;
+}
+
+string TEXTURED_ELEMENT::serialize()
+{   return to_str(type)+" "+to_str(x)+" "+to_str(y)+" "+to_str(z)+" "+to_str(w)+" "+to_str(h)+" "+to_str(transparent)+" "+to_str(texture_nr)+" "+to_str(animator_nr)+" "+to_str(clip)+" "+to_str(flip);
+
 }
 
 TEXTURED_ELEMENT * load_element(string s)
@@ -106,10 +111,10 @@ TEXTURED_ELEMENT * load_element(string s)
 	{ debug("Not enough parameters for textured element: "+s,10);
 	  exit(1);
 	}
-	return create_element(type,x,y,z,w,h,transparent,texture,animator,clip,flip);
+	return new TEXTURED_ELEMENT(type,x,y,z,w,h,transparent,texture,animator,clip,flip);
 }
 
-unsigned short int animator_type_resolve(string type)
+unsigned short int ANIMATOR::type_resolve(string type)
 {	bool type_ok=false;
 	unsigned short int typ;
     if(type.compare("ANIMATOR_TOGGLE")==0) {typ=ANIMATOR_TOGGLE; type_ok=true;}
@@ -123,18 +128,48 @@ unsigned short int animator_type_resolve(string type)
 	return typ;
 }
 
-ANIMATOR * create_animator(int type, int speed, int offset, int frames, int w, int h)
-{ ANIMATOR * ani = new(ANIMATOR);
-	ani->speed=speed;
-	ani->offset=offset;
-	ani->_offset=offset;
-	ani->frames=frames;
-	ani->frame=create_bitmap(w,h);
-	ani->type=type;
-	if(type==ANIMATOR_ON) ani->on=1;
-	else ani->on=0;
-	ani->start=0;
-  return ani;
+string ANIMATOR::type_string()
+{   switch(this->type)
+    {
+        case ANIMATOR_TOGGLE: return "ANIMATOR_TOGGLE";
+        case ANIMATOR_ON: return "ANIMATOR_ON";
+        case ANIMATOR_OFF: return "ANIMATOR_OFF";
+        case MOVATOR_Y: return "MOVATOR_Y";
+    }
+    debug("Unknown trigger type number: "+to_str(type),10);
+	exit(1);
+	return "";
+}
+
+ANIMATOR::ANIMATOR(int type, int speed, int offset, int frames, int w, int h)
+{ 	this->speed=speed;
+	this->offset=offset;
+	this->_offset=offset;
+	this->frames=frames;
+	this->w=w;
+	this->h=h;
+	this->frame=create_bitmap(w,h);
+	this->type=type;
+	if(this->type==ANIMATOR_ON) this->on=1;
+	else this->on=0;
+	this->start=0;
+}
+
+ANIMATOR::ANIMATOR(int type, int speed, int offset, int frames, int w, int h, int on, int start)
+{   this->type=type;
+    this->speed=speed;
+	this->offset=offset;
+	this->_offset=offset;
+	this->frames=frames;
+	this->w=w;
+	this->h=h;
+	this->frame=create_bitmap(w,h);
+	this->on=on;
+    this->start=start;
+}
+
+string ANIMATOR::serialize()
+{   return this->type_string()+" "+to_str(speed)+" "+to_str(offset)+" "+to_str(frames)+" "+to_str(w)+" "+to_str(h)+" "+to_str(on)+" "+to_str(start);
 }
 
 ANIMATOR * load_animator(string s)
@@ -144,7 +179,7 @@ ANIMATOR * load_animator(string s)
 	{ debug("Not enough parameters for animator.",10);
 	  exit(1);
 	}
-	return create_animator(animator_type_resolve(buf), speed, offset, frames, w, h);
+	return new ANIMATOR(ANIMATOR::type_resolve(buf), speed, offset, frames, w, h);
 }
 
 float get_movator_dif(ANIMATOR * a, int t)
@@ -185,7 +220,8 @@ TILE * create_tile()
    til->types = new short unsigned int [MAX_TILE_ELE];
    til->elements = new TEXTURED_ELEMENT * [MAX_TILE_ELE];
    for(int i=0; i<MAX_TILE_ELE; i++)
-	   til->elements[i]= new TEXTURED_ELEMENT;
+//	   til->elements[i]= new TEXTURED_ELEMENT;
+        til->elements[i]=NULL;
    return til;
 }
 
@@ -233,14 +269,15 @@ unsigned short int flip_resolve(string type)
 	return typ;
 }
 
-LIGHT_SOURCE * create_lightsource(int power, int dim, float x, float z)
-{	LIGHT_SOURCE * ls;
-	ls=new(LIGHT_SOURCE);
-	ls->power=power;
-	ls->dim=dim;
-	ls->x=x;
-	ls->z=z;
-	return ls;
+LIGHT_SOURCE::LIGHT_SOURCE(int power, int dim, float x, float z)
+{	this->power=power;
+	this->dim=dim;
+	this->x=x;
+	this->z=z;
+}
+
+string LIGHT_SOURCE::serialize()
+{   return to_str(this->power)+" "+to_str(this->dim)+" "+to_str(this->x)+" "+to_str(this->z);
 }
 
 LIGHT_SOURCE * load_lightsource(string s)
@@ -250,7 +287,7 @@ LIGHT_SOURCE * load_lightsource(string s)
 	{ debug("Not enough parameters for lightsource :"+s,10);
 	  exit(1);
 	}
-	return create_lightsource(power,dim,x,z);
+	return new LIGHT_SOURCE(power,dim,x,z);
 }
 
 TILE * load_tile(string s)
@@ -272,7 +309,7 @@ TILE * load_tile(string s)
 	return tile;
 }
 
-unsigned short int trigger_type_resolve(string type)
+int TRIGGER::type_resolve(string type)
 {	bool type_ok=false;
 	unsigned short int typ;
     if(type.compare("TRIGGER_ENTER")==0) {typ=TRIGGER_ENTER; type_ok=true;}
@@ -330,8 +367,8 @@ TRIGGER * load_trigger(string s)
 	{ debug("Not enough parameters loading trigger: "+s,10);
 	  exit(1);
 	}
-	if(params==8) ret = new TRIGGER(trigger_type_resolve(buf),xpos,zpos,w1,h1,w2,h2,anim);
-	ret = new TRIGGER(trigger_type_resolve(buf),xpos,zpos,w1,h1,w2,h2,anim,buf2);
+	if(params==8) ret = new TRIGGER(TRIGGER::type_resolve(buf),xpos,zpos,w1,h1,w2,h2,anim);
+	ret = new TRIGGER(TRIGGER::type_resolve(buf),xpos,zpos,w1,h1,w2,h2,anim,buf2);
 	return ret;
 }
 

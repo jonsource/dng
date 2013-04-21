@@ -26,6 +26,9 @@ int INFO = 0;
 
 extern CLICKABLE_MAP Clickables;
 extern List<TRIGGER> Triggers;
+extern List<ANIMATOR> Animators;
+extern List<LIGHT_SOURCE> Lightsources;
+extern List<TEXTURED_ELEMENT> Elements;
 extern int * Impassable;
 
 /**
@@ -344,6 +347,21 @@ void text_interpret(string s)
     if(*(*l)[0]=="Triggers")
     {   for(int v=0; v<Triggers.len(); v++)
         {   printf("%s\n",Triggers[v]->serialize().c_str());
+        }
+    }
+    if(*(*l)[0]=="Lightsources")
+    {   for(int v=0; v<Lightsources.len(); v++)
+        {   printf("%s\n",Lightsources[v]->serialize().c_str());
+        }
+    }
+    if(*(*l)[0]=="Animators")
+    {   for(int v=0; v<Animators.len(); v++)
+        {   printf("%s\n",Animators[v]->serialize().c_str());
+        }
+    }
+    if(*(*l)[0]=="Elements")
+    {   for(int v=0; v<Elements.len(); v++)
+        {   printf("%s\n",Elements[v]->serialize().c_str());
         }
     }
 }
