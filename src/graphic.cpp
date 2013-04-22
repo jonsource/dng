@@ -364,10 +364,20 @@ void render_tile(TILE * tile,BITMAP * bmp, int x, int z, CAMERA * cam)
 		}
 		else*/ render_element(tile->types[i],tile->elements[i],bmp,x,z,cam,far);
 	}
+
+	/* draw mobiles - if present */
+	for(int i=0; i<Game->Mobiles.len(); i++)
+    {   MOBILE * mob = Game->Mobiles[i];
+        if(floor(mob->x) == x && floor(mob->z) == z)
+        {   TEXTURED_ELEMENT * ele = new TEXTURED_ELEMENT("TILE_STATIC",0.5,0,0.5,1,1,"no-trans",13,-1,"no-clip","NO_FLIP");
+            //ele->texture=mob->sprite;
+            render_element(TILE_STATIC,ele,bmp,x,z,cam,far);
+        }
+    }
 }
 
 /**
- * subroutine of make_linesight, check whether the given tile can be seen and recursively adds it's neighbors if true
+ * subroutine of make_linesight, check whether the given tile can be seen and recursively add it's neighbors if true
  */
 void see_tile(int x, int z, CAMERA * cam)
 {	//debug("  see tile "+to_str(x)+" "+to_str(z),1);

@@ -65,6 +65,8 @@
 		<Unit filename="src/load_classes.cpp" />
 		<Unit filename="src/load_classes.h" />
 		<Unit filename="src/main.cpp" />
+		<Unit filename="src/mobile.cpp" />
+		<Unit filename="src/mobile.h" />
 		<Unit filename="src/texture.cpp" />
 		<Unit filename="src/texture.h" />
 		<Extensions>

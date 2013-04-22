@@ -62,6 +62,28 @@ using namespace std;
 #define TILE_STATIC_NS_X 9
 #define TILE_STATIC_EW_X 10
 
+#define STAND 0
+#define WALK 1
+#define TURN_LEFT 2
+#define TURN_RIGHT 3
+#define TURN_AROUND 4
+#define ATTACK 5
+#define DIE 6
+
+class TEXTURE;
+
+class MOBILE
+{   public:
+        int heading;
+        float x,y,z;
+        TEXTURE * sprite;
+        int spr_w, spr_h;
+        int speed;
+        int mode;
+        float progress;
+        MOBILE();
+};
+
 class TEXTURE
 {
     public:
@@ -73,7 +95,7 @@ class TEXTURE
 
 class ANIMATOR
 {   public:
-        unsigned short int type, speed, offset, _offset, frames, on;
+        unsigned short int type, speed, offset, _offset, frames, on, mode;
         int start,w,h;
         BITMAP * frame;
         ANIMATOR(int type, int speed, int offset, int frames, int w, int h);
@@ -159,6 +181,7 @@ class GAME
         List<TILE> Tiles;
         List<LIGHT_SOURCE> Lightsources;
         List<TRIGGER> Triggers;
+        List<MOBILE> Mobiles;
         CLICKABLE_MAP Clickables;
         VIEW_SETTINGS view_settings;
         RGB * fade_color;
@@ -169,8 +192,8 @@ class GAME
         int **linesight;
         int light_power;
         int INFO;
-        GAME();
         string map_name;
+        GAME();
 };
 
 extern GAME * Game;

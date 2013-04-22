@@ -29,6 +29,7 @@ floor/meadow1.bmp
 static/tree3.bmp
 static/tree4.bmp
 static/tree5.bmp
+static/enemy1.bmp
 
 # ANIMATORS or efectors
 # ANIMATOR miliseconds per frame, frame offset, number of frames, frame width, frame height

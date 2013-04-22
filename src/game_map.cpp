@@ -17,14 +17,6 @@ using namespace std;
 
 extern char chbuf[256];
 
-GAME::GAME()
-{   this->light_power=128;
-    this->DEBUG_LVL=4;
-    this->DEBUG_LVL_MAIN=4;
-    this->INFO=0;
-    this->TRANSPARENT=1;
-}
-
 string get_line(FILE * f)
 {	string ret="";
 	ret=fgets(chbuf,256,f);
@@ -189,6 +181,17 @@ int load_area(string fname)
 		}
 	}
 
+/* POC only */
+/** TODO
+
+remove
+*/
+    Game->Mobiles.add(new MOBILE());
+    Game->Mobiles[0]->x=4;
+    Game->Mobiles[0]->z=3;
+    Game->Mobiles[0]->sprite=Game->Textures[13];
+    Game->Mobiles[0]->spr_w=64;
+    Game->Mobiles[0]->spr_h=128;
 	return 1;
 }
 

@@ -12,6 +12,15 @@
 #include <stdio.h>
 
 extern int tmsec;
+
+GAME::GAME()
+{   this->light_power=128;
+    this->DEBUG_LVL=4;
+    this->DEBUG_LVL_MAIN=4;
+    this->INFO=0;
+    this->TRANSPARENT=1;
+}
+
 /**
  * loads texture from file. Separates the string s into filename and extension, and loads filename_close.extension
  * and then _medium and _far. If can't find appropriate texture, falls back to resizing.
@@ -175,11 +184,11 @@ ANIMATOR::ANIMATOR(int type, int speed, int offset, int frames, int w, int h, in
 }
 
 string ANIMATOR::serialize()
-{   return this->type_string()+" "+to_str(speed)+" "+to_str(_offset)+" "+to_str(frames)+" "+to_str(w)+" "+to_str(h)+" "+to_str(on)+" "+to_str(start);
+{   return this->type_string()+" "+to_str(speed)+" "+to_str(_offset)+" "+to_str(frames)+" "+to_str(w)+" "+to_str(h)+" "+to_str(on)+" "+to_str(start)+" "+to_str(mode);
 }
 
 string ANIMATOR::save_string()
-{   return to_str(offset)+" "+to_str(on)+" "+to_str(start);
+{   return to_str(offset)+" "+to_str(on)+" "+to_str(start)+" "+to_str(mode);
 }
 
 ANIMATOR * load_animator(string s)
@@ -193,8 +202,8 @@ ANIMATOR * load_animator(string s)
 }
 
 int load_animator_save(ANIMATOR * animator, string s)
-{	int offset, on, start;
-	if(sscanf(s.c_str(),"%d %d %d",&offset,&on,&start)<3)
+{	int offset, on, start, mode;
+	if(sscanf(s.c_str(),"%d %d %d %d",&offset,&on,&start,&mode)<3)
 	{ debug("Not enough parameters for animator save.",10);
 	  exit(1);
 	  return 0;
@@ -202,6 +211,7 @@ int load_animator_save(ANIMATOR * animator, string s)
 	animator->start=start;
 	animator->on=on;
 	animator->offset=offset;
+	animator->mode=mode;
 	return 1;
 }
 
