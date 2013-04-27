@@ -35,6 +35,7 @@ using namespace std;
 #define ANIMATOR_ON 2
 #define ANIMATOR_OFF 3
 #define MOVATOR_Y 4
+#define ANIMATOR_MOBILE 5 // no need to resolve or save or load this type of animator
 
 #define MAX_TILE_ELE 10
 
@@ -71,17 +72,22 @@ using namespace std;
 #define DIE 6
 
 class TEXTURE;
+class ANIMATOR;
+class TEXTURED_ELEMENT;
 
 class MOBILE
 {   public:
         int heading;
         float x,y,z;
+        TEXTURED_ELEMENT * ele;
+        ANIMATOR * ani;
         TEXTURE * sprite;
         int spr_w, spr_h;
         int speed;
         int mode;
-        float progress;
+        int progress;
         MOBILE();
+        ~MOBILE();
 };
 
 class TEXTURE

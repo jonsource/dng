@@ -357,3 +357,22 @@ void text_interpret(string s)
 void game_unload()
 {
 }
+
+void game_turn()
+{   for(int i=0; i<Game->Mobiles.len(); i++)
+    {   MOBILE * mob = Game->Mobiles[i];
+        mob->progress = mob->progress + mob->speed/3;
+        if(mob->progress>=1000)
+        {   mob->progress-=1000;
+        }
+        mob->ele->x += (mob->speed/3)/3000.0;
+        if(mob->ele->x>=1)
+        {   mob->ele->x = 0;
+            mob->x+=1;
+        }
+
+
+    }
+
+
+}

@@ -319,7 +319,9 @@ BITMAP * far_texture(TEXTURED_ELEMENT * txt, int far)
         }
         else
 	    {   int frame_no=0;
-
+            if(a->type==ANIMATOR_MOBILE)
+            {   return a->frame;
+            }
             if(a->type==ANIMATOR_TOGGLE)
             {   //if(a->on) debug("toggle animator "+to_str(a->start)+" "+to_str(a->speed)+" "+to_str(a->frames)+" "+to_str(a->start+a->speed*a->frames)+">"+to_str(tmsec));
                 if(a->on && tmsec>=(a->start+a->speed*a->frames) )
@@ -369,9 +371,12 @@ void render_tile(TILE * tile,BITMAP * bmp, int x, int z, CAMERA * cam)
 	for(int i=0; i<Game->Mobiles.len(); i++)
     {   MOBILE * mob = Game->Mobiles[i];
         if(floor(mob->x) == x && floor(mob->z) == z)
-        {   TEXTURED_ELEMENT * ele = new TEXTURED_ELEMENT("TILE_STATIC",0.5,0,0.5,1,1,"no-trans",13,-1,"no-clip","NO_FLIP");
-            //ele->texture=mob->sprite;
-            render_element(TILE_STATIC,ele,bmp,x,z,cam,far);
+        {   clear_to_color(mob->ani->frame,makecol(255,0,255));
+            if(mob->sprite==NULL) mob->sprite = Game->Textures[12];
+            int fr = mob->progress/250;
+            blit(Game->Textures[13]->close, mob->ani->frame,72*fr,0,28,53,72,75);
+            render_element(TILE_STATIC,mob->ele,bmp,x,z,cam,far);
+
         }
     }
 }
