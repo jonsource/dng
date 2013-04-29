@@ -96,10 +96,16 @@ bool can_leave(int x, int z, int dir)
     return true;
 }
 
-bool can_enter(int x, int z, int dir)
+bool is_passable(int x, int z)
 {   int t=check_coords(x,z);
     for(int i=0; i<10; i++)
     {   if(t==Game->Impassable[i]) return false; }
+    return true;
+}
+
+bool can_enter(int x, int z, int dir)
+{   if(!is_passable(x,z)) return false;
+
     /* search for entry blockers */
     for(int i=0; i<Game->Triggers.len(); i++)
     {   TRIGGER * t;
@@ -361,16 +367,7 @@ void game_unload()
 void game_turn()
 {   for(int i=0; i<Game->Mobiles.len(); i++)
     {   MOBILE * mob = Game->Mobiles[i];
-        mob->progress = mob->progress + mob->speed/3;
-        if(mob->progress>=1000)
-        {   mob->progress-=1000;
-        }
-        mob->ele->x += (mob->speed/3)/3000.0;
-        if(mob->ele->x>=1)
-        {   mob->ele->x = 0;
-            mob->x+=1;
-        }
-
+        mob->HeartBeat();
 
     }
 

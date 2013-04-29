@@ -372,9 +372,18 @@ void render_tile(TILE * tile,BITMAP * bmp, int x, int z, CAMERA * cam)
     {   MOBILE * mob = Game->Mobiles[i];
         if(floor(mob->x) == x && floor(mob->z) == z)
         {   clear_to_color(mob->ani->frame,makecol(255,0,255));
-            if(mob->sprite==NULL) mob->sprite = Game->Textures[12];
-            int fr = mob->progress/250;
-            blit(Game->Textures[13]->close, mob->ani->frame,72*fr,0,28,53,72,75);
+            if(mob->sprite==NULL) mob->sprite = Game->Textures[13];
+            int mod=(cam->heading-mob->heading+2)%4;
+            if(!cam->heading%2)
+            {
+                if(mod==1) mod=3;
+                else if(mod==3) mod=1;
+            }
+            int fr = (mob->act_progress/500)%4;
+            mod=3;
+            int width = 72;
+            if(mod==2) width=64;
+            blit(mob->sprite->close, mob->ani->frame,width*fr,72*mod,28,53,72,75);
             render_element(TILE_STATIC,mob->ele,bmp,x,z,cam,far);
 
         }

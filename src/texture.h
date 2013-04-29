@@ -63,14 +63,6 @@ using namespace std;
 #define TILE_STATIC_NS_X 9
 #define TILE_STATIC_EW_X 10
 
-#define STAND 0
-#define WALK 1
-#define TURN_LEFT 2
-#define TURN_RIGHT 3
-#define TURN_AROUND 4
-#define ATTACK 5
-#define DIE 6
-
 class TEXTURE;
 class ANIMATOR;
 class TEXTURED_ELEMENT;
@@ -85,9 +77,16 @@ class MOBILE
         int spr_w, spr_h;
         int speed;
         int mode;
-        int progress;
+        int last_action, next_action, action;
+        int flag_pass;
+        int act_progress;
+        int act_target;
         MOBILE();
         ~MOBILE();
+        int HeartBeat();
+        void actionDecide();
+        void actionGo();
+        void finishAction();
 };
 
 class TEXTURE
