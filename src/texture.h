@@ -85,6 +85,7 @@ class MOBILE
         ~MOBILE();
         int HeartBeat();
         void actionDecide();
+        void actionDecide(int mode_override);
         void actionGo();
         void finishAction();
 };

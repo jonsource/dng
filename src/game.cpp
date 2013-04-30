@@ -319,6 +319,11 @@ void text_interpret(string s)
     }
     if(*(*l)[0]=="transparent") _interpret_1int(l,"transparent",&Game->TRANSPARENT,0,1);
     if(*(*l)[0]=="light_power") _interpret_1int(l,"light_power",&Game->light_power,0,255);
+    if(*(*l)[0]=="mob_go")
+    {   int direction=0;
+        _interpret_1int(l,"mob_go",&direction,0,4);
+        Game->Mobiles[0]->next_action = direction;
+    }
     if(*(*l)[0]=="Trigger")
     {   int v;
         if(l->len()==1)

@@ -12,6 +12,10 @@
 
 #define ACT_DECIDE 5
 
+#define ACT_FIGHT 6
+
 #define MODE_WANDER 1
+#define MODE_HUNT 2
+#define MODE_FIGHT 3
 
 #endif // MOBILE_H_INCLUDED
