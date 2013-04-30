@@ -96,10 +96,16 @@ bool can_leave(int x, int z, int dir)
     return true;
 }
 
-bool can_enter(int x, int z, int dir)
+bool is_passable(int x, int z)
 {   int t=check_coords(x,z);
     for(int i=0; i<10; i++)
     {   if(t==Game->Impassable[i]) return false; }
+    return true;
+}
+
+bool can_enter(int x, int z, int dir)
+{   if(!is_passable(x,z)) return false;
+
     /* search for entry blockers */
     for(int i=0; i<Game->Triggers.len(); i++)
     {   TRIGGER * t;
@@ -313,6 +319,11 @@ void text_interpret(string s)
     }
     if(*(*l)[0]=="transparent") _interpret_1int(l,"transparent",&Game->TRANSPARENT,0,1);
     if(*(*l)[0]=="light_power") _interpret_1int(l,"light_power",&Game->light_power,0,255);
+    if(*(*l)[0]=="mob_go")
+    {   int direction=0;
+        _interpret_1int(l,"mob_go",&direction,0,4);
+        Game->Mobiles[0]->next_action = direction;
+    }
     if(*(*l)[0]=="Trigger")
     {   int v;
         if(l->len()==1)
@@ -356,4 +367,14 @@ void text_interpret(string s)
 
 void game_unload()
 {
+}
+
+void game_turn()
+{   for(int i=0; i<Game->Mobiles.len(); i++)
+    {   MOBILE * mob = Game->Mobiles[i];
+        mob->HeartBeat();
+
+    }
+
+
 }

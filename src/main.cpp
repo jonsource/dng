@@ -129,7 +129,7 @@ int main(int argc, char *argv[])
 		{ 	game_time=0;
 			if(keyb_ignore>0) keyb_ignore--;
 
-			// game_turn();
+			game_turn();
 		}
 		/* update view */
 		if(status!=PAUSE)

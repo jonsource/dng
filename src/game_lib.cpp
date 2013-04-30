@@ -5,8 +5,14 @@
 
 FILE *dbg=NULL;
 char chbuf[256];
-/*int DEBUG_LVL_MAIN = 4;
-int DEBUG_LVL = DEBUG_LVL_MAIN;*/
+
+/**
+ * square of distance of two coordinates
+ */
+float dist2(float x,float z,float xx, float zz)
+{ return ((x-xx)*(x-xx))+((z-zz)*(z-zz));
+
+}
 
 void init_debug(string fname)
 {   dbg = fopen(fname.c_str(),"w");

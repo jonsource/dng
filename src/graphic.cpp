@@ -2,6 +2,7 @@
 #include <math.h>
 #include "edittext.h"
 #include "game_lib.h"
+#include "mobile.h"
 
 BITMAP * sky1[4];
 BITMAP * api=NULL;
@@ -51,14 +52,6 @@ int init_graphic()
 	init_camera(&Game->view_settings);
 //    show_mouse(screen);
 	return 1;
-}
-
-/**
- * square of distance of two coordinates
- */
-float dist2(float x,float z,float xx, float zz)
-{ return ((x-xx)*(x-xx))+((z-zz)*(z-zz));
-
 }
 
 /**
@@ -319,7 +312,9 @@ BITMAP * far_texture(TEXTURED_ELEMENT * txt, int far)
         }
         else
 	    {   int frame_no=0;
-
+            if(a->type==ANIMATOR_MOBILE)
+            {   return a->frame;
+            }
             if(a->type==ANIMATOR_TOGGLE)
             {   //if(a->on) debug("toggle animator "+to_str(a->start)+" "+to_str(a->speed)+" "+to_str(a->frames)+" "+to_str(a->start+a->speed*a->frames)+">"+to_str(tmsec));
                 if(a->on && tmsec>=(a->start+a->speed*a->frames) )
@@ -369,9 +364,37 @@ void render_tile(TILE * tile,BITMAP * bmp, int x, int z, CAMERA * cam)
 	for(int i=0; i<Game->Mobiles.len(); i++)
     {   MOBILE * mob = Game->Mobiles[i];
         if(floor(mob->x) == x && floor(mob->z) == z)
-        {   TEXTURED_ELEMENT * ele = new TEXTURED_ELEMENT("TILE_STATIC",0.5,0,0.5,1,1,"no-trans",13,-1,"no-clip","NO_FLIP");
-            //ele->texture=mob->sprite;
-            render_element(TILE_STATIC,ele,bmp,x,z,cam,far);
+        {   clear_to_color(mob->ani->frame,makecol(255,0,255));
+            if(mob->sprite==NULL) mob->sprite = Game->Textures[13];
+            int mod=cam->heading-mob->heading+2;
+            if(mod<0) mod+=4;
+            mod=mod%4;
+            if(cam->heading==0 || cam->heading==3)
+            {
+                if(mod==3) mod=1;
+                else if(mod==1) mod=3;
+            }
+
+
+
+            int fr = (mob->act_progress/500)%4;
+            int width = 72;
+            if(mod==2) width=64;
+
+            if(mob->action==ACT_FIGHT)
+            {   mod=4;
+                fr = (mob->act_progress/500)%6;
+                if(fr<3)
+                {
+                    mod=0;
+                    fr=0;
+                }
+                else fr=fr-3;
+                width = 72;
+            }
+            blit(mob->sprite->close, mob->ani->frame,width*fr,72*mod,28,53,72,75);
+            render_element(TILE_STATIC,mob->ele,bmp,x,z,cam,far);
+
         }
     }
 }

@@ -29,5 +29,6 @@ int xz_to_heading(int x, int z);
 bool heading_to_xz(int h, int *x, int *z);
 int mstime();
 STR_LIST * tokenize(string s, string sep);
+float dist2(float x,float z,float xx, float zz);
 
 #endif
