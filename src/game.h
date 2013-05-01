@@ -1,11 +1,11 @@
-#ifndef __GAME_H_
-#define __GAME_H_
+#ifndef GAME_H_
+#define GAME_H_
 
 #include <stdio.h>
 #include <allegro.h>
 #include <string>
 #include "list.h"
-#include "game_lib.h"
+//#include "game_lib.h"
 #include "texture.h"
 #include "interface.h"
 #include "graphic.h"

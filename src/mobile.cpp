@@ -20,7 +20,7 @@ MOBILE::MOBILE()
     this->ele->texture=NULL;
     this->ele->animator = this->ani;
     this->action = ACT_DECIDE;
-    this->mode = MODE_HUNT;
+    this->mode = MODE_WANDER;
     this->flag_pass = 0;
 }
 

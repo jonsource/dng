@@ -1,5 +1,5 @@
-#ifndef __LOAD_CLASSES_H_
-#define __LOAD_CLASSES_H
+#ifndef LOAD_CLASSES_H_
+#define LOAD_CLASSES_H
 
 #include <stdio.h>
 #include <allegro.h>

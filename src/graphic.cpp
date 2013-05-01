@@ -352,13 +352,29 @@ void render_tile(TILE * tile,BITMAP * bmp, int x, int z, CAMERA * cam)
 	/** TODO
 	 *  for SIDE and FRONT check if neighboring tile is seen, if not, don't draw
 	 */
-	for(int i=0; i<tile->len; i++)
-	{	/*if(tile->types[i]==TILE_FRONT)
-		{	render_element(TILE_SIDE,tile->elements[i],bmp,x,z,cam,far);
-			render_element(TILE_FRONT,tile->elements[i],bmp,x,z,cam,far);
-		}
-		else*/ render_element(tile->types[i],tile->elements[i],bmp,x,z,cam,far);
+
+    /* sorting elements */
+
+    IND_VAL * sort_array = new IND_VAL[tile->len];
+    for(int i=0; i<tile->len; i++)
+    {   sort_array[i].index=i;
+        sort_array[i].value=dist2(x,z,tile->elements[i]->x,tile->elements[i]->z);
+    }
+
+    qsort(sort_array,tile->len,sizeof(IND_VAL),compare_ind_val);
+    //debug(" baf ",5);
+    for(int i=0; i<tile->len; i++)
+	{	int ind=sort_array[i].index;
+      //  dappend(" "+to_str(ind),5);
+	    render_element(tile->types[ind],tile->elements[ind],bmp,x,z,cam,far);
 	}
+	delete [] sort_array;
+    //debug(" baf2 ",5);
+    /* old way of rendering - without sorting
+	for(int i=0; i<tile->len; i++)
+	{	render_element(tile->types[i],tile->elements[i],bmp,x,z,cam,far);
+	}
+    */
 
 	/* draw mobiles - if present */
 	for(int i=0; i<Game->Mobiles.len(); i++)

@@ -1,5 +1,5 @@
-#ifndef __GAME_LIB_H_
-#define __GAME_LIB_H
+#ifndef GAME_LIB_H_
+#define GAME_LIB_H
 
 #define HEAD_NORTH  0
 #define HEAD_EAST   1
@@ -10,6 +10,11 @@
 #include "list.h"
 
 using namespace std;
+
+typedef struct
+{   int index;
+    float value;
+} IND_VAL;
 
 void init_debug(string s);
 void deinit_debug();
@@ -30,5 +35,6 @@ bool heading_to_xz(int h, int *x, int *z);
 int mstime();
 STR_LIST * tokenize(string s, string sep);
 float dist2(float x,float z,float xx, float zz);
+int compare_ind_val(const void * a, const void * b);
 
 #endif
