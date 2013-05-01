@@ -82,7 +82,7 @@ void init()
 	install_mouse();
 
     load_ini("game.ini");
-    debug("main debug lvl: "+to_str(Game->DEBUG_LVL_MAIN));
+    debug("main debug lvl: "+to_str(Game->GetDebugLvlMain()));
 	init_graphic();
 
 	//install interrupts

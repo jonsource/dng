@@ -8,18 +8,11 @@
 #include "texture.h"
 #include "game_map.h"
 #include "game_lib.h"
+#include "game.h"
 #include <string>
 #include <stdio.h>
 
 extern int tmsec;
-
-GAME::GAME()
-{   this->light_power=128;
-    this->DEBUG_LVL=4;
-    this->DEBUG_LVL_MAIN=4;
-    this->INFO=0;
-    this->TRANSPARENT=1;
-}
 
 /**
  * loads texture from file. Separates the string s into filename and extension, and loads filename_close.extension
@@ -85,33 +78,38 @@ string TEXTURE::serialize()
 
 TEXTURED_ELEMENT::TEXTURED_ELEMENT(string type, float x, float y, float z, float w, float h, string transparent, int texture, int animator, string clip, string flip)
 {   unsigned short int typ;
-   this->x = x;
-   this->y = y;
-   this->z = z;
-   this->w = w;
-   this->h = h;
-   this->transparent = to_bool(transparent);
-   this->clip = to_bool(clip);
-   if(texture>=Game->Textures.len())
-   { debug("Referencing undefined texture "+to_str(texture),10);
-   	 this->texture = Game->Textures[0];
-   }
-   else this->texture = Game->Textures[texture];
-   this->texture_nr = texture;
-   this->transparent = to_bool(transparent);
-   if(animator>-1)
-   {   if(animator<Game->Animators.len())	this->animator = Game->Animators[animator];
-   	   else
-   	   {	debug("Referencing undefined animator "+to_str(animator),10);
-   	   	   exit(1);
-   	   }
-   }
-   else this->animator = NULL;
-   this->animator_nr = animator;
-   typ=TILE::type_resolve(type);
-   this->type=typ;
-   this->flip=flip_resolve(flip);
-   //debug("Element "+type);
+    this->x = x;
+    this->y = y;
+    this->z = z;
+    this->w = w;
+    this->h = h;
+    this->transparent = to_bool(transparent);
+    this->clip = to_bool(clip);
+    if(texture==-1)
+    {   this->texture = NULL;
+    }
+    else
+    {   if(texture>=Game->Textures.len())
+        {   debug("Referencing undefined texture "+to_str(texture),10);
+            this->texture = Game->Textures[0];
+        }
+        else this->texture = Game->Textures[texture];
+    }
+    this->texture_nr = texture;
+    this->transparent = to_bool(transparent);
+    if(animator>-1)
+    {   if(animator<Game->Animators.len())	this->animator = Game->Animators[animator];
+       else
+       {	debug("Referencing undefined animator "+to_str(animator),10);
+           exit(1);
+       }
+    }
+    else this->animator = NULL;
+    this->animator_nr = animator;
+    typ=TILE::type_resolve(type);
+    this->type=typ;
+    this->flip=flip_resolve(flip);
+    //debug("Element "+type);
 }
 
 string TEXTURED_ELEMENT::serialize()

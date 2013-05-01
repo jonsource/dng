@@ -1,0 +1,10 @@
+:speed
+100
+
+:sprite_bmp
+data/images/static/enemy1_close.bmp
+
+:sprite_modes
+0 0 0 0
+
+:end

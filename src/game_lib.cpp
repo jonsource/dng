@@ -5,6 +5,7 @@
 
 FILE *dbg=NULL;
 char chbuf[256];
+int DEBUG_LVL, DEBUG_LVL_MAIN;
 
 /**
  * square of distance of two coordinates
@@ -110,7 +111,7 @@ int mstime()
  */
 void debug(string s, int lvl)
 {
-	if(lvl<Game->DEBUG_LVL) return;
+	if(lvl<DEBUG_LVL) return;
 	s="\n"+to_str((int)mstime())+" "+s;
 	printf(s.c_str());
 	fprintf(dbg,s.c_str());
@@ -127,7 +128,7 @@ void debug(string s)
  * append debug information (omits current time stamp)
  */
 void dappend(string s, int lvl)
-{ 	if(lvl<Game->DEBUG_LVL) return;
+{ 	if(lvl<DEBUG_LVL) return;
     printf(s.c_str());
 	fprintf(dbg,s.c_str());
 	fflush(dbg);
@@ -144,17 +145,39 @@ void dappend(string s)
  * set what lvl of importance is needed to be logged, 0 for everything, 10 for production version
  * may be used to temporarily increase logging in parts of code
  */
-void set_debug_lvl(int lvl)
+namespace game_lib
 {
-	Game->DEBUG_LVL=lvl;
-}
 
-/**
- * reset debug level to main lvl
- */
-void reset_debug_lvl()
-{
-	Game->DEBUG_LVL=Game->DEBUG_LVL_MAIN;
+    int set_debug_lvl(int lvl)
+    {
+        return DEBUG_LVL=lvl;
+    }
+
+    int get_debug_lvl()
+    {
+        return DEBUG_LVL;
+    }
+
+
+
+    int set_debug_lvl_main(int lvl)
+    {
+        return DEBUG_LVL_MAIN=lvl;
+    }
+
+
+    int get_debug_lvl_main()
+    {
+        return DEBUG_LVL_MAIN;
+    }
+
+    /**
+     * reset debug level to main lvl
+     */
+    int reset_debug_lvl()
+    {
+        return DEBUG_LVL=DEBUG_LVL_MAIN;
+    }
 }
 
 /**
