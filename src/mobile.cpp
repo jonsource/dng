@@ -16,7 +16,7 @@ MOBILE::MOBILE()
     this->act_target=100;
     this->speed=100;
     this->ani = new ANIMATOR(ANIMATOR_MOBILE,0,0,0,128,128);
-    this->ele = new TEXTURED_ELEMENT("TILE_STATIC",0,0,0.5,1,1,"no-trans",13,-1,"no-clip","NO_FLIP");
+    this->ele = new TEXTURED_ELEMENT("TILE_STATIC",0,0,0,0.8,0.8,"no-trans",13,-1,"no-clip","NO_FLIP");
     this->ele->texture=NULL;
     this->ele->animator = this->ani;
     this->action = ACT_DECIDE;
@@ -38,7 +38,7 @@ void MOBILE::finishAction()
     this->next_action = ACT_DECIDE;
     debug(" ["+to_str(this->x)+","+to_str(this->z)+"]"+" action changed to :"+to_str(this->action),5);
     if(this->action>=ACT_GO_NORTH && this->action<=ACT_GO_WEST)
-    {   this->act_target = 4000;
+    {   this->act_target = 3000;
         this->heading = this->action;
     }
     if(this->action==ACT_FIGHT)

@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "allegro.h"
 #include "game.h"
+#include "game_lib.h"
 #include "chat.h"
 #include "game_map.h"
 #include "edittext.h"

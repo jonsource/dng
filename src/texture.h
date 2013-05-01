@@ -129,12 +129,18 @@ class TEXTURED_ELEMENT
 
 class TILE
 {   public:
-        int len;
+        int elements_len;
         int *element_nrs;
         TEXTURED_ELEMENT ** elements;
-        unsigned short int * types;
+        unsigned short int * element_types;
+        int *static_nrs;
+        int statics_len;
+        TEXTURED_ELEMENT ** statics;
+        unsigned short int * static_types;
         TILE();
         int add_element(string type, int element);
+        int add_element_subr(unsigned short int typ, int element);
+        int add_static_subr(unsigned short int typ, int stat);
         string serialize();
         static string type_string(int i);
         static unsigned short int type_resolve(string s);
@@ -202,7 +208,15 @@ class GAME
         GAME();
 };
 
+typedef struct
+{   TEXTURED_ELEMENT * ele;
+    unsigned short int ele_t;
+    int ind; //debuging use only
+    float value;
+} IND_VAL;
+
 extern GAME * Game;
+
 
 TEXTURE * load_texture(string s);
 TEXTURED_ELEMENT * load_element(string s);

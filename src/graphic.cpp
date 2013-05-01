@@ -338,6 +338,27 @@ BITMAP * far_texture(TEXTURED_ELEMENT * txt, int far)
 	return txt->texture->close;
 }
 
+void render_tile_floor(TILE * tile,BITMAP * bmp, int x, int z, CAMERA * cam)
+{   int d = dist(x,z,cam);
+
+	int far=2;
+	if(d<9) { far=1;}
+	if(d<4) { far=0;}
+
+	/** TODO
+	 *  for SIDE and FRONT check if neighboring tile is seen, if not, don't draw
+	 */
+
+    /* old way of rendering - without sorting - used for walls ets.. */
+   /* int upper=tile->elements_len;
+    if (upper>1) upper = 1;
+	for(int i=0; i<upper; i++)
+	{	render_element(tile->element_types[i],tile->elements[i],bmp,x,z,cam,far);
+	}*/
+	if(tile->element_types[0]==TILE_FLOOR)
+        render_element(tile->element_types[0],tile->elements[0],bmp,x,z,cam,far);
+}
+
 /**
  * render a tile of map, i.e. render all of its elements as necessary
  */
@@ -352,19 +373,18 @@ void render_tile(TILE * tile,BITMAP * bmp, int x, int z, CAMERA * cam)
 	/** TODO
 	 *  for SIDE and FRONT check if neighboring tile is seen, if not, don't draw
 	 */
-	for(int i=0; i<tile->len; i++)
-	{	/*if(tile->types[i]==TILE_FRONT)
-		{	render_element(TILE_SIDE,tile->elements[i],bmp,x,z,cam,far);
-			render_element(TILE_FRONT,tile->elements[i],bmp,x,z,cam,far);
-		}
-		else*/ render_element(tile->types[i],tile->elements[i],bmp,x,z,cam,far);
+
+    /* old way of rendering - without sorting - used for walls ets.. */
+	for(int i=0; i<tile->elements_len; i++)
+	{	if(tile->element_types[i]!=TILE_FLOOR) render_element(tile->element_types[i],tile->elements[i],bmp,x,z,cam,far);
 	}
 
-	/* draw mobiles - if present */
+    TEXTURED_ELEMENT * mobile = NULL;
+    /* prepare mobile - if present, only one mobile per square allowed */
 	for(int i=0; i<Game->Mobiles.len(); i++)
     {   MOBILE * mob = Game->Mobiles[i];
         if(floor(mob->x) == x && floor(mob->z) == z)
-        {   clear_to_color(mob->ani->frame,makecol(255,0,255));
+        {   clear_to_color(mob->ani->frame,makecol(254,0,255));
             if(mob->sprite==NULL) mob->sprite = Game->Textures[13];
             int mod=cam->heading-mob->heading+2;
             if(mod<0) mod+=4;
@@ -392,11 +412,43 @@ void render_tile(TILE * tile,BITMAP * bmp, int x, int z, CAMERA * cam)
                 else fr=fr-3;
                 width = 72;
             }
-            blit(mob->sprite->close, mob->ani->frame,width*fr,72*mod,28,53,72,75);
-            render_element(TILE_STATIC,mob->ele,bmp,x,z,cam,far);
-
+            blit(mob->sprite->close, mob->ani->frame,width*fr,72*mod,0,53,width,75);
+            blit(mob->sprite->close, mob->ani->frame,width*fr,72*mod,128-width,53,width,75);
+            //render_element(TILE_STATIC,mob->ele,bmp,x,z,cam,far);
+            mobile = mob->ele;
+            break; // no need to search further - only one mobile per square
         }
     }
+
+    /* sorting static elements + mobile if present */
+
+
+    int stat_len = tile->statics_len;
+    if(mobile != NULL ) stat_len++;
+    IND_VAL * sort_array = new IND_VAL[stat_len]; // allocate enough space for statics and a mobile - if present
+    for(int i=0; i<tile->statics_len; i++) // yes, use tile->statics_len, we're filling in the statics only
+    {   sort_array[i].ele=tile->statics[i];
+        sort_array[i].ind=i; //debuging use only
+        sort_array[i].ele_t= tile->static_types[i];
+        sort_array[i].value=dist2(cam->dolly_xpos,cam->dolly_zpos,x+tile->statics[i]->x,z+tile->statics[i]->z);
+    }
+    // add mobile to the end of the list
+    if(mobile != NULL )
+    {   sort_array[stat_len-1].ele = mobile;
+        sort_array[stat_len-1].ind = -10; //debuging use only
+        sort_array[stat_len-1].ele_t = mobile->type;
+        sort_array[stat_len-1].value=dist2(cam->dolly_xpos,cam->dolly_zpos,x+mobile->x,z+mobile->x);
+    }
+
+
+    qsort(sort_array,stat_len,sizeof(IND_VAL),compare_ind_val);
+
+    for(int i=0; i<stat_len; i++)
+	{
+        //dappend(" "+to_str((int)*sort_array[i].ele_t),5);
+	    render_element((int)sort_array[i].ele_t,sort_array[i].ele,bmp,x,z,cam,far);
+	}
+	delete [] sort_array;
 }
 
 /**
@@ -411,8 +463,8 @@ void see_tile(int x, int z, CAMERA * cam)
 		return;
 	  }
 	  Game->linesight[x][z]=s;
-	  for(int i=0;i<Game->Tiles[s-1]->len;i++)
-		  if(Game->Tiles[s-1]->types[i]==TILE_FRONT) { return; }
+	  for(int i=0;i<Game->Tiles[s-1]->elements_len;i++)
+		  if(Game->Tiles[s-1]->element_types[i]==TILE_FRONT) { return; }
 
 	  if(!see_coords(x+cam->xfront,z+cam->zfront)) see_tile(x+cam->xfront,z+cam->zfront,cam);
 	  if(cam->xfront==0)
@@ -495,24 +547,38 @@ void draw_view(int xpos, int ypos, int zpos, int heading)
 
    make_linesight(xpos,zpos,cam);
    //debug(" * in draw_view after linesight",1);
-  int fx, fz;
- for(dx=MAX_VIEW_DIST; dx>=0; dx--)
-     for(dz=dx+1; dz>=0; dz--)
-     { fx=xpos+dx*cam->xfront+dz*cam->zfront;  // ano zfront, y je nahoru
-       fz=zpos+dz*cam->xfront+dx*cam->zfront;
-       if(see_coords(fx,fz))
-         render_tile(Game->Tiles[Game->game_map[fx][fz]-1],game_bmp, fx, fz, cam);
-       fx=xpos+dx*cam->xfront-dz*cam->zfront;  // ano zfront, y je nahoru
-       fz=zpos-dz*cam->xfront+dx*cam->zfront;
-       if(see_coords(fx,fz))
-    	 render_tile(Game->Tiles[Game->game_map[fx][fz]-1],game_bmp, fx, fz, cam);
-     }
+    int fx, fz;
+    /* render floors and ceilings */
+    for(dx=MAX_VIEW_DIST; dx>=0; dx--)
+    {   for(dz=dx+1; dz>=0; dz--)
+        {   fx=xpos+dx*cam->xfront+dz*cam->zfront;  // ano zfront, y je nahoru
+            fz=zpos+dz*cam->xfront+dx*cam->zfront;
+            if(see_coords(fx,fz))
+                render_tile_floor(Game->Tiles[Game->game_map[fx][fz]-1],game_bmp, fx, fz, cam);
+            fx=xpos+dx*cam->xfront-dz*cam->zfront;  // ano zfront, y je nahoru
+            fz=zpos-dz*cam->xfront+dx*cam->zfront;
+            if(see_coords(fx,fz))
+                render_tile_floor(Game->Tiles[Game->game_map[fx][fz]-1],game_bmp, fx, fz, cam);
+        }
+    }
 
+    /* render the rest */
+    for(dx=MAX_VIEW_DIST; dx>=0; dx--)
+    {   for(dz=dx+1; dz>=0; dz--)
+        {   fx=xpos+dx*cam->xfront+dz*cam->zfront;  // ano zfront, y je nahoru
+            fz=zpos+dz*cam->xfront+dx*cam->zfront;
+            if(see_coords(fx,fz))
+                render_tile(Game->Tiles[Game->game_map[fx][fz]-1],game_bmp, fx, fz, cam);
+            fx=xpos+dx*cam->xfront-dz*cam->zfront;  // ano zfront, y je nahoru
+            fz=zpos-dz*cam->xfront+dx*cam->zfront;
+            if(see_coords(fx,fz))
+                render_tile(Game->Tiles[Game->game_map[fx][fz]-1],game_bmp, fx, fz, cam);
+        }
+    }
 
    if(Game->INFO>1)
    {
-
-        /* overlay some text */
+    /* overlay some text */
        set_clip_rect(game_bmp, 0, 0, game_bmp->w, game_bmp->h);
       // textprintf_ex(bmp, font, 0,  0, makecol(0, 0, 0), -1,
     //		 "Viewport width: %d  height: %d", viewport_w,viewport_h);
