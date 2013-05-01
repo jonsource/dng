@@ -1,23 +1,36 @@
+#include "allegro.h"
 #include "mobile.h"
 #include "game_lib.h"
 #include "game.h"
 
 extern int gz,gx;
 
+SPRITE::SPRITE()
+{
+    this->sprite = NULL;
+}
+
+SPRITE::~SPRITE()
+{
+    destroy_bitmap(this->sprite);
+    this->Modes.clear_all();
+}
+
 MOBILE::MOBILE()
 {
     this->x=0;
     this->y=0;
     this->z=0;
-    this->sprite = NULL;
+    this->sprite = new SPRITE();
     this->spr_w=0;
     this->spr_h=0;
     this->act_progress=0;
     this->act_target=100;
     this->speed=100;
     this->ani = new ANIMATOR(ANIMATOR_MOBILE,0,0,0,128,128);
-    this->ele = new TEXTURED_ELEMENT("TILE_STATIC",0,0,0,0.8,0.8,"no-trans",13,-1,"no-clip","NO_FLIP");
-    this->ele->texture=NULL;
+    this->ele = new TEXTURED_ELEMENT("TILE_STATIC",0,0,0,0.8,0.8,"no-trans",-1,-1,"no-clip","NO_FLIP");
+    //this->ele = NULL;
+    //this->ele->texture=NULL;
     this->ele->animator = this->ani;
     this->action = ACT_DECIDE;
     this->mode = MODE_HUNT;
@@ -28,6 +41,9 @@ MOBILE::~MOBILE()
 {
     delete this->ani;
     delete this->ele;
+    this->sprite->Modes.clear_all();
+    destroy_bitmap(this->sprite->sprite);
+    delete this->sprite;
 }
 
 void MOBILE::finishAction()
@@ -45,7 +61,7 @@ void MOBILE::finishAction()
     {   this->act_target = 3000;
     }
     this->flag_pass=0;
-    //debug("finish action, next action :"+to_str(this->next_action),5);
+    debug("finish action, next action :"+to_str(this->next_action),1);
 }
 
 void MOBILE::actionGo()
@@ -60,9 +76,10 @@ void MOBILE::actionGo()
         }
         perc=perc-1;
     }
+    debug("action Go");
     this->ele->x = 0.5 + perc * x;
     this->ele->z = 0.5 + perc * z;
-    //debug("action Go, progress :"+to_str(this->act_progress)+" ["+to_str(this->x)+","+to_str(this->x)+"]",5);
+    debug("action Go, progress :"+to_str(this->act_progress)+" ["+to_str(this->x)+","+to_str(this->x)+"]",1);
 }
 void MOBILE::actionDecide()
 {
@@ -143,5 +160,15 @@ int MOBILE::HeartBeat()
                             break;
     }
 
+    debug(" succesfull end heart beat",1);
     return 1;
+}
+
+SPRITE_MODE * load_sprite_mode(string s)
+{	SPRITE_MODE * ret = new SPRITE_MODE;
+	if(sscanf(s.c_str(),"%d %d %d %d",&ret->start_y,&ret->width,&ret->height,&ret->frames)<4)
+	{ debug("Not enough parameters for sprite_mode: "+s,10);
+	  exit(1);
+	}
+	return ret;
 }

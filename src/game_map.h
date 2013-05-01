@@ -13,6 +13,8 @@
 
 using namespace std;
 
+class MOBILE;
+
 int load_map(string fname);
 void unload_map();
 string serialize_map();
@@ -29,5 +31,6 @@ double load_double(string str);
 bool load_bool(string str);
 RGB * load_color(string str);
 int * load_impassable(string str);
+MOBILE* load_mobile(string fname);
 
 #endif /* MAP_H_ */

@@ -17,8 +17,16 @@ void debug(string s);
 void debug(string s,int lvl);
 void dappend(string s, int lvl);
 void dappend(string s);
-void set_debug_lvl(int lvl);
-void reset_debug_lvl();
+
+namespace game_lib
+{
+    int get_debug_lvl_main();
+    int set_debug_lvl_main(int lvl);
+    int get_debug_lvl();
+    int set_debug_lvl(int lvl);
+    int reset_debug_lvl();
+}
+
 bool to_bool(string s);
 string to_str(int i);
 string to_str(float f);

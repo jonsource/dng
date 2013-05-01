@@ -66,29 +66,7 @@ using namespace std;
 class TEXTURE;
 class ANIMATOR;
 class TEXTURED_ELEMENT;
-
-class MOBILE
-{   public:
-        int heading;
-        float x,y,z;
-        TEXTURED_ELEMENT * ele;
-        ANIMATOR * ani;
-        TEXTURE * sprite;
-        int spr_w, spr_h;
-        int speed;
-        int mode;
-        int last_action, next_action, action;
-        int flag_pass;
-        int act_progress;
-        int act_target;
-        MOBILE();
-        ~MOBILE();
-        int HeartBeat();
-        void actionDecide();
-        void actionDecide(int mode_override);
-        void actionGo();
-        void finishAction();
-};
+class MOBILE;
 
 class TEXTURE
 {
@@ -184,39 +162,12 @@ typedef struct {
         int fov;
 } VIEW_SETTINGS;
 
-class GAME
-{   public:
-        int DEBUG_LVL_MAIN, DEBUG_LVL;
-        List<TEXTURE> Textures;
-        List<TEXTURED_ELEMENT> Elements;
-        List<ANIMATOR> Animators;
-        List<TILE> Tiles;
-        List<LIGHT_SOURCE> Lightsources;
-        List<TRIGGER> Triggers;
-        List<MOBILE> Mobiles;
-        CLICKABLE_MAP Clickables;
-        VIEW_SETTINGS view_settings;
-        RGB * fade_color;
-        int * Impassable;
-        int TRANSPARENT;
-        int MAP_SIZE;
-        int **game_map;
-        int **linesight;
-        int light_power;
-        int INFO;
-        string map_name;
-        GAME();
-};
-
 typedef struct
 {   TEXTURED_ELEMENT * ele;
     unsigned short int ele_t;
     int ind; //debuging use only
     float value;
 } IND_VAL;
-
-extern GAME * Game;
-
 
 TEXTURE * load_texture(string s);
 TEXTURED_ELEMENT * load_element(string s);

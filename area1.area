@@ -8,6 +8,9 @@
 :impassable
 3 0 0 0 0 0 0 0 0 0
 
+:mobiles
+data/mobiles/enemy1.dat
+
 # TEXTURES
 # textures are loaded from /data/images/DIR/NAME.EXE files
 # first NAME_close.EXT file is read, then NAME_middle.EXT and NAME_far.EXT files are loaded

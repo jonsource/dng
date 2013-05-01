@@ -11,7 +11,7 @@
 #include "texture.h"
 #include <string>
 #include <stdio.h>
-
+#include "mobile.h"
 
 using namespace std;
 
@@ -137,9 +137,11 @@ int load_ini(string fname)
 		if(str1.find(":")==0) // : at the beginning of new line
 		{				// is new block
 
-		    if(load_variable_subr(f,"debuglevel",&Game->DEBUG_LVL_MAIN,load_int,&str1,false))
-            {   reset_debug_lvl();
-                debug("Debug level: "+to_str(Game->DEBUG_LVL_MAIN)+" (0 - all, 10 - none)",10);
+            int dbg_lvl;
+		    if(load_variable_subr(f,"debuglevel",&dbg_lvl,load_int,&str1,false))
+            {   Game->SetDebugLvlMain(dbg_lvl);
+                Game->ResetDebugLvl();
+                debug("Debug level: "+to_str(Game->GetDebugLvlMain())+" (0 - all, 10 - none)",10);
             }
             load_variable(f,"field-of-view",&Game->view_settings.fov,load_int, &str1);
             load_variable(f,"stepback",&Game->view_settings.step_back,load_double, &str1);
@@ -171,6 +173,23 @@ int load_area(string fname)
             load_multivar(f,"fade_color",&Game->fade_color, load_color, &str1);
             load_multivar(f,"impassable",&Game->Impassable, load_impassable, &str1);
 
+            if(str1.compare(":mobiles")==0)
+            {   debug("Loading mobiles");
+                while(!feof(f)) // must be a while statement - to skip empty lines and comments
+                {   str2=get_line(f);
+                    if(str2.length()==0) continue;
+                    if(str2.find("#")==0) continue;
+                    if(str2.find(":")==0)
+                    {	debug("Done loading mobiles");
+                        str1 = str2;
+                        break;
+                    }
+
+                    Game->Mobiles.add(load_mobile(str2.c_str()));
+                    debug("after Loading mobile");
+                }
+            }
+
 			load_block(f,"textures",&Game->Textures, load_texture, &str1);
 			load_block(f,"animators", &Game->Animators, load_animator, &str1);
 			load_block(f,"elements", &Game->Elements, load_element, &str1);
@@ -186,13 +205,62 @@ int load_area(string fname)
 
 remove
 */
-    Game->Mobiles.add(new MOBILE());
+//    Game->Mobiles.add(new MOBILE());
     Game->Mobiles[0]->x=4;
     Game->Mobiles[0]->z=3;
-    Game->Mobiles[0]->sprite=Game->Textures[13];
+//    Game->Mobiles[0]->sprite=Game->Textures[13];
     Game->Mobiles[0]->spr_w=64;
     Game->Mobiles[0]->spr_h=128;
 	return 1;
+}
+
+MOBILE* load_mobile(string fname)
+{	string str1, str2;
+	FILE *f=fopen(fname.c_str(),"r");
+	if(!f)
+	{	debug("Mobile "+fname+" not found!\n",10);
+		exit(0);
+	}
+	MOBILE * mob = new MOBILE();
+	mob->fname = fname;
+
+	while(!feof(f))
+	{ 	str1=get_line(f);
+
+        if(str1.length()==0) continue;
+        if(str1.find("#")==0) continue;
+		if(str1.find(":")==0) // : at the beginning of new line
+		{				// is new block
+            if(str1.compare(":sprite_bmp")==0)
+            {   debug("Loading sprite");
+                while(!feof(f)) // must be a while statement - to skip empty lines and comments
+                {   str2=get_line(f);
+                    if(str2.length()==0) continue;
+                    if(str2.find("#")==0) continue;
+                    if(str2.find(":")==0)
+                    {	debug("Done loading sprite");
+                        str1 = str2; break;
+                    } //next part of definitions
+                    PALETTE pal;
+                    mob->sprite->sprite = load_bitmap(str2.c_str(), pal);
+                    debug("load bitmap "+str2);
+                    if(mob->sprite->sprite==NULL)
+                    {
+                        debug("Missing sprite : "+str2,10);
+                        exit(1);
+                    }
+                    break; // we are reading just one value
+                }
+            }
+
+            load_variable_subr(f,"speed",&mob->speed,load_int, &str1,true);
+            load_block(f,"sprite_modes",&mob->sprite->Modes, load_sprite_mode, &str1);
+
+			if(str1.compare(":end")==0)
+			{ 	debug("End of "+fname+"\n"); break; }
+		}
+	}
+	return mob;
 }
 
 int load_map_base(string fname)

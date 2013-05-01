@@ -13,6 +13,9 @@
 :impassable
 0 0 0 0 0 0 0 0 0 0
 
+:mobiles
+data/mobiles/enemy1.dat
+
 :textures
 # 0
 floor/meadow1.bmp

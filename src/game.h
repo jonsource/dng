@@ -17,7 +17,33 @@ using namespace std;
 #define PLAY     2
 #define PAUSE    -1
 
-class GAME;
+class GAME
+{   public:
+        List<TEXTURE> Textures;
+        List<TEXTURED_ELEMENT> Elements;
+        List<ANIMATOR> Animators;
+        List<TILE> Tiles;
+        List<LIGHT_SOURCE> Lightsources;
+        List<TRIGGER> Triggers;
+        List<MOBILE> Mobiles;
+        CLICKABLE_MAP Clickables;
+        VIEW_SETTINGS view_settings;
+        RGB * fade_color;
+        int * Impassable;
+        int TRANSPARENT;
+        int MAP_SIZE;
+        int **game_map;
+        int **linesight;
+        int light_power;
+        int INFO;
+        string map_name;
+        GAME();
+        int GetDebugLvl();
+        int GetDebugLvlMain();
+        int SetDebugLvl(int dbg_lvl);
+        int SetDebugLvlMain(int dbg_lvl);
+        int ResetDebugLvl();
+};
 
 void game_load();
 void game_unload();
@@ -33,5 +59,6 @@ void player_move_subr(int x, int y, int z, int h, bool force);
 void text_interpret(string s);
 bool is_passable(int x, int z);
 
+extern GAME * Game;
 
 #endif

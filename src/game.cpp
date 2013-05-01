@@ -2,6 +2,7 @@
 #include "game_lib.h"
 #include "load_classes.h"
 #include "game_map.h"
+#include "mobile.h"
 
 
 extern int keyb_ignore;
@@ -13,6 +14,34 @@ Character *Player;
 int gy=0,gz=2,gx=3,gh=0;
 
 GAME * Game;
+
+GAME::GAME()
+{   game_lib::set_debug_lvl_main(4);
+    game_lib::set_debug_lvl(4);
+    this->light_power=128;
+    this->INFO=0;
+    this->TRANSPARENT=1;
+}
+
+int GAME::GetDebugLvlMain()
+{   return game_lib::get_debug_lvl_main();
+}
+
+int GAME::SetDebugLvlMain(int dbg_lvl)
+{   return game_lib::set_debug_lvl_main(dbg_lvl);
+}
+
+int GAME::GetDebugLvl()
+{   return game_lib::get_debug_lvl();
+}
+
+int GAME::SetDebugLvl(int dbg_lvl)
+{   return game_lib::set_debug_lvl(dbg_lvl);
+}
+
+int GAME::ResetDebugLvl()
+{   return game_lib::reset_debug_lvl();
+}
 
 /**
  * initialize and load game
