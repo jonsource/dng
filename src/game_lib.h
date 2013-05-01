@@ -11,11 +11,6 @@
 
 using namespace std;
 
-typedef struct
-{   int index;
-    float value;
-} IND_VAL;
-
 void init_debug(string s);
 void deinit_debug();
 void debug(string s);

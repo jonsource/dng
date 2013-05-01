@@ -343,7 +343,11 @@ void unload_area()
 
     for(int i=0; i<Game->Tiles.len(); i++)
     {   delete[] Game->Tiles.items[i]->elements;
-        delete[] Game->Tiles.items[i]->types;
+        delete[] Game->Tiles.items[i]->element_types;
+    }
+    for(int i=0; i<Game->Tiles.len(); i++)
+    {   delete[] Game->Tiles.items[i]->statics;
+        delete[] Game->Tiles.items[i]->static_types;
     }
     Game->Tiles.clear_all();
 

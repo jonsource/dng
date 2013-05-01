@@ -192,8 +192,8 @@ STR_LIST * tokenize(string s, string sep)
 }
 
 int compare_ind_val(const void * a, const void * b)
-{   if ( (*(IND_VAL*)a).value <  (*(IND_VAL*)b).value ) return -1;
+{   if ( (*(IND_VAL*)a).value <  (*(IND_VAL*)b).value ) return 1;
     if ( (*(IND_VAL*)a).value == (*(IND_VAL*)b).value ) return 0;
-    if ( (*(IND_VAL*)a).value >  (*(IND_VAL*)b).value ) return 1;
+    if ( (*(IND_VAL*)a).value >  (*(IND_VAL*)b).value ) return -1;
     return 0;
 }

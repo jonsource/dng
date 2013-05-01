@@ -231,30 +231,58 @@ float get_movator_dif(ANIMATOR * a, int t)
 
 int TILE::add_element(string type, int element)
 {   unsigned short int typ;
-	if(this->len+1 >= MAX_TILE_ELE)
+    typ = TILE::type_resolve(type);
+    if(typ>=TILE_STATIC) return this->add_static_subr(typ,element);
+    else return this->add_element_subr(typ,element);
+}
+
+int TILE::add_element_subr(unsigned short int typ, int element)
+{   if(this->elements_len+1 >= MAX_TILE_ELE)
 	{	debug("Not enough space for further element in tile",10);
 	    return 0;
 	}
-	typ = TILE::type_resolve(type);
 	if(element<Game->Elements.len())
-    {   this->elements[this->len] = Game->Elements[element];
-        this->element_nrs[this->len] = element;
+    {   this->elements[this->elements_len] = Game->Elements[element];
+        this->element_nrs[this->elements_len] = element;
     }
 	else
 	{	debug("Referencing undefined element "+to_str(element),10);
 	   exit(1);
 	}
-	this->types[this->len] = typ;
-	debug("tile: "+type+":"+to_str(this->types[this->len])+" "+to_str(this->elements[this->len]->type),3);
-	this->len++;
+	this->element_types[this->elements_len] = typ;
+	debug("tile: "+TILE::type_string(typ)+":"+to_str(this->element_types[this->elements_len])+" "+to_str(this->elements[this->elements_len]->type),3);
+	this->elements_len++;
+	return 1;
+};
+
+int TILE::add_static_subr(unsigned short int typ, int stat)
+{   if(this->statics_len+1 >= MAX_TILE_ELE)
+	{	debug("Not enough space for further static in tile",10);
+	    return 0;
+	}
+	if(stat<Game->Elements.len())
+    {   this->statics[this->statics_len] = Game->Elements[stat];
+        this->static_nrs[this->statics_len] = stat;
+    }
+	else
+	{	debug("Referencing undefined static "+to_str(stat),10);
+	   exit(1);
+	}
+	this->static_types[this->statics_len] = typ;
+	debug("tile: "+TILE::type_string(typ)+":"+to_str(this->static_types[this->statics_len])+" "+to_str(this->statics[this->statics_len]->type),3);
+	this->statics_len++;
 	return 1;
 };
 
 TILE::TILE()
-{  this->len=0;
-   this->types = new short unsigned int [MAX_TILE_ELE];
+{  this->elements_len=0;
+   this->statics_len=0;
+   this->element_types = new short unsigned int [MAX_TILE_ELE];
+   this->static_types = new short unsigned int [MAX_TILE_ELE];
    this->element_nrs = new int [MAX_TILE_ELE];
+   this->static_nrs = new int [MAX_TILE_ELE];
    this->elements = new TEXTURED_ELEMENT * [MAX_TILE_ELE];
+   this->statics = new TEXTURED_ELEMENT * [MAX_TILE_ELE];
    for(int i=0; i<MAX_TILE_ELE; i++)
 //	   til->elements[i]= new TEXTURED_ELEMENT;
         this->elements[i]=NULL;
@@ -321,10 +349,13 @@ TILE * load_tile(string s)
 
 string TILE::serialize()
 {   string ret="";
-    for(int i=0; i < this->len; i++)
+    for(int i=0; i < this->elements_len; i++)
     {   if(i>0) ret+=" ";
-        if(elements[i]!=NULL) ret+=TILE::type_string(this->types[i])+" "+to_str(this->element_nrs[i]);
-
+        if(elements[i]!=NULL) ret+=TILE::type_string(this->element_types[i])+" "+to_str(this->element_nrs[i]);
+    }
+    for(int i=0; i < this->statics_len; i++)
+    {   if(i>0) ret+=" ";
+        if(statics[i]!=NULL) ret+=TILE::type_string(this->static_types[i])+" "+to_str(this->static_nrs[i]);
     }
     return ret;
 }
