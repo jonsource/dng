@@ -297,8 +297,10 @@ void render_element(int type, TEXTURED_ELEMENT * element, BITMAP *bmp, int x, in
  */
 BITMAP * far_texture(TEXTURED_ELEMENT * txt, int far)
 {	/* animate texture */
+
     if(txt->animator!=NULL)
 	{	/* apply MOVATORS */
+
         int t=tmsec;
         ANIMATOR * a=txt->animator;
         if(a->type==MOVATOR_Y)
@@ -312,7 +314,9 @@ BITMAP * far_texture(TEXTURED_ELEMENT * txt, int far)
             return a->frame;
         }
         else
-	    {   int frame_no=0;
+	    {
+
+	        int frame_no=0;
             if(a->type==ANIMATOR_MOBILE)
             {   return a->frame;
             }
@@ -331,7 +335,7 @@ BITMAP * far_texture(TEXTURED_ELEMENT * txt, int far)
 	    }
 
     }
-	switch(far)
+    switch(far)
 	{ case 0: return txt->texture->close;
 	  case 1: return txt->texture->medium;
 	  case 2: return txt->texture->far;
@@ -488,7 +492,7 @@ void see_tile(int x, int z, CAMERA * cam)
  * recursively count what tiles we  can see from current position
  */
 void make_linesight(int x, int z, CAMERA * cam)
-{	debug(" linesight "+to_str(x)+" "+to_str(z),1);
+{	//debug(" linesight "+to_str(x)+" "+to_str(z),1);
 	for(int i=0; i<Game->MAP_SIZE; i++)
 		for(int j=0; j<Game->MAP_SIZE; j++)
 			Game->linesight[i][j]=0;

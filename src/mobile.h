@@ -15,6 +15,7 @@
 
 #define ACT_FIGHT 6
 
+#define MODE_NO_OVERRIDE -1
 #define MODE_WANDER 1
 #define MODE_HUNT 2
 #define MODE_FIGHT 3

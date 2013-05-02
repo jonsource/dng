@@ -90,21 +90,6 @@ class ANIMATOR
         static unsigned short int type_resolve(string s);
 };
 
-class TEXTURED_ELEMENT
-{   public:
-		float x,y,z,w,h;
-		int type,flip;
-		bool transparent,clip;
-		int texture_nr;
-		TEXTURE * texture;
-		int animator_nr;
-		ANIMATOR * animator;
-		TEXTURED_ELEMENT(string type, float x, float y, float z, float w, float h, string transparent, int texture, int animator, string clip, string flip);
-		string serialize();
-		string type_string();
-		static int type_resolve(string s);
-};
-
 class TILE
 {   public:
         int elements_len;

@@ -69,6 +69,8 @@
 		<Unit filename="src/mobile.h" />
 		<Unit filename="src/texture.cpp" />
 		<Unit filename="src/texture.h" />
+		<Unit filename="src/textured_element.cpp" />
+		<Unit filename="src/textured_element.h" />
 		<Extensions>
 			<code_completion />
 			<envvars />
