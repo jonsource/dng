@@ -303,7 +303,6 @@ BITMAP * far_texture(TEXTURED_ELEMENT * txt, int far)
 
         int t=tmsec;
         ANIMATOR * a=txt->animator;
-        debug("ft1 "+to_str(txt->animator_nr));
         if(a->type==MOVATOR_Y)
         {   /* update state, a->on 1 means it is moving (from position),
                a->offset 0 means start position, a->offset 1 means end position */
@@ -336,13 +335,11 @@ BITMAP * far_texture(TEXTURED_ELEMENT * txt, int far)
 	    }
 
     }
-    debug("ft2");
-	switch(far)
+    switch(far)
 	{ case 0: return txt->texture->close;
 	  case 1: return txt->texture->medium;
 	  case 2: return txt->texture->far;
 	}
-	debug("ft3");
 	return txt->texture->close;
 }
 
@@ -495,7 +492,7 @@ void see_tile(int x, int z, CAMERA * cam)
  * recursively count what tiles we  can see from current position
  */
 void make_linesight(int x, int z, CAMERA * cam)
-{	debug(" linesight "+to_str(x)+" "+to_str(z),1);
+{	//debug(" linesight "+to_str(x)+" "+to_str(z),1);
 	for(int i=0; i<Game->MAP_SIZE; i++)
 		for(int j=0; j<Game->MAP_SIZE; j++)
 			Game->linesight[i][j]=0;
