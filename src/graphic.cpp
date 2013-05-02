@@ -297,10 +297,13 @@ void render_element(int type, TEXTURED_ELEMENT * element, BITMAP *bmp, int x, in
  */
 BITMAP * far_texture(TEXTURED_ELEMENT * txt, int far)
 {	/* animate texture */
+
     if(txt->animator!=NULL)
 	{	/* apply MOVATORS */
+
         int t=tmsec;
         ANIMATOR * a=txt->animator;
+        debug("ft1 "+to_str(txt->animator_nr));
         if(a->type==MOVATOR_Y)
         {   /* update state, a->on 1 means it is moving (from position),
                a->offset 0 means start position, a->offset 1 means end position */
@@ -312,7 +315,9 @@ BITMAP * far_texture(TEXTURED_ELEMENT * txt, int far)
             return a->frame;
         }
         else
-	    {   int frame_no=0;
+	    {
+
+	        int frame_no=0;
             if(a->type==ANIMATOR_MOBILE)
             {   return a->frame;
             }
@@ -331,11 +336,13 @@ BITMAP * far_texture(TEXTURED_ELEMENT * txt, int far)
 	    }
 
     }
+    debug("ft2");
 	switch(far)
 	{ case 0: return txt->texture->close;
 	  case 1: return txt->texture->medium;
 	  case 2: return txt->texture->far;
 	}
+	debug("ft3");
 	return txt->texture->close;
 }
 

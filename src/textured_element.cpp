@@ -44,13 +44,3 @@ string TEXTURED_ELEMENT::serialize()
 {   return TILE::type_string(type)+" "+to_str(x)+" "+to_str(y)+" "+to_str(z)+" "+to_str(w)+" "+to_str(h)+" "+trans_to_str(transparent)+" "+to_str(texture_nr)+" "+to_str(animator_nr)+" "+clip_to_str(clip)+" "+flip_to_str(flip);
 }
 
-TEXTURED_ELEMENT::TEXTURED_ELEMENT(string s)
-{	char type[32], transparent[32], clip[16], flip[16];
-	float x,y,z,w,h;
-	int texture,animator;
-	if(sscanf(s.c_str(),"%s %f %f %f %f %f %s %d %d %s %s",type,&x,&y,&z,&w,&h,transparent,&texture,&animator,clip,flip)<11)
-	{ debug("Not enough parameters for textured element: "+s,10);
-	  exit(1);
-	}
-	TEXTURED_ELEMENT(type,x,y,z,w,h,transparent,texture,animator,clip,flip);
-}

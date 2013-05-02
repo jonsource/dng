@@ -488,7 +488,14 @@ string load_string(string str)
 }
 
 TEXTURED_ELEMENT * load_element(string  str)
-{   return new TEXTURED_ELEMENT(str);
+{	char type[32], transparent[32], clip[16], flip[16];
+	float x,y,z,w,h;
+	int texture,animator;
+	if(sscanf(str.c_str(),"%s %f %f %f %f %f %s %d %d %s %s",type,&x,&y,&z,&w,&h,transparent,&texture,&animator,clip,flip)<11)
+	{ debug("Not enough parameters for textured element: "+str,10);
+	  exit(1);
+	}
+	return new TEXTURED_ELEMENT(type,x,y,z,w,h,transparent,texture,animator,clip,flip);
 }
 
 float load_float(string str)

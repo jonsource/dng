@@ -6,6 +6,8 @@
  */
 
 #include "graphic.h"
+#include "textured_element.h"
+#include "game_lib.h"
 
 void make_floor_element(V3D_f **v, TEXTURED_ELEMENT * element, int x, int z, CAMERA * cam, int far)
 {	make_flat_element_subr(v, element, x, z, cam, far,0);
