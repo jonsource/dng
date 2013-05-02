@@ -487,6 +487,10 @@ string load_string(string str)
 {   return str;
 }
 
+TEXTURED_ELEMENT * load_element(string  str)
+{   return new TEXTURED_ELEMENT(str);
+}
+
 float load_float(string str)
 {   float ret;
     if(sscanf(str.c_str(),"%f",&ret)==1) return ret;

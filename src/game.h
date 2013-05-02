@@ -7,6 +7,7 @@
 #include "list.h"
 //#include "game_lib.h"
 #include "texture.h"
+#include "textured_element.h"
 #include "interface.h"
 #include "graphic.h"
 
