@@ -329,10 +329,10 @@ int _interpret_1int(STR_LIST * l, string command, int * val, int minval, int max
     else
     {
         string h=*(*l)[1];
-        sscanf(h.c_str(),"%d",&v);
-        if(v<minval || v>maxval) printf("Invalid parameter to %s [%d-%d]\n",command.c_str(),minval,maxval);
+        sscanf(h.c_str(),"%d",val);
+        if(*val<minval || *val>maxval) printf("Invalid parameter to %s [%d-%d]\n",command.c_str(),minval,maxval);
         else
-        {   *val = v;
+        {   v = *val;
             printf("%s = %d\n",command.c_str(),*val);
         }
     }
@@ -348,6 +348,12 @@ void text_interpret(string s)
     }
     if(*(*l)[0]=="transparent") _interpret_1int(l,"transparent",&Game->TRANSPARENT,0,1);
     if(*(*l)[0]=="light_power") _interpret_1int(l,"light_power",&Game->light_power,0,255);
+    if(*(*l)[0]=="clone")
+    {   int temp=-1;
+        if(_interpret_1int(l,"clone",&temp,0,Game->MobileTemplates.len()-1) != -1)
+        {   Game->Mobiles.add(Game->MobileTemplates[temp]->CloneAt(gx,gz));
+        }
+    }
     if(*(*l)[0]=="mob_go")
     {   int direction=0;
         _interpret_1int(l,"mob_go",&direction,0,4);

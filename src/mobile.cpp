@@ -35,16 +35,26 @@ MOBILE * MOBILE_TEMPLATE::Clone()
     return ret;
 }
 
+MOBILE * MOBILE_TEMPLATE::CloneAt(int x, int z)
+{   MOBILE * ret = new MOBILE();
+    ret->parent = this;
+    ret->speed = this->speed;
+    ret->x = x;
+    ret->z = z;
+    return ret;
+}
+
 MOBILE::MOBILE()
 {   this->x=0;
     this->y=0;
     this->z=0;
+    this->heading=0;
     this->parent = NULL;
     this->act_progress=0;
     this->act_target=100;
     this->speed=100;
     this->ani = new ANIMATOR(ANIMATOR_MOBILE,0,0,0,128,128);
-    this->ele = new TEXTURED_ELEMENT("TILE_STATIC",0,0,0,0.8,0.8,"no-trans",-1,-1,"no-clip","NO_FLIP");
+    this->ele = new TEXTURED_ELEMENT("TILE_STATIC",0.5,0,0.5,0.8,0.8,"no-trans",-1,-1,"no-clip","NO_FLIP");
     this->ele->animator = this->ani;
     this->action = ACT_DECIDE;
     this->mode = MODE_HUNT;

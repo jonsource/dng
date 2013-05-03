@@ -48,6 +48,7 @@ class MOBILE_TEMPLATE
         MOBILE_TEMPLATE();
         ~MOBILE_TEMPLATE();
         MOBILE * Clone();
+        MOBILE * CloneAt(int x, int z);
 
 };
 

@@ -205,15 +205,9 @@ int load_area(string fname)
 
 remove
 */
-//    Game->Mobiles.add(new MOBILE());
-   // Game->Mobiles[0]->x=4;
-   // Game->Mobiles[0]->z=3;
-//    Game->Mobiles[0]->sprite=Game->Textures[13];
-//    Game->Mobiles[0]->spr_w=64;
-//    Game->Mobiles[0]->spr_h=128;
-      Game->Mobiles.add(Game->MobileTemplates[0]->Clone());
+      /*Game->Mobiles.add(Game->MobileTemplates[0]->Clone());
       Game->Mobiles[0]->x=4;
-      Game->Mobiles[0]->z=3;
+      Game->Mobiles[0]->z=3;*/
 	return 1;
 }
 
@@ -426,6 +420,9 @@ void unload_area()
 
     delete Game->fade_color;
     delete[] Game->Impassable;
+
+    Game->Mobiles.clear_all();
+    Game->MobileTemplates.clear_all();
 }
 
 int save_map()
@@ -451,6 +448,7 @@ void unload_map()
     Game->Lightsources.clear_all();
     Game->Triggers.clear_all();
     Game->Clickables.clear();
+    Game->Mobiles.clear_all();
 }
 
 void change_map(string fname, int x, int z)
