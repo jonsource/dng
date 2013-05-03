@@ -463,7 +463,10 @@ void render_tile(TILE * tile,BITMAP * bmp, int x, int z, CAMERA * cam)
 /**
  * subroutine of make_linesight, check whether the given tile can be seen and recursively add it's neighbors if true
  */
-void see_tile(int x, int z, CAMERA * cam)
+
+void see_tile(int x, int z, CAMERA * cam);
+
+void see_tile_subr(int x, int z, CAMERA * cam, int recourse)
 {	//debug("  see tile "+to_str(x)+" "+to_str(z),1);
 	int s=check_coords(x,z);
 	if(s)
@@ -472,20 +475,25 @@ void see_tile(int x, int z, CAMERA * cam)
 		return;
 	  }
 	  Game->linesight[x][z]=s;
+	  if(!recourse) return;
 	  for(int i=0;i<Game->Tiles[s-1]->elements_len;i++)
 		  if(Game->Tiles[s-1]->element_types[i]==TILE_FRONT) { return; }
 
 	  if(!see_coords(x+cam->xfront,z+cam->zfront)) see_tile(x+cam->xfront,z+cam->zfront,cam);
 	  if(cam->xfront==0)
-	  { if(x>=cam->dolly_xpos-1 && !see_coords(x+1,z+cam->zfront)) see_tile(x+1,z+cam->zfront,cam);
+	  { if(x>cam->dolly_xpos-1 && !see_coords(x+1,z+cam->zfront)) see_tile(x+1,z+cam->zfront,cam);
 	    if(x<cam->dolly_xpos && !see_coords(x-1,z+cam->zfront)) see_tile(x-1,z+cam->zfront,cam);
 	  }
 	  else
-	  { if(z>=cam->dolly_zpos-1 && !see_coords(x+cam->xfront,z+1)) see_tile(x+cam->xfront,z+1,cam);
+	  { if(z>cam->dolly_zpos-1 && !see_coords(x+cam->xfront,z+1)) see_tile(x+cam->xfront,z+1,cam);
 	  	if(z<cam->dolly_zpos && !see_coords(x+cam->xfront,z-1)) see_tile(x+cam->xfront,z-1,cam);
 	  }
 	}
 	//dappend("  done "+to_str(x)+" "+to_str(z));
+}
+
+void see_tile(int x, int z, CAMERA * cam)
+{   see_tile_subr(x,z,cam,1);
 }
 
 /**
@@ -493,19 +501,21 @@ void see_tile(int x, int z, CAMERA * cam)
  */
 void make_linesight(int x, int z, CAMERA * cam)
 {	//debug(" linesight "+to_str(x)+" "+to_str(z),1);
+
 	for(int i=0; i<Game->MAP_SIZE; i++)
 		for(int j=0; j<Game->MAP_SIZE; j++)
 			Game->linesight[i][j]=0;
+
 	//debug(" * after sight reset",1);
 	// three initial tiles
 	see_tile(x,z,cam);
 	if(cam->xfront==0)
-	{ 	see_tile(x-1,z,cam);
-		see_tile(x+1,z,cam);
-	}
+	{ 	see_tile_subr(x-1,z,cam,0);
+		see_tile_subr(x+1,z,cam,0);
+    }
 	else
-	{ 	see_tile(x,z+1,cam);
-		see_tile(x,z-1,cam);
+	{ 	see_tile_subr(x,z+1,cam,0);
+		see_tile_subr(x,z-1,cam,0);
 	}
 }
 
@@ -557,15 +567,17 @@ void draw_view(int xpos, int ypos, int zpos, int heading)
    make_linesight(xpos,zpos,cam);
    //debug(" * in draw_view after linesight",1);
     int fx, fz;
+    int zfront = cam->zfront;
+    int xfront = cam->xfront;
     /* render floors and ceilings */
     for(dx=MAX_VIEW_DIST; dx>=0; dx--)
     {   for(dz=dx+1; dz>=0; dz--)
-        {   fx=xpos+dx*cam->xfront+dz*cam->zfront;  // ano zfront, y je nahoru
-            fz=zpos+dz*cam->xfront+dx*cam->zfront;
+        {   fx=xpos+dx*xfront+dz*zfront;  // ano zfront, y je nahoru
+            fz=zpos+dz*xfront+dx*zfront;
             if(see_coords(fx,fz))
                 render_tile_floor(Game->Tiles[Game->game_map[fx][fz]-1],game_bmp, fx, fz, cam);
-            fx=xpos+dx*cam->xfront-dz*cam->zfront;  // ano zfront, y je nahoru
-            fz=zpos-dz*cam->xfront+dx*cam->zfront;
+            fx=xpos+dx*xfront-dz*zfront;  // ano zfront, y je nahoru
+            fz=zpos-dz*xfront+dx*zfront;
             if(see_coords(fx,fz))
                 render_tile_floor(Game->Tiles[Game->game_map[fx][fz]-1],game_bmp, fx, fz, cam);
         }
@@ -574,12 +586,12 @@ void draw_view(int xpos, int ypos, int zpos, int heading)
     /* render the rest */
     for(dx=MAX_VIEW_DIST; dx>=0; dx--)
     {   for(dz=dx+1; dz>=0; dz--)
-        {   fx=xpos+dx*cam->xfront+dz*cam->zfront;  // ano zfront, y je nahoru
-            fz=zpos+dz*cam->xfront+dx*cam->zfront;
+        {   fx=xpos+dx*xfront+dz*zfront;  // ano zfront, y je nahoru
+            fz=zpos+dz*xfront+dx*zfront;
             if(see_coords(fx,fz))
                 render_tile(Game->Tiles[Game->game_map[fx][fz]-1],game_bmp, fx, fz, cam);
-            fx=xpos+dx*cam->xfront-dz*cam->zfront;  // ano zfront, y je nahoru
-            fz=zpos-dz*cam->xfront+dx*cam->zfront;
+            fx=xpos+dx*xfront-dz*zfront;  // ano zfront, y je nahoru
+            fz=zpos-dz*xfront+dx*zfront;
             if(see_coords(fx,fz))
                 render_tile(Game->Tiles[Game->game_map[fx][fz]-1],game_bmp, fx, fz, cam);
         }
@@ -615,6 +627,17 @@ void draw_view(int xpos, int ypos, int zpos, int heading)
              "Up vector: %.2f, %.2f, %.2f", cam->xup, cam->yup, cam->zup);
        textprintf_ex(game_bmp, font, 0, 120, makecol(0, 0, 0), -1,
              "Frames per second: %d", fps);
+
+        int see=makecol(128,128,128);
+        int not_see=makecol(72,72,72);
+        for(int i=0; i<Game->MAP_SIZE; i++)
+        {   for(int j=0; j<Game->MAP_SIZE; j++)
+            {   if(Game->linesight[i][j]==0) putpixel(game_bmp,20+i,330+j,see);
+                else putpixel(game_bmp,20+i,330+j,not_see);
+
+
+            }
+        }
     }
 
     if(Game->INFO==1) text_output(game_bmp);
