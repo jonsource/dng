@@ -24,10 +24,10 @@ class TEXTURED_ELEMENT;
 class ANIMATOR;
 
 typedef struct
-{   unsigned short int start_y;
-    unsigned short int width;
-    unsigned short int height;
-    unsigned short int frames;
+{   int start_y;
+    int width;
+    int height;
+    int frames;
 } SPRITE_MODE;
 
 class SPRITE
@@ -60,6 +60,7 @@ class MOBILE
         void actionDecide(int mode_override);
         void actionGo();
         void finishAction();
+        void Init();
 };
 
 SPRITE_MODE * load_sprite_mode(std::string s);

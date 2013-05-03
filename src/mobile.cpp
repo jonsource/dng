@@ -16,9 +16,8 @@ SPRITE::~SPRITE()
     this->Modes.clear_all();
 }
 
-MOBILE::MOBILE()
-{
-    this->x=0;
+void MOBILE::Init()
+{   this->x=0;
     this->y=0;
     this->z=0;
     this->sprite = new SPRITE();
@@ -33,6 +32,12 @@ MOBILE::MOBILE()
     this->action = ACT_DECIDE;
     this->mode = MODE_HUNT;
     this->flag_pass = 0;
+
+}
+
+MOBILE::MOBILE()
+{   this->Init();
+
 }
 
 MOBILE::~MOBILE()
