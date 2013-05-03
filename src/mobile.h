@@ -22,6 +22,7 @@
 
 class TEXTURED_ELEMENT;
 class ANIMATOR;
+class MOBILE;
 
 typedef struct
 {   int start_y;
@@ -38,15 +39,25 @@ class SPRITE
         ~SPRITE();
 };
 
-class MOBILE
+class MOBILE_TEMPLATE
 {   public:
         std::string fname;
+        SPRITE * sprite;
+        //int spr_w, spr_h;
+        int speed;
+        MOBILE_TEMPLATE();
+        ~MOBILE_TEMPLATE();
+        MOBILE * Clone();
+
+};
+
+class MOBILE
+{   public:
+        MOBILE_TEMPLATE * parent;
         int heading;
         float x,y,z;
         TEXTURED_ELEMENT * ele;
         ANIMATOR * ani;
-        SPRITE * sprite;
-        int spr_w, spr_h;
         int speed;
         int mode;
         int last_action, next_action, action;

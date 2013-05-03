@@ -8,6 +8,7 @@
 //#include "game_lib.h"
 #include "texture.h"
 #include "textured_element.h"
+#include "mobile.h"
 #include "interface.h"
 #include "graphic.h"
 
@@ -27,6 +28,7 @@ class GAME
         List<LIGHT_SOURCE> Lightsources;
         List<TRIGGER> Triggers;
         List<MOBILE> Mobiles;
+        List<MOBILE_TEMPLATE> MobileTemplates;
         CLICKABLE_MAP Clickables;
         VIEW_SETTINGS view_settings;
         RGB * fade_color;

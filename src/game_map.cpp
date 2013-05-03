@@ -185,7 +185,7 @@ int load_area(string fname)
                         break;
                     }
 
-                    Game->Mobiles.add(load_mobile(str2.c_str()));
+                    Game->MobileTemplates.add(load_mobile_template(str2.c_str()));
                     debug("after Loading mobile");
                 }
             }
@@ -206,22 +206,25 @@ int load_area(string fname)
 remove
 */
 //    Game->Mobiles.add(new MOBILE());
-    Game->Mobiles[0]->x=4;
-    Game->Mobiles[0]->z=3;
+   // Game->Mobiles[0]->x=4;
+   // Game->Mobiles[0]->z=3;
 //    Game->Mobiles[0]->sprite=Game->Textures[13];
-    Game->Mobiles[0]->spr_w=64;
-    Game->Mobiles[0]->spr_h=128;
+//    Game->Mobiles[0]->spr_w=64;
+//    Game->Mobiles[0]->spr_h=128;
+      Game->Mobiles.add(Game->MobileTemplates[0]->Clone());
+      Game->Mobiles[0]->x=4;
+      Game->Mobiles[0]->z=3;
 	return 1;
 }
 
-MOBILE* load_mobile(string fname)
+MOBILE_TEMPLATE* load_mobile_template(string fname)
 {	string str1, str2;
 	FILE *f=fopen(fname.c_str(),"r");
 	if(!f)
-	{	debug("Mobile "+fname+" not found!\n",10);
+	{	debug("Mobile template "+fname+" not found!\n",10);
 		exit(0);
 	}
-	MOBILE * mob = new MOBILE();
+	MOBILE_TEMPLATE * mob = new MOBILE_TEMPLATE();
 	mob->fname = fname;
 
 	while(!feof(f))

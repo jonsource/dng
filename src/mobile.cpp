@@ -16,13 +16,30 @@ SPRITE::~SPRITE()
     this->Modes.clear_all();
 }
 
-void MOBILE::Init()
+MOBILE_TEMPLATE::MOBILE_TEMPLATE()
+{   this->sprite = new SPRITE();
+    this->fname = "none";
+    this->speed=100;
+}
+
+MOBILE_TEMPLATE::~MOBILE_TEMPLATE()
+{   this->sprite->Modes.clear_all();
+    destroy_bitmap(this->sprite->sprite);
+    delete this->sprite;
+}
+
+MOBILE * MOBILE_TEMPLATE::Clone()
+{   MOBILE * ret = new MOBILE();
+    ret->parent = this;
+    ret->speed = this->speed;
+    return ret;
+}
+
+MOBILE::MOBILE()
 {   this->x=0;
     this->y=0;
     this->z=0;
-    this->sprite = new SPRITE();
-    this->spr_w=0;
-    this->spr_h=0;
+    this->parent = NULL;
     this->act_progress=0;
     this->act_target=100;
     this->speed=100;
@@ -32,21 +49,12 @@ void MOBILE::Init()
     this->action = ACT_DECIDE;
     this->mode = MODE_HUNT;
     this->flag_pass = 0;
-
-}
-
-MOBILE::MOBILE()
-{   this->Init();
-
 }
 
 MOBILE::~MOBILE()
 {
     delete this->ani;
     delete this->ele;
-    this->sprite->Modes.clear_all();
-    destroy_bitmap(this->sprite->sprite);
-    delete this->sprite;
 }
 
 void MOBILE::finishAction()

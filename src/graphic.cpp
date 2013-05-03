@@ -390,7 +390,7 @@ void render_tile(TILE * tile,BITMAP * bmp, int x, int z, CAMERA * cam)
     {   MOBILE * mob = Game->Mobiles[i];
         if(floor(mob->x) == x && floor(mob->z) == z)
         {   clear_to_color(mob->ani->frame,makecol(255,0,255));
-            if(mob->sprite==NULL)
+            if(mob->parent->sprite==NULL)
             {
                 debug("Missing sprite - mobile :"+to_str(i));
                 exit(1);
@@ -421,8 +421,8 @@ void render_tile(TILE * tile,BITMAP * bmp, int x, int z, CAMERA * cam)
                 else fr=fr-3;
                 width = 72;
             }
-            blit(mob->sprite->sprite, mob->ani->frame,width*fr,72*mod,0,53,width,75);
-            blit(mob->sprite->sprite, mob->ani->frame,width*fr,72*mod,128-width,53,width,75);
+            blit(mob->parent->sprite->sprite, mob->ani->frame,width*fr,72*mod,0,53,width,75);
+            blit(mob->parent->sprite->sprite, mob->ani->frame,width*fr,72*mod,128-width,53,width,75);
             //render_element(TILE_STATIC,mob->ele,bmp,x,z,cam,far);
             mobile = mob->ele;
             break; // no need to search further - only one mobile per square

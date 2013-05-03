@@ -13,7 +13,7 @@
 
 using namespace std;
 
-class MOBILE;
+class MOBILE_TEMPLATE;
 
 int load_map(string fname);
 void unload_map();
@@ -31,6 +31,6 @@ double load_double(string str);
 bool load_bool(string str);
 RGB * load_color(string str);
 int * load_impassable(string str);
-MOBILE* load_mobile(string fname);
+MOBILE_TEMPLATE * load_mobile_template(string fname);
 
 #endif /* MAP_H_ */
