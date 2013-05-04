@@ -48,7 +48,7 @@ int load_block(FILE *f, string block, List<T> * l, T * (*loader)(string), string
 }
 
 template<class T>
-int load_block_save(FILE *f, string block, List<T> * l, int (*loader)(T *, string), string * str1)
+int load_block_save(FILE *f, string block, List<T> * l, int (*loader)(T *, string), string * str1, bool create)
 {	string str2;
 	int count = 0;
 	if(str1->compare(":"+block)==0)
@@ -61,11 +61,14 @@ int load_block_save(FILE *f, string block, List<T> * l, int (*loader)(T *, strin
 			{	debug("Done loading "+block+" save");
 				str1[0] = str2; break;
 			} //next part of definitions
-			loader((*l)[count],str2);
-			count ++;
+			if(create)
+            {
+                l->add(new T);
+            }
+			if(loader((*l)[count],str2)) count ++;
 		}
 	}
-	if(count<l->len()) debug("Not enough entries for members of "+block+". Save Corrupt!",10);
+	if(count < l->len()-1) debug("Not enough entries for members of "+block+". Save Corrupt!",10);
 	return count;
 }
 
@@ -143,10 +146,10 @@ int load_ini(string fname)
                 Game->ResetDebugLvl();
                 debug("Debug level: "+to_str(Game->GetDebugLvlMain())+" (0 - all, 10 - none)",10);
             }
-            load_variable(f,"field-of-view",&Game->view_settings.fov,load_int, &str1);
-            load_variable(f,"stepback",&Game->view_settings.step_back,load_double, &str1);
-            load_variable(f,"aspect",&Game->view_settings.aspect,load_double, &str1);
-            load_variable(f,"view_height",&Game->view_settings.view_height,load_double, &str1);
+            load_variable(f, "field-of-view", &Game->view_settings.fov,load_int, &str1);
+            load_variable(f, "stepback", &Game->view_settings.step_back,load_double, &str1);
+            load_variable(f, "aspect", &Game->view_settings.aspect,load_double, &str1);
+            load_variable(f, "view_height", &Game->view_settings.view_height,load_double, &str1);
 
             if(str1.compare(":end")==0)
 			{ 	debug("End of "+fname+"\n"); break; }
@@ -170,30 +173,32 @@ int load_area(string fname)
 		if(str1.find(":")==0) // : at the beginning of new line
 		{				// is new block
 
-            load_multivar(f,"fade_color",&Game->fade_color, load_color, &str1);
-            load_multivar(f,"impassable",&Game->Impassable, load_impassable, &str1);
+            load_multivar(f, "fade_color", &Game->fade_color, load_color, &str1);
+            load_multivar(f, "impassable", &Game->Impassable, load_impassable, &str1);
 
             if(str1.compare(":mobiles")==0)
             {   debug("Loading mobiles");
                 while(!feof(f)) // must be a while statement - to skip empty lines and comments
-                {   str2=get_line(f);
-                    if(str2.length()==0) continue;
-                    if(str2.find("#")==0) continue;
-                    if(str2.find(":")==0)
+                {   str2 = get_line(f);
+                    if(str2.length() == 0) continue;
+                    if(str2.find("#") == 0) continue;
+                    if(str2.find(":") == 0)
                     {	debug("Done loading mobiles");
                         str1 = str2;
                         break;
                     }
 
                     Game->MobileTemplates.add(load_mobile_template(str2.c_str()));
+                    int last = Game->MobileTemplates.len() - 1;
+                    Game->MobileTemplates[last]->template_nr = last;  // register the number for reloading mobiles from save
                     debug("after Loading mobile");
                 }
             }
 
-			load_block(f,"textures",&Game->Textures, load_texture, &str1);
-			load_block(f,"animators", &Game->Animators, load_animator, &str1);
-			load_block(f,"elements", &Game->Elements, load_element, &str1);
-			load_block(f,"tiles", &Game->Tiles, load_tile, &str1);
+			load_block(f, "textures", &Game->Textures, load_texture, &str1);
+			load_block(f, "animators", &Game->Animators, load_animator, &str1);
+			load_block(f, "elements", &Game->Elements, load_element, &str1);
+			load_block(f, "tiles", &Game->Tiles, load_tile, &str1);
 
 			if(str1.compare(":end")==0)
 			{ 	debug("End of "+fname+"\n"); break; }
@@ -363,7 +368,8 @@ int load_map_save(string fname)
 
 			/*load_block(f,"lightsources", &Game->Lightsources, load_lightsource, &str1);
 			load_block(f,"triggers", &Game->Triggers, load_trigger, &str1);*/
-			load_block_save(f,"animators", &Game->Animators, load_animator_save, &str1);
+			load_block_save(f, "animators", &Game->Animators, load_animator_save, &str1, false); // false - don't create the object, only fill in
+			load_block_save(f, "mobiles", &Game->Mobiles, load_mobile_save, &str1, true); // true - create the object from the save
 
 			if(str1.compare(":end")==0)
 			{ 	debug("End of "+fname+"\n"); break; }
@@ -436,6 +442,8 @@ int save_map()
 	debug("Saving map "+sav+".",5);
 	fprintf(f,":animators\n");
     fprintf(f,Game->Animators.save_string().c_str());
+    fprintf(f,":mobiles\n");
+    fprintf(f,Game->Mobiles.save_string().c_str());
     fprintf(f,":end\n");
     fclose(f);
     return 1;

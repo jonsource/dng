@@ -130,6 +130,20 @@ ANIMATOR::ANIMATOR(int type, int speed, int offset, int frames, int w, int h, in
     this->start=start;
 }
 
+ANIMATOR::ANIMATOR()
+{   this->speed=0;
+	this->offset=0;
+	this->_offset=0;
+	this->frames=0;
+	this->w=0;
+	this->h=0;
+	this->frame=NULL;
+	this->type=0;
+	this->on=0;
+	this->start=0;
+
+}
+
 string ANIMATOR::serialize()
 {   return this->type_string()+" "+to_str(speed)+" "+to_str(_offset)+" "+to_str(frames)+" "+to_str(w)+" "+to_str(h)+" "+to_str(on)+" "+to_str(start)+" "+to_str(mode);
 }
@@ -150,7 +164,7 @@ ANIMATOR * load_animator(string s)
 
 int load_animator_save(ANIMATOR * animator, string s)
 {	int offset, on, start, mode;
-	if(sscanf(s.c_str(),"%d %d %d %d",&offset,&on,&start,&mode)<3)
+	if(sscanf(s.c_str(),"%d %d %d %d",&offset,&on,&start,&mode)<4)
 	{ debug("Not enough parameters for animator save.",10);
 	  exit(1);
 	  return 0;

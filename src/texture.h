@@ -82,6 +82,7 @@ class ANIMATOR
         unsigned short int type, speed, offset, _offset, frames, on, mode;
         int start,w,h;
         BITMAP * frame;
+        ANIMATOR();
         ANIMATOR(int type, int speed, int offset, int frames, int w, int h);
         ANIMATOR(int type, int speed, int offset, int frames, int w, int h, int on, int start);
         string serialize();

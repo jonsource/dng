@@ -45,16 +45,18 @@ class MOBILE_TEMPLATE
         SPRITE * sprite;
         //int spr_w, spr_h;
         int speed;
+        int template_nr;
         MOBILE_TEMPLATE();
         ~MOBILE_TEMPLATE();
         MOBILE * Clone();
         MOBILE * CloneAt(int x, int z);
-
+        int ResetClone(MOBILE * mob);
 };
 
 class MOBILE
 {   public:
         MOBILE_TEMPLATE * parent;
+        int parent_nr;
         int heading;
         float x,y,z;
         TEXTURED_ELEMENT * ele;
@@ -73,8 +75,11 @@ class MOBILE
         void actionGo();
         void finishAction();
         void Init();
+        std::string serialize();
+        std::string save_string();
 };
 
 SPRITE_MODE * load_sprite_mode(std::string s);
+int load_mobile_save(MOBILE * mob, std::string s);
 
 #endif // MOBILE_H_INCLUDED

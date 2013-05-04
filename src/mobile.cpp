@@ -20,6 +20,7 @@ MOBILE_TEMPLATE::MOBILE_TEMPLATE()
 {   this->sprite = new SPRITE();
     this->fname = "none";
     this->speed=100;
+    this->template_nr = -1;
 }
 
 MOBILE_TEMPLATE::~MOBILE_TEMPLATE()
@@ -28,17 +29,20 @@ MOBILE_TEMPLATE::~MOBILE_TEMPLATE()
     delete this->sprite;
 }
 
+int MOBILE_TEMPLATE::ResetClone(MOBILE * mob)
+{   mob->parent = this;
+    mob->speed = this->speed;
+}
+
 MOBILE * MOBILE_TEMPLATE::Clone()
 {   MOBILE * ret = new MOBILE();
-    ret->parent = this;
-    ret->speed = this->speed;
+    this->ResetClone(ret);
     return ret;
 }
 
 MOBILE * MOBILE_TEMPLATE::CloneAt(int x, int z)
 {   MOBILE * ret = new MOBILE();
-    ret->parent = this;
-    ret->speed = this->speed;
+    this->ResetClone(ret);
     ret->x = x;
     ret->z = z;
     return ret;
@@ -202,6 +206,19 @@ int MOBILE::HeartBeat()
     return 1;
 }
 
+std::string MOBILE::serialize()
+{   std::string ret=to_str(this->x)+" "+to_str(this->y)+" "+to_str(this->z)+" "+to_str(this->heading)+" "+to_str(this->action)+" "+to_str(this->act_progress)+" "+to_str(this->act_target)+" "+to_str(this->flag_pass)+" "+to_str(this->last_action)+" "+to_str(this->next_action);
+    if(this->parent->template_nr==-1)
+    {   debug("ERROR: Unindexed parent template when serializing "+this->parent->fname,10);
+    }
+    return to_str(this->parent->template_nr)+" "+ret;
+}
+
+std::string MOBILE::save_string()
+{
+    return this->serialize();
+}
+
 SPRITE_MODE * load_sprite_mode(string s)
 {
     SPRITE_MODE * ret = new SPRITE_MODE;
@@ -211,4 +228,17 @@ SPRITE_MODE * load_sprite_mode(string s)
         exit(1);
     }
     return ret;
+}
+
+int load_mobile_save(MOBILE * mob, string s)
+{	int ind;
+    if(sscanf(s.c_str(),"%d %*s",&ind))
+    {   Game->MobileTemplates[ind]->ResetClone(mob);
+    }
+    if(sscanf(s.c_str(),"%*d %f %f %f %d %d %d %d %d %d %d",&mob->x,&mob->y,&mob->z,&mob->heading,&mob->action,&mob->act_progress,&mob->act_target,&mob->flag_pass,&mob->last_action,&mob->next_action)<10)
+	{ debug("Not enough parameters for mobile save.",10);
+	  exit(1);
+	  return 0;
+	}
+	return 1;
 }
