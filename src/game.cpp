@@ -43,6 +43,17 @@ int GAME::ResetDebugLvl()
 {   return game_lib::reset_debug_lvl();
 }
 
+int GAME::DestroyMobile(int i)
+{   debug("mobile to destroy: "+to_str(i)+", mobiles length :"+to_str(Game->Mobiles.len()),5);
+    if(i>=Game->Mobiles.len()) return 0;
+    MOBILE * mob = Game->Mobiles[i];
+    debug(" mob ",5);
+    Game->Mobiles.remove(i);
+    debug(" remove ",5);
+    delete mob;
+    debug("destroyed mobile: "+to_str(i)+", mobiles length :"+to_str(Game->Mobiles.len()),5);
+    return 1;
+}
 /**
  * initialize and load game
  */
@@ -359,6 +370,11 @@ void text_interpret(string s)
         _interpret_1int(l,"mob_go",&direction,0,4);
         Game->Mobiles[0]->next_action = direction;
     }
+    if(*(*l)[0]=="kill")
+    {   int mob_i;
+        _interpret_1int(l,"kill",&mob_i,0,Game->Mobiles.len()-1);
+        Game->DestroyMobile(mob_i);
+    }
     if(*(*l)[0]=="Trigger")
     {   int v;
         if(l->len()==1)
@@ -398,6 +414,7 @@ void text_interpret(string s)
     if(*(*l)[0]=="Map")
     {   printf(serialize_map().c_str());
     }
+    debug("<<< end interpret");
 }
 
 void game_unload()
@@ -405,11 +422,12 @@ void game_unload()
 }
 
 void game_turn()
-{   for(int i=0; i<Game->Mobiles.len(); i++)
+{   debug("game turn "+to_str(Game->Mobiles.len()),1);
+    for(int i=0; i<Game->Mobiles.len(); i++)
     {   MOBILE * mob = Game->Mobiles[i];
         mob->HeartBeat();
 
     }
-
+    debug("end game turn",1);
 
 }

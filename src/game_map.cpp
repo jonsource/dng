@@ -401,24 +401,24 @@ int load_map(string fname)
 void unload_area()
 {   unload_map();
     for(int i=0; i<Game->Textures.len(); i++)
-    {   destroy_bitmap(Game->Textures.items[i]->close);
-        destroy_bitmap(Game->Textures.items[i]->medium);
-        destroy_bitmap(Game->Textures.items[i]->far);
+    {   destroy_bitmap(Game->Textures[i]->close);
+        destroy_bitmap(Game->Textures[i]->medium);
+        destroy_bitmap(Game->Textures[i]->far);
     }
     Game->Textures.clear_all();
 
     for(int i=0; i<Game->Animators.len(); i++)
-    {   destroy_bitmap(Game->Animators.items[i]->frame);
+    {   destroy_bitmap(Game->Animators[i]->frame);
     }
     Game->Animators.clear_all();
 
     for(int i=0; i<Game->Tiles.len(); i++)
-    {   delete[] Game->Tiles.items[i]->elements;
-        delete[] Game->Tiles.items[i]->element_types;
+    {   delete[] Game->Tiles[i]->elements;
+        delete[] Game->Tiles[i]->element_types;
     }
     for(int i=0; i<Game->Tiles.len(); i++)
-    {   delete[] Game->Tiles.items[i]->statics;
-        delete[] Game->Tiles.items[i]->static_types;
+    {   delete[] Game->Tiles[i]->statics;
+        delete[] Game->Tiles[i]->static_types;
     }
     Game->Tiles.clear_all();
 

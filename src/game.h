@@ -46,6 +46,7 @@ class GAME
         int SetDebugLvl(int dbg_lvl);
         int SetDebugLvlMain(int dbg_lvl);
         int ResetDebugLvl();
+        int DestroyMobile(int i);
 };
 
 void game_load();

@@ -16,17 +16,18 @@
 template <class T>
 class List
 {
-public:
-	T ** items;
-	int max_item,alloc_size;
-	List(void);
-	//void add(void * item);
-	void add(T * item);
-	void clear_all();
-	T* operator[](const int index);
-	int len();
-	std::string serialize();
-	std::string save_string();
+    private:
+        T ** items;
+        int length,alloc_size;
+    public:
+        List(void);
+        int add(T * item);
+        void clear_all();
+        int remove(const int i);
+        T* operator[](const int index);
+        int len();
+        std::string serialize();
+        std::string save_string();
 };
 
 template <class T>
@@ -53,25 +54,25 @@ template <class T>
 List<T>::List(void)
 {
 	items=NULL;
-	max_item=0;
+	length=0;
 	alloc_size=0;
 }
 
 template <class T>
-void List<T>::add(T * item)
-{	if(max_item >= alloc_size)
+int List<T>::add(T * item)
+{	if(length >= alloc_size)
 	{	//debug("Expanding list from: "+to_str(max_item),2);
-		T ** re = new T* [alloc_size?(alloc_size*2):4];
+		T ** re = new T* [alloc_size ? (alloc_size*2) : 4];
 		for(int i=0;i<alloc_size; i++) re[i]=items[i];
 		delete []items;
 		items = re;
-		alloc_size=alloc_size?(alloc_size*2):4;
+		alloc_size = alloc_size ? (alloc_size*2) : 4;
 		//debug(" ... to: "+to_str(alloc_size),2);
 	}
 //debug("Adding item as #"+to_str(max_item+1),2);
-items[max_item]=item;
+    items[length]=item;
 //dappend(" - item added",1);
-max_item++;
+    return ++length;
 }
 
 template <class T>
@@ -82,7 +83,7 @@ T* List<T>::operator[](const int index)
 
 template <class T>
 int List<T>::len()
-{	return max_item;
+{	return length;
 }
 
 template <class T>
@@ -94,8 +95,19 @@ void List<T>::clear_all()
     }
     delete []items;
     items=NULL;
-	max_item=0;
+	length=0;
 	alloc_size=0;
+}
+
+template <class T>
+int List<T>::remove(int i)
+{	if(i<0 || i >= this->length) return -1;
+    if(this->length > 1 && i < length-1)
+    {   this->items[i]=this->items[length-1];
+    }
+    this->items[length-1]=NULL;
+    this->length--;
+    return length;
 }
 
 typedef List<std::string> STR_LIST;
