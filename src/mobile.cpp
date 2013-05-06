@@ -24,9 +24,7 @@ MOBILE_TEMPLATE::MOBILE_TEMPLATE()
 }
 
 MOBILE_TEMPLATE::~MOBILE_TEMPLATE()
-{   this->sprite->Modes.clear_all();
-    destroy_bitmap(this->sprite->sprite);
-    delete this->sprite;
+{   delete this->sprite;
 }
 
 int MOBILE_TEMPLATE::ResetClone(MOBILE * mob)
