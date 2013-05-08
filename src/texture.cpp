@@ -194,7 +194,10 @@ int TILE::add_element(string type, int element)
 {   unsigned short int typ;
     typ = TILE::type_resolve(type);
     if(typ>=TILE_STATIC) return this->add_static_subr(typ,element);
-    else return this->add_element_subr(typ,element);
+    else
+    {   if(typ==TILE_FRONT) this->block_sight=1;
+        return this->add_element_subr(typ,element);
+    }
 }
 
 int TILE::add_element_subr(unsigned short int typ, int element)
@@ -238,6 +241,7 @@ int TILE::add_static_subr(unsigned short int typ, int stat)
 TILE::TILE()
 {  this->elements_len=0;
    this->statics_len=0;
+   this->block_sight=0;
    this->element_types = new short unsigned int [MAX_TILE_ELE];
    this->static_types = new short unsigned int [MAX_TILE_ELE];
    this->element_nrs = new int [MAX_TILE_ELE];

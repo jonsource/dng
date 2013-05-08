@@ -10,7 +10,7 @@ class TEXTURED_ELEMENT
 {   public:
 		float x,y,z,w,h;
 		int type,flip;
-		bool transparent,clip;
+		int transparent,clip;
 		int texture_nr;
 		TEXTURE * texture;
 		int animator_nr;

@@ -476,8 +476,8 @@ void see_tile_subr(int x, int z, CAMERA * cam, int recourse)
 	  }
 	  Game->linesight[x][z]=s;
 	  if(!recourse) return;
-	  for(int i=0;i<Game->Tiles[s-1]->elements_len;i++)
-		  if(Game->Tiles[s-1]->element_types[i]==TILE_FRONT) { return; }
+
+	  if(Game->Tiles[s-1]->block_sight) {return;}
 
 	  if(!see_coords(x+cam->xfront,z+cam->zfront)) see_tile(x+cam->xfront,z+cam->zfront,cam);
 	  if(cam->xfront==0)

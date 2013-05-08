@@ -95,6 +95,7 @@ class TILE
 {   public:
         int elements_len;
         int *element_nrs;
+        int block_sight;
         TEXTURED_ELEMENT ** elements;
         unsigned short int * element_types;
         int *static_nrs;
