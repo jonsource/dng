@@ -71,11 +71,12 @@ MOBILE::~MOBILE()
 
 void MOBILE::finishAction()
 {
+    debug("NPC finish action",5);
     this->last_action = this->action;
     if(this->next_action==ACT_DECIDE) this->actionDecide();
     this->action = this->next_action;
     this->next_action = ACT_DECIDE;
-    debug(" ["+to_str(this->x)+","+to_str(this->z)+"]"+" action changed to :"+to_str(this->action),5);
+    //debug("NPC ["+to_str(this->x)+","+to_str(this->z)+"]"+" action changed to :"+to_str(this->action),5);
     if(this->action>=ACT_GO_NORTH && this->action<=ACT_GO_WEST)
     {
         this->act_target = 3000;
@@ -85,8 +86,12 @@ void MOBILE::finishAction()
     {
         this->act_target = 3000;
     }
+    if(this->action==ACT_STAND)
+    {
+        this->act_target = 5000;
+    }
     this->flag_pass=0;
-    debug("finish action, next action :"+to_str(this->next_action),1);
+    debug("NPC finish action, next action :"+to_str(this->next_action)+"\n",5);
 }
 
 void MOBILE::actionGo()
@@ -158,7 +163,7 @@ void MOBILE::actionDecide(int mode_override)
         }
         /* check whether can leave and enter, else wander */
         heading_to_xz(this->next_action,&x,&z);
-        if(!can_enter(this->x+x,this->z+z,this->next_action) || !can_leave(this->x,this->z,this->next_action))
+        if(!can_enter(this->x+x,this->z+z,(this->next_action+2)%4) || !can_leave(this->x,this->z,this->next_action))
         {   debug("can't reach directly - wander",5);
             this->actionDecide(MODE_WANDER);
             return;
@@ -168,22 +173,27 @@ void MOBILE::actionDecide(int mode_override)
     }
     if(_mode == MODE_WANDER)
     {
-        if(rand()%3)
+        if(rand()%3) //continue walking forward
         {
             heading_to_xz(this->heading,&x,&z);
-            if(can_enter(this->x+x,this->z+z,this->heading) && can_leave(this->x,this->z,this->heading))
+            if(can_enter(this->x+x,this->z+z,(this->heading+2)%4) && can_leave(this->x,this->z,this->heading))
             {
                 this->next_action = ACT_GO_NORTH+this->heading;
                 return;
             }
         }
 
+        int dir_set=0;
         for(dir=i; dir<i+4; dir++)
         {
             heading_to_xz(dir%4,&x,&z);
-            if(is_passable(this->x+x,this->z+z)) break;
+            if(can_enter(this->x+x,this->z+z,(dir+2)%4) && can_leave(this->x,this->z,dir%4))
+            {   dir_set=1;
+                break;
+            }
         }
-        this->next_action = ACT_GO_NORTH+dir%4;
+        if(dir_set) this->next_action = ACT_GO_NORTH+dir%4; // can go somewhere
+        else this->next_action = ACT_STAND;
     }
 
     //debug("action Decide, next action :"+to_str(this->next_action),5);

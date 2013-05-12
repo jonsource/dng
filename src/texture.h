@@ -30,6 +30,7 @@ using namespace std;
 #define BLOCKER_SOUTH 10
 #define BLOCKER_WEST 11
 #define BLOCKER_ENTER 12
+#define BLOCKER_LEAVE 13
 
 #define ANIMATOR_TOGGLE 1
 #define ANIMATOR_ON 2

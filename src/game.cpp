@@ -115,23 +115,44 @@ void game_draw()
 }
 
 void player_move(int x, int y, int z, int h)
-{   player_move_subr(x,y,z,h,false);
-
+{   debug("Player move start",5);
+    player_move_subr(x,y,z,h,false);
+    debug("Player move stop\n",5);
 }
 
 int can_leave(int x, int z, int dir)
 {   /* apply leave triggers and blockers */
 
+    /* wrong usage of clickable - doesn't block npcs
     List<CLICKABLE> clklist;
     CLICKABLE * clk;
+
 
     clklist=Game->Clickables["leave"];
 
     for(int i=0; i<clklist.len(); i++)
     {   clk=clklist[i];
-        debug("leave trigger "+heading_to_str(clk->callback->type-8),5);
-        /* correct heading && moving blockation is in position to block */
-        if(clk->callback->type - BLOCKER_TO_HEADING == dir && ((int)(get_movator_dif(clk->callback->animator,tmsec)*100))<clk->w1) return 0;
+
+        // correct heading && moving blockation is in position to block
+        if(clk->callback->type - BLOCKER_TO_HEADING == dir && ((int)(get_movator_dif(clk->callback->animator,tmsec)*100))<clk->w1)
+        {   debug("Blocked by leave trigger "+heading_to_str(clk->callback->type-8),5);
+            return 0;
+        }
+    }
+    return 1;*/
+
+    /* search for leave blockers */
+    for(int i=0; i<Game->Triggers.len(); i++)
+    {   TRIGGER * t;
+        t=Game->Triggers[i];
+        if(t->type<BLOCKER_NORTH || t->type>BLOCKER_LEAVE || t->type==BLOCKER_ENTER) continue; // not a leave blocker, skipping
+        debug("Can leave ["+to_str(x)+","+to_str(z)+"] Trigger "+to_str(t->xpos)+" "+to_str(t->zpos),5);
+        /* correct coordinates and (BLOCKER_ENTER or correct heading) */
+        if(t->xpos==x && t->zpos==z && (t->type==BLOCKER_ENTER || t->type-BLOCKER_TO_HEADING==dir))
+        {   debug("Blocker encountered. "+to_str(t->type),5);
+            /* moving blockation is in position to block */
+            if((int)(get_movator_dif(t->animator,tmsec)*100)<t->w1) return 0;
+        }
     }
     return 1;
 }
@@ -151,10 +172,10 @@ int can_enter(int x, int z, int dir)
     {   TRIGGER * t;
         t=Game->Triggers[i];
         if(t->type<BLOCKER_NORTH || t->type>BLOCKER_ENTER) continue; // not a blocker, skipping
-        debug("["+to_str(x)+","+to_str(z)+"] Trigger "+to_str(t->xpos)+" "+to_str(t->zpos),3);
+        debug("Can enter ["+to_str(x)+","+to_str(z)+"] Trigger "+to_str(t->xpos)+" "+to_str(t->zpos),5);
         /* correct coordinates and (BLOCKER_ENTER or correct heading) */
         if(t->xpos==x && t->zpos==z && (t->type==BLOCKER_ENTER || t->type-BLOCKER_TO_HEADING==dir))
-        {   debug("Blocker encountered. "+to_str(t->type));
+        {   debug("Blocker encountered. "+to_str(t->type),5);
             /* moving blockation is in position to block */
             if((int)(get_movator_dif(t->animator,tmsec)*100)<t->w1) return 0;
         }
@@ -350,6 +371,36 @@ int _interpret_1int(STR_LIST * l, string command, int * val, int minval, int max
     return v;
 }
 
+int _interpret_2int(STR_LIST *l, string command, int * v1, int *v2, int min1, int max1, int min2, int max2  )
+{   int v = (min1 < min2)? min1-1 : min2-1;
+    if(l->len()==1)
+    {   printf("%s = %d %d\n",command.c_str(),*v1,*v2);
+        return *v1;
+    }
+    if(l->len()==2)
+    {   printf("Wrong number of arguments to %s. Either 0 to print or 2 to assign.",command.c_str());
+        return v;
+    }
+    else
+    {   string h=*(*l)[1];
+        sscanf(h.c_str(),"%d",v1);
+        if(*v1<min1 || *v1>max1)
+        {   printf("Invalid parameter 1 to %s [%d-%d]\n",command.c_str(),min1,max1);
+            return v;
+        }
+        h=*(*l)[2];
+        sscanf(h.c_str(),"%d",v2);
+        if(*v2<min2 || *v2>max2)
+        {   printf("Invalid parameter 2 to %s [%d-%d]\n",command.c_str(),min2,max2);
+            return v;
+        }
+        {   v = *v1;
+            printf("%s = %d %d\n",command.c_str(),*v1,*v2);
+        }
+    }
+    return v;
+}
+
 void text_interpret(string s)
 {   STR_LIST * l=tokenize(s," ");
     if(l->len()<1) return;
@@ -413,6 +464,11 @@ void text_interpret(string s)
     }
     if(*(*l)[0]=="Map")
     {   printf(serialize_map().c_str());
+    }
+    if(*(*l)[0]=="Teleport")
+    {   int destx,destz;
+        _interpret_2int(l,"Teleport",&destx,&destz,0,Game->MAP_SIZE-1,0,Game->MAP_SIZE-1);
+        player_move_subr(destx, gy, destz, gh, true);
     }
     debug("<<< end interpret");
 }
