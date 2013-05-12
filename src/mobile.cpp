@@ -139,7 +139,7 @@ void MOBILE::actionDecide(int mode_override)
             this->actionDecide(MODE_FIGHT);
             return;
         }
-        if(dist2(this->x,this->z,gx,gz) > 100) //player too fat, wander
+        if(dist2(this->x,this->z,gx,gz) > 100) //player too far, wander
         {
             debug("player too far - wander",5);
             this->actionDecide(MODE_WANDER);
@@ -156,6 +156,13 @@ void MOBILE::actionDecide(int mode_override)
             if(gz>this->z) this->next_action = ACT_GO_SOUTH;
             else this->next_action = ACT_GO_NORTH;
         }
+        /* check whether can leave and enter, else wander */
+        heading_to_xz(this->next_action,&x,&z);
+        if(!can_enter(this->x+x,this->z+z,this->next_action) || !can_leave(this->x,this->z,this->next_action))
+        {   debug("can't reach directly - wander",5);
+            this->actionDecide(MODE_WANDER);
+            return;
+        }
         debug("player close - hunt : "+heading_to_str(this->next_action)+"["+to_str(this->x)+","+to_str(this->z)+"]->("+to_str(dist2(this->x,0,gx,0))+","+to_str(dist2(0,this->z,0,gz))+")->["+to_str(gx)+","+to_str(gz)+"]",5);
 
     }
@@ -164,7 +171,7 @@ void MOBILE::actionDecide(int mode_override)
         if(rand()%3)
         {
             heading_to_xz(this->heading,&x,&z);
-            if(is_passable(this->x+x,this->z+z))
+            if(can_enter(this->x+x,this->z+z,this->heading) && can_leave(this->x,this->z,this->heading))
             {
                 this->next_action = ACT_GO_NORTH+this->heading;
                 return;

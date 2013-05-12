@@ -119,7 +119,7 @@ void player_move(int x, int y, int z, int h)
 
 }
 
-bool can_leave(int x, int z, int dir)
+int can_leave(int x, int z, int dir)
 {   /* apply leave triggers and blockers */
 
     List<CLICKABLE> clklist;
@@ -131,20 +131,20 @@ bool can_leave(int x, int z, int dir)
     {   clk=clklist[i];
         debug("leave trigger "+heading_to_str(clk->callback->type-8),5);
         /* correct heading && moving blockation is in position to block */
-        if(clk->callback->type - BLOCKER_TO_HEADING == dir && ((int)(get_movator_dif(clk->callback->animator,tmsec)*100))<clk->w1) return false;
+        if(clk->callback->type - BLOCKER_TO_HEADING == dir && ((int)(get_movator_dif(clk->callback->animator,tmsec)*100))<clk->w1) return 0;
     }
-    return true;
+    return 1;
 }
 
-bool is_passable(int x, int z)
+int is_passable(int x, int z)
 {   int t=check_coords(x,z);
     for(int i=0; i<10; i++)
-    {   if(t==Game->Impassable[i]) return false; }
-    return true;
+    {   if(t==Game->Impassable[i]) return 0; }
+    return 1;
 }
 
-bool can_enter(int x, int z, int dir)
-{   if(!is_passable(x,z)) return false;
+int can_enter(int x, int z, int dir)
+{   if(!is_passable(x,z)) return 0;
 
     /* search for entry blockers */
     for(int i=0; i<Game->Triggers.len(); i++)
@@ -156,10 +156,10 @@ bool can_enter(int x, int z, int dir)
         if(t->xpos==x && t->zpos==z && (t->type==BLOCKER_ENTER || t->type-BLOCKER_TO_HEADING==dir))
         {   debug("Blocker encountered. "+to_str(t->type));
             /* moving blockation is in position to block */
-            if((int)(get_movator_dif(t->animator,tmsec)*100)<t->w1) return false;
+            if((int)(get_movator_dif(t->animator,tmsec)*100)<t->w1) return 0;
         }
     }
-    return true;
+    return 1;
 }
 
 void player_move_subr(int x, int y, int z, int h, bool force)

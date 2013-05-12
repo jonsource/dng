@@ -61,7 +61,9 @@ void mouse_click(int mw, int mh);
 void player_move(int x, int y, int z, int h);
 void player_move_subr(int x, int y, int z, int h, bool force);
 void text_interpret(string s);
-bool is_passable(int x, int z);
+int can_leave(int x, int z, int dir);
+int can_enter(int x, int z, int dir);
+int is_passable(int x, int z);
 
 extern GAME * Game;
 
