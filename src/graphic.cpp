@@ -512,10 +512,18 @@ void make_linesight(int x, int z, CAMERA * cam)
 	if(cam->xfront==0)
 	{ 	see_tile_subr(x-1,z,cam,0);
 		see_tile_subr(x+1,z,cam,0);
+		see_tile_subr(x-2,z+cam->zfront,cam,0);
+		see_tile_subr(x+2,z+cam->zfront,cam,0);
+		see_tile_subr(x-3,z+cam->zfront*2,cam,0);
+		see_tile_subr(x+3,z+cam->zfront*2,cam,0);
     }
 	else
 	{ 	see_tile_subr(x,z+1,cam,0);
 		see_tile_subr(x,z-1,cam,0);
+		see_tile_subr(x+cam->xfront,z+2,cam,0);
+		see_tile_subr(x+cam->xfront,z-2,cam,0);
+		see_tile_subr(x+cam->xfront*2,z+3,cam,0);
+		see_tile_subr(x+cam->xfront*2,z-3,cam,0);
 	}
 }
 
@@ -545,9 +553,11 @@ void draw_view(int xpos, int ypos, int zpos, int heading)
 
 
    cam->dolly_ypos=ypos+0.5;
-   cam->dolly_xpos=xpos+0.5;
-   cam->dolly_zpos=zpos+0.5;
-   debug("begin draw_view()",2);
+   /*cam->dolly_xpos=xpos+0.5;
+   cam->dolly_zpos=zpos+0.5;*/
+   xpos=(int)(cam->dolly_xpos);
+   zpos=(int)(cam->dolly_zpos);
+   //debug("begin draw_view() "+to_str(xpos)+" "+to_str(cam->dolly_xpos)+" / "+to_str(zpos)+" "+to_str(cam->dolly_zpos),5);
 
    //blit(api, game_bmp, 0, 0, 0, 0, 640, 480);
 
