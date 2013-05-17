@@ -13,6 +13,7 @@ extern BITMAP * game_bmp;
 Character *Player;
 int gy=0,gz=2,gx=3,gh=0;
 
+extern CAMERA * cam;
 GAME * Game;
 
 GAME::GAME()
@@ -271,6 +272,8 @@ void player_move_subr(int x, int y, int z, int h, bool force)
         gx=x;
         gz=z;
         gy=y;
+        cam->dolly_xpos=gx+0.5;
+        cam->dolly_zpos=gz+0.5;
     }
 }
 
@@ -484,6 +487,16 @@ void game_turn()
         mob->HeartBeat();
 
     }
+
+    /* player multimove */
+
+    //debug("multimove ["+to_str(gx)+","+to_str(gz)+"]",5);
+    //debug("multimove ["+to_str(gx)+","+to_str(gz)+"]",5);
+
+    if(cam->dolly_xpos-0.45 < gx) cam->dolly_xpos+=0.1;
+    if(cam->dolly_xpos-0.55 > gx) cam->dolly_xpos-=0.1;
+    if(cam->dolly_zpos-0.45 < gz) cam->dolly_zpos+=0.1;
+    if(cam->dolly_zpos-0.55 > gz) cam->dolly_zpos-=0.1;
     debug("end game turn",1);
 
 }
