@@ -68,6 +68,10 @@ string to_str(bool b)
 	return "false";
 }
 
+string to_str(string s)
+{	return s;
+}
+
 /**
 
 */

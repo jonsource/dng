@@ -636,7 +636,7 @@ void draw_view(int xpos, int ypos, int zpos, int heading)
        textprintf_ex(game_bmp, font, 0, 112, makecol(0, 0, 0), -1,
              "Up vector: %.2f, %.2f, %.2f", cam->xup, cam->yup, cam->zup);
        textprintf_ex(game_bmp, font, 0, 120, makecol(0, 0, 0), -1,
-             "Frames per second: %d", fps);
+             "Frames per second: %d   Game time: %d", fps, Game->time);
 
         int see=makecol(128,128,128);
         int not_see=makecol(72,72,72);

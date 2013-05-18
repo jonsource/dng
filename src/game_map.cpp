@@ -16,6 +16,7 @@
 using namespace std;
 
 extern char chbuf[256];
+extern int gx,gy,gz,gh;
 
 string get_line(FILE * f)
 {	string ret="";
@@ -204,15 +205,7 @@ int load_area(string fname)
 			{ 	debug("End of "+fname+"\n"); break; }
 		}
 	}
-
-/* POC only */
-/** TODO
-
-remove
-*/
-      /*Game->Mobiles.add(Game->MobileTemplates[0]->Clone());
-      Game->Mobiles[0]->x=4;
-      Game->Mobiles[0]->z=3;*/
+    Game->area_name=fname;
 	return 1;
 }
 
@@ -386,15 +379,16 @@ int load_map(string fname)
     {   Game->Animators[i]->offset=Game->Animators[i]->_offset;
 
     }
-    debug("Looking for "+sav);
+    debug("Looking for "+sav,5);
     FILE *f=fopen(sav.c_str(),"r");
     if(f)
     {
         fclose(f);
-        dappend(" ... found");
+        dappend(" ... found",5);
         load_map_save(sav);
 
     }
+    Game->map_name=fname;
     return 1;
 }
 
@@ -482,6 +476,36 @@ void change_area(string aname, string mname, int x, int z)
     debug("tiles :"+to_str(Game->Tiles.len()));
 
     change_map(mname,x,z);
+}
+
+int load_game_save(string fname)
+{	string str1, str2;
+	FILE *f=fopen(fname.c_str(),"r");
+	if(!f)
+	{	debug("Game save "+fname+" not found! Beginning from start.\n",10);
+		return 0;
+	}
+	while(!feof(f))
+	{ 	str1=get_line(f);
+
+        if(str1.length()==0) continue;
+        if(str1.find("#")==0) continue;
+		if(str1.find(":")==0) // : at the beginning of new line
+		{				// is new block
+
+            load_variable(f, "area", &Game->area_name,load_string, &str1);
+            load_variable(f, "map", &Game->map_name,load_string, &str1);
+            load_variable(f, "time", &Game->time,load_int, &str1);
+            load_variable(f, "position_x", &gx,load_int, &str1);
+            load_variable(f, "position_y", &gy,load_int, &str1);
+            load_variable(f, "position_z", &gz,load_int, &str1);
+            load_variable(f, "position_h", &gh,load_int, &str1);
+
+            if(str1.compare(":end")==0)
+			{ 	debug("End of "+fname+"\n"); break; }
+		}
+	}
+	return 1;
 }
 
 int load_int(string str)

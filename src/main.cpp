@@ -172,14 +172,16 @@ int main(int argc, char *argv[])
         }
         else
 		if(!keyb_ignore)
-		{ 	if(key[KEY_W]) keypress(KEY_W);
-			if(key[KEY_S]) keypress(KEY_S);
-			if(key[KEY_A]) keypress(KEY_A);
-			if(key[KEY_D]) keypress(KEY_D);
-			if(key[KEY_E]) keypress(KEY_E);
-			if(key[KEY_Q]) keypress(KEY_Q);
-			if(key[KEY_R]) keypress(KEY_R);
-			if(key[KEY_F]) keypress(KEY_F);
+		{ 	if(!key[KEY_LCONTROL])
+		    {   if(key[KEY_W]) keypress(KEY_W);
+                if(key[KEY_S]) keypress(KEY_S);
+                if(key[KEY_A]) keypress(KEY_A);
+                if(key[KEY_D]) keypress(KEY_D);
+                if(key[KEY_E]) keypress(KEY_E);
+                if(key[KEY_Q]) keypress(KEY_Q);
+                if(key[KEY_R]) keypress(KEY_R);
+                if(key[KEY_F]) keypress(KEY_F);
+		    }
 
             if(key[KEY_F1]) keypress(KEY_F1);
 			if(key[KEY_F2]) keypress(KEY_F2);
@@ -199,6 +201,7 @@ int main(int argc, char *argv[])
 
 		}
 		if(key[KEY_LCONTROL] && key[KEY_Q]) quit=1;
+
 	}
 	game_unload();
 	deinit();

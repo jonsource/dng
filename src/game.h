@@ -40,6 +40,7 @@ class GAME
         int light_power;
         int INFO;
         string map_name;
+        string area_name;
         GAME();
         int GetDebugLvl();
         int GetDebugLvlMain();
@@ -47,9 +48,11 @@ class GAME
         int SetDebugLvlMain(int dbg_lvl);
         int ResetDebugLvl();
         int DestroyMobile(int i);
+        int time;
 };
 
 void game_load();
+int game_save();
 void game_unload();
 void game_draw();
 void game_turn();

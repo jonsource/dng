@@ -22,6 +22,7 @@ GAME::GAME()
     this->light_power=128;
     this->INFO=0;
     this->TRANSPARENT=1;
+    this->time=0;
 }
 
 int GAME::GetDebugLvlMain()
@@ -66,9 +67,50 @@ void game_load()
 	Classes = new ClassTemplates();
 	Player = new Character(1);
 	load_graphics();
-	change_area("area1.area","map1.map",3,3);
-	debug("done game_load");
+	if(!load_game_save("save/game.sav"))
+    {   change_area("area1.area","map1.map",3,3);
+    }
+    else
+    {   //change_area(Game->area_name,Game->map_name,gx,gz);
+        load_area(Game->area_name);
+        load_map(Game->map_name);
+        player_move_subr(gx,gy,gz,gh,true);
+    }
+    debug("done game_load");
+}
 
+/**
+ * save current game
+ */
+
+int game_save()
+{   FILE *f;
+    string sav="save/game.sav";
+    f = fopen(sav.c_str(),"w");
+    if(!f)
+	{	debug("Couldn't write game save "+sav+"!\n",10);
+		exit(0);
+	}
+	debug("Saving game "+sav+".",5);
+	fprintf(f,":area\n");
+    fprintf(f,Game->area_name.c_str());
+    fprintf(f,"\n:map\n");
+    fprintf(f,Game->map_name.c_str());
+    fprintf(f,"\n:time\n");
+    fprintf(f,to_str(Game->time).c_str());
+    fprintf(f,"\n:position_x\n");
+    fprintf(f,to_str(gx).c_str());
+    fprintf(f,"\n:position_y\n");
+    fprintf(f,to_str(gy).c_str());
+    fprintf(f,"\n:position_z\n");
+    fprintf(f,to_str(gz).c_str());
+    fprintf(f,"\n:position_h\n");
+    fprintf(f,to_str(gh).c_str());
+    /*string position=to_str(gx)+" "+to_str(gy)+" "+to_str(gz)+" "+to_str(gh);
+    fprintf(f,position.c_str());*/
+    fprintf(f,"\n:end\n");
+    fclose(f);
+    return 1;
 }
 
 /**
@@ -477,7 +519,8 @@ void text_interpret(string s)
 }
 
 void game_unload()
-{
+{   game_save();
+    unload_area();
 }
 
 void game_turn()
@@ -497,6 +540,8 @@ void game_turn()
     if(cam->dolly_xpos-0.55 > gx) cam->dolly_xpos-=0.1;
     if(cam->dolly_zpos-0.45 < gz) cam->dolly_zpos+=0.1;
     if(cam->dolly_zpos-0.55 > gz) cam->dolly_zpos-=0.1;
+
+    Game->time+=1;
     debug("end game turn",1);
 
 }
