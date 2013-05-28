@@ -11,6 +11,7 @@
 #include "game.h"
 #include <string>
 #include <stdio.h>
+#include "sound.h"
 
 extern int tmsec;
 
@@ -506,6 +507,7 @@ void TRIGGER::fire()
             a->start=tmsec;
             debug("animator toggle "+to_str(a->on)+" "+to_str(a->start));
         }
+        play_sound();
     }
     debug("Trigger at "+to_str(this->xpos)+" "+to_str(this->zpos)+" fired!");
     if(this->action!=NULL) dappend(" action: "+*this->action);

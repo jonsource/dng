@@ -6,6 +6,7 @@
 #include "chat.h"
 #include "game_map.h"
 #include "edittext.h"
+#include "sound.h"
 
 #define TIMER 20
 
@@ -84,6 +85,7 @@ void init()
     load_ini("game.ini");
     debug("main debug lvl: "+to_str(Game->GetDebugLvlMain()));
 	init_graphic();
+	init_sound();
 
 	//install interrupts
 	install_int(fps_proc,1000);
