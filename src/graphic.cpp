@@ -4,10 +4,12 @@
 #include "game_lib.h"
 #include "game.h"
 #include "mobile.h"
+#include "pc_slot.h"
 
 BITMAP * sky1[4];
 BITMAP * api=NULL;
 BITMAP * CURSOR;
+BITMAP * H_BAR;
 RGB pal[256];
 extern BITMAP *game_bmp,* first,* second;
 extern int fps, tmsec;
@@ -40,8 +42,8 @@ int init_graphic()
 	second=create_bitmap(SCREEN_W, SCREEN_H);
 	game_bmp = first;
 	//rect(game_bmp, x, y, x+w-1, y+h-1, makecol(255, 0, 0));
-	set_clip_rect(first, x, y, x+viewport_w, y+viewport_h);
-	set_clip_rect(second, x, y, x+viewport_w, y+viewport_h);
+	//set_clip_rect(first, x, y, x+viewport_w, y+viewport_h);
+	//set_clip_rect(second, x, y, x+viewport_w, y+viewport_h);
 	set_clip_state(first,0);
 	set_clip_state(second,0);
 	if(game_bmp==NULL)
@@ -96,6 +98,7 @@ int load_graphics()
     PALETTE pal;
 
     CURSOR = load_bmp("data/images/api/cursor.bmp",pal);
+    H_BAR = load_bmp("data/images/api/health-bar.bmp",pal);
       //set_mouse_sprite(load_bmp("data/images/api/cursor.bmp",pal));
 
           s="data/images/sky1/skylarge1.bmp";
@@ -593,7 +596,7 @@ void draw_view(int xpos, int ypos, int zpos, int heading)
         }
     }
 
-    /* render the rest */
+    /* render rest of the view */
     for(dx=MAX_VIEW_DIST; dx>=0; dx--)
     {   for(dz=dx+1; dz>=0; dz--)
         {   fx=xpos+dx*xfront+dz*zfront;  // ano zfront, y je nahoru
@@ -607,10 +610,12 @@ void draw_view(int xpos, int ypos, int zpos, int heading)
         }
     }
 
+    draw_pc_slots(game_bmp);
+
    if(Game->INFO>1)
    {
     /* overlay some text */
-       set_clip_rect(game_bmp, 0, 0, game_bmp->w, game_bmp->h);
+       //set_clip_rect(game_bmp, 0, 0, game_bmp->w, game_bmp->h);
       // textprintf_ex(bmp, font, 0,  0, makecol(0, 0, 0), -1,
     //		 "Viewport width: %d  height: %d", viewport_w,viewport_h);
        //textprintf_ex(bmp, font, 0,  32, makecol(0, 0, 0), -1,

@@ -2,6 +2,8 @@
 #include "mobile.h"
 #include "game_lib.h"
 #include "game.h"
+#include "pc_slot.h"
+#include "character.h"
 
 extern int gz,gx;
 
@@ -30,6 +32,7 @@ MOBILE_TEMPLATE::~MOBILE_TEMPLATE()
 int MOBILE_TEMPLATE::ResetClone(MOBILE * mob)
 {   mob->parent = this;
     mob->speed = this->speed;
+    return 0;
 }
 
 MOBILE * MOBILE_TEMPLATE::Clone()
@@ -72,6 +75,16 @@ MOBILE::~MOBILE()
 void MOBILE::finishAction()
 {
     debug("NPC finish action",5);
+
+    /* TODO: finish combat system */
+    if(this->action == ACT_FIGHT)
+    {   if(this->x==gx && this->z==gz)
+        {
+            Game->PcSlots[0].character->HP--;
+
+        }
+    }
+
     this->last_action = this->action;
     if(this->next_action==ACT_DECIDE) this->actionDecide();
     this->action = this->next_action;

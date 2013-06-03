@@ -9,11 +9,7 @@
 #define TEXTURE_H_
 
 #include "allegro.h"
-#include "list.h"
-#include <map>
 #include <string>
-
-using namespace std;
 
 #define TRIGGER_NORTH 0
 #define TRIGGER_EAST 1
@@ -72,10 +68,10 @@ class MOBILE;
 class TEXTURE
 {
     public:
-        string name;
+        std::string name;
         BITMAP *close, *medium, *far;
         TEXTURE();
-        string serialize();
+        std::string serialize();
 };
 
 class ANIMATOR
@@ -86,10 +82,10 @@ class ANIMATOR
         ANIMATOR();
         ANIMATOR(int type, int speed, int offset, int frames, int w, int h);
         ANIMATOR(int type, int speed, int offset, int frames, int w, int h, int on, int start);
-        string serialize();
-        string save_string();
-        string type_string();
-        static unsigned short int type_resolve(string s);
+        std::string serialize();
+        std::string save_string();
+        std::string type_string();
+        static unsigned short int type_resolve(std::string s);
 };
 
 class TILE
@@ -104,12 +100,12 @@ class TILE
         TEXTURED_ELEMENT ** statics;
         unsigned short int * static_types;
         TILE();
-        int add_element(string type, int element);
+        int add_element(std::string type, int element);
         int add_element_subr(unsigned short int typ, int element);
         int add_static_subr(unsigned short int typ, int stat);
-        string serialize();
-        static string type_string(int i);
-        static unsigned short int type_resolve(string s);
+        std::string serialize();
+        static std::string type_string(int i);
+        static unsigned short int type_resolve(std::string s);
 };
 
 class LIGHT_SOURCE
@@ -117,33 +113,8 @@ class LIGHT_SOURCE
         int power,dim;
         float x,z;
         LIGHT_SOURCE(int power, int dim, float x, float z);
-        string serialize();
+        std::string serialize();
 };
-
-class TRIGGER
-{   public:
-        int xpos;
-        int zpos;
-        int type;
-        int w1,h1,w2,h2;
-        int animator_nr;
-        ANIMATOR * animator;
-        TRIGGER(int type, int xpos, int zpos, int w1, int h1, int w2, int h2, int animator);
-        TRIGGER(int type, int xpos, int zpos, int w1, int h1, int w2, int h2, int animator, string action);
-        void fire();
-        string serialize();
-        string type_string();
-        static int type_resolve(string type);
-        string * action;
-};
-
-typedef struct
-{   int w1,h1,w2,h2;
-    TRIGGER * callback;
-} CLICKABLE;
-
-typedef map < string, List<CLICKABLE> > CLICKABLE_MAP;
-typedef map < string, List<CLICKABLE> >::iterator CLICKABLE_MAP_ITERATOR;
 
 typedef struct {
         double aspect, view_height, step_back;
@@ -157,23 +128,22 @@ typedef struct
     float value;
 } IND_VAL;
 
-TEXTURE * load_texture(string s);
-TEXTURED_ELEMENT * load_element(string s);
+TEXTURE * load_texture(std::string s);
+TEXTURED_ELEMENT * load_element(std::string s);
 //TEXTURED_ELEMENT * create_element(string type, float x, float y, float z, float w, float h, string transparent, int texture, int animator, string clip, string flip);
-ANIMATOR * load_animator(string s);
-int load_animator_save(ANIMATOR * animator, string s);
+ANIMATOR * load_animator(std::string s);
+int load_animator_save(ANIMATOR * animator, std::string s);
 //ANIMATOR * create_animator(int speed, int offset, int frames, int w, int h);
 float get_movator_dif(ANIMATOR * a,int t);
-TILE * load_tile(string s);
+TILE * load_tile(std::string s);
 //TILE * create_tile();
-int tile_add_element(TILE * til,string type,int element);
-unsigned short int tile_type_resolve(string type);
-unsigned short int flip_resolve(string type);
-LIGHT_SOURCE * load_lightsource(string s);
+int tile_add_element(TILE * til,std::string type,int element);
+unsigned short int tile_type_resolve(std::string type);
+unsigned short int flip_resolve(std::string type);
+LIGHT_SOURCE * load_lightsource(std::string s);
 //LIGHT_SOURCE * create_lightsource(int power, int dim, float x, float z);
-TRIGGER * load_trigger(string s);
-string clip_to_str(bool clip);
-string flip_to_str(int type);
-string trans_to_str(bool trans);
+std::string clip_to_str(bool clip);
+std::string flip_to_str(int type);
+std::string trans_to_str(bool trans);
 
 #endif /* TEXTURE_H_ */

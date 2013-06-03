@@ -67,6 +67,10 @@
 		<Unit filename="src/main.cpp" />
 		<Unit filename="src/mobile.cpp" />
 		<Unit filename="src/mobile.h" />
+		<Unit filename="src/pc_slot.cpp" />
+		<Unit filename="src/pc_slot.h" />
+		<Unit filename="src/sound.cpp" />
+		<Unit filename="src/sound.h" />
 		<Unit filename="src/texture.cpp" />
 		<Unit filename="src/texture.h" />
 		<Unit filename="src/textured_element.cpp" />

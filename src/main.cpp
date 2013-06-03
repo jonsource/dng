@@ -13,7 +13,7 @@
 int frames,tot_frames;
 int game_time;
 int msec,sec,mins,hr;
-long int tmsec;
+int tmsec;
 int quit;
 int fps;
 unsigned short int keyb_ignore;

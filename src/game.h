@@ -12,12 +12,12 @@
 #include "interface.h"
 #include "graphic.h"
 
-using namespace std;
-
 #define DEAD     0
 #define CREATE   1
 #define PLAY     2
 #define PAUSE    -1
+
+class PCSLOT;
 
 class GAME
 {   public:
@@ -39,9 +39,11 @@ class GAME
         int **linesight;
         int light_power;
         int INFO;
-        string map_name;
-        string area_name;
+        std::string map_name;
+        std::string area_name;
         GAME();
+        ~GAME();
+        PCSLOT * PcSlots;
         int GetDebugLvl();
         int GetDebugLvlMain();
         int SetDebugLvl(int dbg_lvl);
@@ -63,11 +65,12 @@ void restart();
 void mouse_click(int mw, int mh);
 void player_move(int x, int y, int z, int h);
 void player_move_subr(int x, int y, int z, int h, bool force);
-void text_interpret(string s);
+void text_interpret(std::string s);
 int can_leave(int x, int z, int dir);
 int can_enter(int x, int z, int dir);
 int is_passable(int x, int z);
 
 extern GAME * Game;
+extern int tmsec;
 
 #endif

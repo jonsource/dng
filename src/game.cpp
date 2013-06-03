@@ -3,7 +3,7 @@
 #include "load_classes.h"
 #include "game_map.h"
 #include "mobile.h"
-
+#include "pc_slot.h"
 
 extern int keyb_ignore;
 extern int status;
@@ -23,6 +23,12 @@ GAME::GAME()
     this->INFO=0;
     this->TRANSPARENT=1;
     this->time=0;
+    this->PcSlots = new PCSLOT[6];
+}
+
+GAME::~GAME()
+{   delete [] this->PcSlots;
+
 }
 
 int GAME::GetDebugLvlMain()
@@ -67,6 +73,12 @@ void game_load()
 	Classes = new ClassTemplates();
 	Player = new Character(1);
 	load_graphics();
+
+	Game->PcSlots[0].setCharacter(Player);
+	Player = new Character(0);
+	Player->name="shambala";
+	Game->PcSlots[1].setCharacter(Player);
+
 	if(!load_game_save("save/game.sav"))
     {   change_area("area1.area","map1.map",3,3);
     }
@@ -230,7 +242,6 @@ void player_move_subr(int x, int y, int z, int h, bool force)
 {	int nz,nx;
     int can_pass=true;
 
-
     if(!force)
     {
         /* NORMAL MOVEMENT */
@@ -272,39 +283,16 @@ void player_move_subr(int x, int y, int z, int h, bool force)
         }
 
             /* clear old triggers */
-        Game->Clickables["place"].clear_all();
-        Game->Clickables["leave"].clear_all();
-        Game->Clickables["enter"].clear_all();
+            clear_triggers("place");
+            clear_triggers("leave");
+            clear_triggers("enter");
 
-        /* apply local clickable triggers */
-        for(int i=0; i<Game->Triggers.len(); i++)
-        {   TRIGGER * t;
-            t=Game->Triggers[i];
-            debug("["+to_str(gx)+","+to_str(gz)+"] Trigger "+to_str(t->xpos)+" "+to_str(t->zpos),3);
-                /* correct coordinates and (TYPE_ENTER or correct heading) */
-            if(t->xpos==gx && t->zpos==gz && (t->type==TRIGGER_ENTER || t->type==gh || t->type>=8 ))
-            {   debug("Trigger encountered. "+to_str(t->type));
-                CLICKABLE * clk = new CLICKABLE;
-                clk->h1=t->h1;
-                clk->w1=t->w1;
-                clk->h2=t->h2;
-                clk->w2=t->w2;
-                clk->callback = t;
-                if(t->type<TRIGGER_WEST) Game->Clickables["place"].add(clk);
-                else if(t->type==TRIGGER_LEAVE || (t->type>=BLOCKER_NORTH && t->type<=BLOCKER_WEST)) Game->Clickables["leave"].add(clk);
-                else if(t->type==TRIGGER_ENTER) Game->Clickables["enter"].add(clk);
-            }
-        }
+        /* apply local triggers and clickables */
+            apply_local_triggers(gx, gz, gh);
 
-        /* moved (not just changed heading), apply enter triggers */
+        /* moved (not just changed heading), fire enter triggers */
         if(x!=0 || z!=0)
-        {   List<CLICKABLE> clklist=Game->Clickables["enter"];
-            CLICKABLE * clk = new CLICKABLE;
-            for(int i=0; i<clklist.len(); i++)
-            {   clk=clklist[i];
-                debug("enter trigger "+*clk->callback->action,5);
-                clk->callback->fire();
-            }
+        {   fire_triggers("enter");
         }
     }
     else
@@ -316,26 +304,6 @@ void player_move_subr(int x, int y, int z, int h, bool force)
         gy=y;
         cam->dolly_xpos=gx+0.5;
         cam->dolly_zpos=gz+0.5;
-    }
-}
-
-void mouse_click(int mw, int mh)
-{   List<CLICKABLE> clklist;
-    CLICKABLE * clk;
-    debug("Left mouse button "+to_str(mw)+" "+to_str(mh));
-
-    CLICKABLE_MAP_ITERATOR it;
-    for(it = Game->Clickables.begin(); it!=Game->Clickables.end(); it++)
-    {   if(it->first=="leave") continue;
-        clklist=Game->Clickables[it->first];
-
-        for(int i=0; i<clklist.len(); i++)
-        {   clk=clklist[i];
-            if(mw>=clk->w1 && mw <=clk->w2 && mh>=clk->h1 && mh<= clk->h2)
-            {   debug(it->first+" ",5);
-                clk->callback->fire();
-            }
-        }
     }
 }
 
