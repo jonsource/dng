@@ -8,156 +8,16 @@
 #include "game_map.h"
 #include "game.h"
 #include "game_lib.h"
+#include "game_lib_load.h"
 #include "texture.h"
 #include <string>
-#include <stdio.h>
-#include "mobile.h"
+//#include <stdio.h>
+//#include "mobile.h"
 
 using namespace std;
 
 extern char chbuf[256];
 extern int gx,gy,gz,gh;
-
-string get_line(FILE * f)
-{	string ret="";
-	ret=fgets(chbuf,256,f);
-	if(ret.find("#")==0) // # at the beginning of new line
-		return "";	// is comment go-on
-	ret=ret.substr(0,ret.size()-1);
-	return ret;
-}
-
-template<class T>
-int load_block(FILE *f, string block, List<T> * l, T * (*loader)(string), string * str1)
-{	string str2;
-	unsigned short int count = 0;
-	if(str1->compare(":"+block)==0)
-	{ 	debug("Loading "+block);
-		while(!feof(f))
-		{ 	str2=get_line(f);
-            if(str2.length()==0) continue;
-            if(str2.find("#")==0) continue;
-			if(str2.find(":")==0)
-			{	debug("Done loading "+block);
-				str1[0] = str2; break;
-			} //next part of definitions
-			l->add(loader(str2));
-			count ++;
-		}
-	}
-	return count;
-}
-
-template<class T>
-int load_block_save(FILE *f, string block, List<T> * l, int (*loader)(T *, string), string * str1, bool create)
-{	string str2;
-	int count = 0;
-	if(str1->compare(":"+block)==0)
-	{ 	debug("Loading "+block+" save");
-		while(!feof(f))
-		{ 	str2=get_line(f);
-            if(str2.length()==0) continue;
-            if(str2.find("#")==0) continue;
-			if(str2.find(":")==0)
-			{	debug("Done loading "+block+" save");
-				str1[0] = str2; break;
-			} //next part of definitions
-			if(create)
-            {
-                l->add(new T);
-            }
-			if(loader((*l)[count],str2)) count ++;
-		}
-	}
-	if(count < l->len()-1) debug("Not enough entries for members of "+block+". Save Corrupt!",10);
-	return count;
-}
-
-template<class T>
-int load_multivar(FILE *f, string block, T ** l, T * (*loader)(string), string * str1)
-{	string str2;
-	unsigned short int count = 0;
-	if(str1->compare(":"+block)==0)
-	{ 	debug("Loading "+block);
-		while(!feof(f))
-		{ 	str2=get_line(f);
-            if(str2.length()==0) continue;
-            if(str2.find("#")==0) continue;
-			if(str2.find(":")==0)
-			{	debug("Done loading "+block);
-				str1[0] = str2; break;
-			} //next part of definitions
-			*l=loader(str2);
-			count ++;
-			break;
-		}
-	}
-	return count;
-}
-
-template<class T>
-int load_variable_subr(FILE *f, string block, T * var, T (*loader)(string), string * str1, bool report)
-{   string str2;
-    unsigned short int count = 0;
-    if(str1->compare(":"+block)==0)
-    {   debug("Loading "+block);
-		while(!feof(f)) // must be a while statement - to skip empty lines and comments
-        {   str2=get_line(f);
-            if(str2.length()==0) continue;
-            if(str2.find("#")==0) continue;
-			if(str2.find(":")==0)
-			{	debug("Done loading "+block);
-				str1[0] = str2; break;
-			} //next part of definitions
-			*var = loader(str2);
-			if(report)
-            {
-                debug(block+" loaded: "+to_str(*var),10);
-            }
-            count++;
-			break;
-        }
-    }
-    return count;
-}
-
-template<class T>
-int load_variable(FILE *f, string block, T * var, T (*loader)(string), string * str1)
-{   return load_variable_subr(f,block,var,loader,str1,true);
-}
-
-int load_ini(string fname)
-{   string str1, str2;
-	FILE *f=fopen(fname.c_str(),"r");
-	if(!f)
-	{	debug("File "+fname+" not found!\n",10);
-		exit(0);
-	}
-	while(!feof(f))
-	{ 	str1=get_line(f);
-
-        if(str1.length()==0) continue;
-        if(str1.find("#")==0) continue;
-		if(str1.find(":")==0) // : at the beginning of new line
-		{				// is new block
-
-            int dbg_lvl;
-		    if(load_variable_subr(f,"debuglevel",&dbg_lvl,load_int,&str1,false))
-            {   Game->SetDebugLvlMain(dbg_lvl);
-                Game->ResetDebugLvl();
-                debug("Debug level: "+to_str(Game->GetDebugLvlMain())+" (0 - all, 10 - none)",10);
-            }
-            load_variable(f, "field-of-view", &Game->view_settings.fov,load_int, &str1);
-            load_variable(f, "stepback", &Game->view_settings.step_back,load_double, &str1);
-            load_variable(f, "aspect", &Game->view_settings.aspect,load_double, &str1);
-            load_variable(f, "view_height", &Game->view_settings.view_height,load_double, &str1);
-
-            if(str1.compare(":end")==0)
-			{ 	debug("End of "+fname+"\n"); break; }
-		}
-	}
-	return 1;
-}
 
 int load_area(string fname)
 {	string str1, str2;
@@ -207,55 +67,6 @@ int load_area(string fname)
 	}
     Game->area_name=fname;
 	return 1;
-}
-
-MOBILE_TEMPLATE* load_mobile_template(string fname)
-{	string str1, str2;
-	FILE *f=fopen(fname.c_str(),"r");
-	if(!f)
-	{	debug("Mobile template "+fname+" not found!\n",10);
-		exit(0);
-	}
-	MOBILE_TEMPLATE * mob = new MOBILE_TEMPLATE();
-	mob->fname = fname;
-
-	while(!feof(f))
-	{ 	str1=get_line(f);
-
-        if(str1.length()==0) continue;
-        if(str1.find("#")==0) continue;
-		if(str1.find(":")==0) // : at the beginning of new line
-		{				// is new block
-            if(str1.compare(":sprite_bmp")==0)
-            {   debug("Loading sprite");
-                while(!feof(f)) // must be a while statement - to skip empty lines and comments
-                {   str2=get_line(f);
-                    if(str2.length()==0) continue;
-                    if(str2.find("#")==0) continue;
-                    if(str2.find(":")==0)
-                    {	debug("Done loading sprite");
-                        str1 = str2; break;
-                    } //next part of definitions
-                    PALETTE pal;
-                    mob->sprite->sprite = load_bitmap(str2.c_str(), pal);
-                    debug("load bitmap "+str2);
-                    if(mob->sprite->sprite==NULL)
-                    {
-                        debug("Missing sprite : "+str2,10);
-                        exit(1);
-                    }
-                    break; // we are reading just one value
-                }
-            }
-
-            load_variable_subr(f,"speed",&mob->speed,load_int, &str1,true);
-            load_block(f,"sprite_modes",&mob->sprite->Modes, load_sprite_mode, &str1);
-
-			if(str1.compare(":end")==0)
-			{ 	debug("End of "+fname+"\n"); break; }
-		}
-	}
-	return mob;
 }
 
 int load_map_base(string fname)
@@ -508,18 +319,6 @@ int load_game_save(string fname)
 	return 1;
 }
 
-int load_int(string str)
-{   int ret;
-    if(sscanf(str.c_str(),"%d",&ret)==1) return ret;
-    debug("Wrong value "+str+" for load_float()!",10);
-    exit(1);
-    return 0;
-}
-
-string load_string(string str)
-{   return str;
-}
-
 TEXTURED_ELEMENT * load_element(string  str)
 {	char type[32], transparent[32], clip[16], flip[16];
 	float x,y,z,w,h;
@@ -529,44 +328,6 @@ TEXTURED_ELEMENT * load_element(string  str)
 	  exit(1);
 	}
 	return new TEXTURED_ELEMENT(type,x,y,z,w,h,transparent,texture,animator,clip,flip);
-}
-
-float load_float(string str)
-{   float ret;
-    if(sscanf(str.c_str(),"%f",&ret)==1) return ret;
-    debug("Wrong value "+str+" for load_float()!",10);
-    exit(1);
-    return 0.0;
-}
-
-double load_double(string str)
-{   float ret;
-    if(sscanf(str.c_str(),"%f",&ret)==1) return ret;
-    debug("Wrong value "+str+" for load_double()!",10);
-    exit(1);
-    return 0.0;
-}
-
-bool load_bool(string str)
-{   return to_bool(str);
-
-}
-
-RGB * load_color(string str)
-{	RGB * ret = new RGB;
-    int r,g,b;
-    if(sscanf(str.c_str(),"%d %d %d",&r,&g,&b)<3)
-	{ debug("Not enough parameters for color: "+str,10);
-	  exit(1);
-	}
-	ret->r=(char)r;
-	ret->g=(char)g;
-	ret->b=(char)b;
-	return ret;
-}
-
-string serialize_color(RGB * color)
-{   return to_str(color->r)+" "+to_str(color->g)+" "+to_str(color->b);
 }
 
 int * load_impassable(string str)

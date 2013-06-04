@@ -225,7 +225,7 @@ void render_element(int type, TEXTURED_ELEMENT * element, BITMAP *bmp, int x, in
    	   default: debug("Missing or bad tile type in render element!",3); return;
    }
 
-   /* apply lighting to vertices, used to render lit textures */
+   /* apply lighting to vertices, used for rendering lit textures */
    int ls;
    for (c=0; c<4; c++)
    {  	/* apply players light */

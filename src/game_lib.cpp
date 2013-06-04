@@ -218,9 +218,21 @@ STR_LIST * tokenize(string s, string sep)
     return ret;
 }
 
+
+/* comparator function for qicksort */
 int compare_ind_val(const void * a, const void * b)
 {   if ( (*(IND_VAL*)a).value <  (*(IND_VAL*)b).value ) return 1;
     if ( (*(IND_VAL*)a).value == (*(IND_VAL*)b).value ) return 0;
     if ( (*(IND_VAL*)a).value >  (*(IND_VAL*)b).value ) return -1;
     return 0;
+}
+
+/* get line from file, ignore commented lines */
+string get_line(FILE * f)
+{	string ret="";
+	ret=fgets(chbuf,256,f);
+	if(ret.find("#")==0) // # at the beginning of new line
+		return "";	// is comment go-on
+	ret=ret.substr(0,ret.size()-1);
+	return ret;
 }

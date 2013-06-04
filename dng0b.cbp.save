@@ -54,6 +54,8 @@
 		<Unit filename="src/game.h" />
 		<Unit filename="src/game_lib.cpp" />
 		<Unit filename="src/game_lib.h" />
+		<Unit filename="src/game_lib_load.cpp" />
+		<Unit filename="src/game_lib_load.h" />
 		<Unit filename="src/game_map.cpp" />
 		<Unit filename="src/game_map.h" />
 		<Unit filename="src/graphic.cpp" />

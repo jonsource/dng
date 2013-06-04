@@ -63,7 +63,6 @@
 class TEXTURE;
 class ANIMATOR;
 class TEXTURED_ELEMENT;
-class MOBILE;
 
 class TEXTURE
 {

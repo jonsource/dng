@@ -40,5 +40,6 @@ int mstime();
 STR_LIST * tokenize(string s, string sep);
 float dist2(float x,float z,float xx, float zz);
 int compare_ind_val(const void * a, const void * b);
+string get_line(FILE * f);
 
 #endif
