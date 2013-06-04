@@ -11,8 +11,7 @@
 #include "game_lib_load.h"
 #include "texture.h"
 #include <string>
-//#include <stdio.h>
-//#include "mobile.h"
+#include "mobile.h"
 
 using namespace std;
 

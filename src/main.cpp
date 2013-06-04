@@ -3,6 +3,7 @@
 #include "allegro.h"
 #include "game.h"
 #include "game_lib.h"
+#include "game_lib_load.h"
 #include "chat.h"
 #include "game_map.h"
 #include "edittext.h"
