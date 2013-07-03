@@ -66,11 +66,6 @@ int GAME::DestroyMobile(int i)
  * initialize and load game
  */
 
-void trig_cb(int mw, int mh)
-{
-    debug("Callback "+to_str(mw)+" "+to_str(mh),5);
-}
-
 void game_load()
 {
     srand(time(0));
@@ -84,10 +79,9 @@ void game_load()
 	Player->name="shambala";
 	Game->PcSlots[1].setCharacter(Player);
 
-    CLICKABLE * clk = new CLICKABLE(0,390,640,480,trig_cb);
-    Game->Clickables["gui"].add(clk);
+    init_gui();
 
-	if(!load_game_save("save/game.sav"))
+    if(!load_game_save("save/game.sav"))
     {   change_area("area1.area","map1.map",3,3);
     }
     else

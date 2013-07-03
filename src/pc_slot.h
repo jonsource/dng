@@ -8,6 +8,7 @@
 #define PC_SLOT_DETAIL 4
 #define PC_SLOT_SKILLS 5
 #define PC_SLOT_SPELLS 6
+#define PC_SLOT_MAP 7
 
 
 class Character;
@@ -22,7 +23,7 @@ class PCSLOT
 };
 
 void draw_pc_slots(BITMAP * bmp);
-
+void click_pc_slots(int mw, int mh);
 
 
 #endif // PC_SLOT_H_INCLUDED

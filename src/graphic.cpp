@@ -675,40 +675,39 @@ void draw_view(int xpos, int ypos, int zpos, int heading)
     //		 "Viewport width: %d  height: %d", viewport_w,viewport_h);
        //textprintf_ex(bmp, font, 0,  32, makecol(0, 0, 0), -1,
              //"Viewport height: %d (h/H changes)", viewport_h);
-       textprintf_ex(game_bmp, font, 0, 40, makecol(0, 0, 0), -1,
+       int col=makecol(200,200,200);
+       textprintf_ex(game_bmp, font, 0, 40, col, -1,
              "Field of view: %f  Aspect: %.2f Light: %d", cam->fov,cam->aspect,Game->light_power);
-       //textprintf_ex(bmp, font, 0, 48, makecol(0, 0, 0), -1,
+       //textprintf_ex(bmp, font, 0, 48, col, -1,
              //"Aspect ratio: %.2f (a/A changes)", cam.aspect);
-       textprintf_ex(game_bmp, font, 0, 56, makecol(0, 0, 0), -1,
+       textprintf_ex(game_bmp, font, 0, 56, col, -1,
              "Position X: %.2f(%.2f) Y: %.2f(%.2f) Z: %.2f(%.2f)", (float)cam->xpos,cam->dolly_xpos,(float)cam->ypos,cam->dolly_ypos,(float)cam->zpos,cam->dolly_zpos);
-       //textprintf_ex(bmp, font, 0, 64, makecol(0, 0, 0), -1,
+       //textprintf_ex(bmp, font, 0, 64, col, -1,
         //	 "Y position: %.2f (y/Y changes)", (float)cam.ypos);
-       //textprintf_ex(bmp, font, 0, 72, makecol(0, 0, 0), -1,
+       //textprintf_ex(bmp, font, 0, 72, col, -1,
         //	 "Z position: %.2f (z/Z changes)", (float)cam.zpos);
-       textprintf_ex(game_bmp, font, 0, 80, makecol(0, 0, 0), -1,
+       textprintf_ex(game_bmp, font, 0, 80, col, -1,
              "Heading: %d %s Stepback: %.2f", cam->heading,heading_to_str(cam->heading).c_str(),cam->step_back);
-       textprintf_ex(game_bmp, font, 0, 88, makecol(0, 0, 0), -1,
+       textprintf_ex(game_bmp, font, 0, 88, col, -1,
              "Pitch: %.2f deg (pgup/pgdn changes)", cam->pitch);
-       textprintf_ex(game_bmp, font, 0, 96, makecol(0, 0, 0), -1,
+       textprintf_ex(game_bmp, font, 0, 96, col, -1,
              "Roll: %.2f deg (r/R changes)", cam->roll);
-       textprintf_ex(game_bmp, font, 0, 104, makecol(0, 0, 0), -1,
+       textprintf_ex(game_bmp, font, 0, 104, col, -1,
              "Front vector: %d, %d, %d", cam->xfront, cam->yfront, cam->zfront);
-       textprintf_ex(game_bmp, font, 0, 112, makecol(0, 0, 0), -1,
+       textprintf_ex(game_bmp, font, 0, 112, col, -1,
              "Up vector: %.2f, %.2f, %.2f", cam->xup, cam->yup, cam->zup);
-       textprintf_ex(game_bmp, font, 0, 120, makecol(0, 0, 0), -1,
+       textprintf_ex(game_bmp, font, 0, 120, col, -1,
              "Frames per second: %d   Game time: %d", fps, Game->time);
+        CLICKABLE_MAP clkm = Game->Clickables;
+        CLICKABLE_MAP_ITERATOR clkmi;
+        string s="";
+        for(clkmi=clkm.begin(); clkmi!=clkm.end(); clkmi++)
+        {   s=s+" "+clkmi->first;
 
-        int see=makecol(128,128,128);
-        int not_see=makecol(72,72,72);
-        for(int i=0; i<Game->MAP_SIZE; i++)
-        {   for(int j=0; j<Game->MAP_SIZE; j++)
-            {   if(Game->linesight[i][j]==0) putpixel(game_bmp,20+i,330+j,see);
-                else putpixel(game_bmp,20+i,330+j,not_see);
-
-
-            }
         }
-    }
+        textprintf_ex(game_bmp, font, 200, 20, col, -1,
+             s.c_str(), fps, Game->time);
+   }
 
     if(Game->INFO==1) text_output(game_bmp);
 

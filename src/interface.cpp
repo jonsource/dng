@@ -235,3 +235,9 @@ void apply_local_triggers(int x, int z, int h)
         }
     }
 }
+
+void init_gui()
+{
+    CLICKABLE * clk = new CLICKABLE(0,340,640,480,click_pc_slots);
+    Game->Clickables["gui"].add(clk);
+}

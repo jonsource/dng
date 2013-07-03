@@ -259,7 +259,11 @@ void unload_map()
     Game->map_name.clear();
     Game->Lightsources.clear_all();
     Game->Triggers.clear_all();
-    Game->Clickables.clear();
+    //Game->Clickables.clear();
+    Game->Clickables["enter"].clear_all();
+    Game->Clickables["leave"].clear_all();
+    Game->Clickables["place"].clear_all();
+
     Game->Mobiles.clear_all();
 }
 

@@ -34,6 +34,9 @@ class Character
     int SP;
     int SP_max;
 
+    int level;
+    int experience;
+
   private:
 };
 
