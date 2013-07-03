@@ -69,7 +69,7 @@ TRIGGER * load_trigger(string s)
 	return ret;
 }
 
-TRIGGER::TRIGGER(int type, int xpos, int zpos, int w1, int h1, int w2, int h2,int animator, string action)
+void TRIGGER::ConstructTrigger(int type, int xpos, int zpos, int w1, int h1, int w2, int h2,int animator, string action, void(*callback)(int mw, int mh))
 {   this->type=type;
     this->xpos=xpos;
     this->zpos=zpos;
@@ -78,6 +78,7 @@ TRIGGER::TRIGGER(int type, int xpos, int zpos, int w1, int h1, int w2, int h2,in
     this->h2=h2;
     this->w2=w2;
     this->animator_nr=animator;
+    this->callback = callback;
     if(animator>-1)
     {   if(animator<Game->Animators.len())	this->animator = Game->Animators[animator];
         else
@@ -90,8 +91,17 @@ TRIGGER::TRIGGER(int type, int xpos, int zpos, int w1, int h1, int w2, int h2,in
     else this->action = new string(action);
 }
 
-TRIGGER::TRIGGER(int type, int xpos, int zpos, int w1, int h1, int w2, int h2,int animator)
-{   TRIGGER(type,xpos,zpos,w1,h1,w2,h2,animator,"");
+TRIGGER::TRIGGER(int type, int xpos, int zpos, int w1, int h1, int w2, int h2, string action)
+{   ConstructTrigger(type,xpos,zpos,w1,h1,w2,h2,-1,action, NULL);
+}
+TRIGGER::TRIGGER(int type, int xpos, int zpos, int w1, int h1, int w2, int h2, int animator)
+{   ConstructTrigger(type,xpos,zpos,w1,h1,w2,h2,animator,"", NULL);
+}
+TRIGGER::TRIGGER(int type, int xpos, int zpos, int w1, int h1, int w2, int h2, int animator, string action)
+{   ConstructTrigger(type,xpos,zpos,w1,h1,w2,h2,animator,action, NULL);
+}
+TRIGGER::TRIGGER(int type, void(*callback)(int mw, int mh))
+{   ConstructTrigger(type,0,0,0,0,0,0,-1,"", callback);
 }
 
 string TRIGGER::serialize()
@@ -146,10 +156,16 @@ void TRIGGER::fire()
 }
 
 void mouse_click(int mw, int mh)
-{   List<CLICKABLE> * clklist;
-    CLICKABLE * clk;
-    debug("Left mouse button "+to_str(mw)+" "+to_str(mh));
+{   debug("Left mouse button "+to_str(mw)+" "+to_str(mh),5);
 
+    if(mh>400)
+    {
+
+        return;
+    }
+
+    List<CLICKABLE> * clklist;
+    CLICKABLE * clk;
     CLICKABLE_MAP_ITERATOR it;
     for(it = Game->Clickables.begin(); it!=Game->Clickables.end(); it++)
     {   if(it->first=="leave") continue;

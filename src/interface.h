@@ -7,20 +7,28 @@
 class ANIMATOR;
 
 class TRIGGER
-{   public:
+{
+    private:
+        void ConstructTrigger(int type, int xpos, int zpos, int w1, int h1, int w2, int h2,int animator, string action, void(*callback)(int mw, int mh));
+    public:
         int xpos;
         int zpos;
         int type;
         int w1,h1,w2,h2;
         int animator_nr;
+        void (*callback) (int mw, int mh);
         ANIMATOR * animator;
         TRIGGER(int type, int xpos, int zpos, int w1, int h1, int w2, int h2, int animator);
+        TRIGGER(int type, int xpos, int zpos, int w1, int h1, int w2, int h2, std::string action);
         TRIGGER(int type, int xpos, int zpos, int w1, int h1, int w2, int h2, int animator, std::string action);
+        TRIGGER(int type, void (*callback)(int mw, int mh));
         void fire();
+        void fire(int mw, int mh);
         std::string serialize();
         std::string type_string();
         static int type_resolve(std::string type);
         std::string * action;
+
 };
 
 typedef struct
