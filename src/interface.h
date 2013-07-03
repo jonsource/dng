@@ -31,10 +31,14 @@ class TRIGGER
 
 };
 
-typedef struct
-{   int w1,h1,w2,h2;
-    TRIGGER * callback;
-} CLICKABLE;
+class CLICKABLE
+{   public:
+        CLICKABLE();
+        CLICKABLE(int w1, int h1, int w2, int h2, void (*callback)(int mw, int mh));
+        int w1,h1,w2,h2;
+        void (*callback)(int mw, int mh);
+        TRIGGER * trigger;
+};
 
 typedef std::map < std::string, List<CLICKABLE> > CLICKABLE_MAP;
 typedef std::map < std::string, List<CLICKABLE> >::iterator CLICKABLE_MAP_ITERATOR;

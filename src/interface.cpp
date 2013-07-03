@@ -4,6 +4,7 @@
 #include "stdio.h"
 #include "sound.h"
 #include "game_map.h"
+#include "pc_slot.h"
 
 //CLICKABLE_MAP Clickables;
 int TRIGGER::type_resolve(string type)
@@ -119,7 +120,16 @@ string TRIGGER::serialize()
 }
 
 void TRIGGER::fire()
-{   ANIMATOR * a = this->animator;
+{   fire(-1,-1);
+}
+
+void TRIGGER::fire(int mw, int mh)
+{   if(callback!=NULL)
+    {   callback(mw,mh);
+        return;
+    }
+
+    ANIMATOR * a = this->animator;
     if(a!=NULL)
     {   if(a->type==MOVATOR_Y)
         {   if(!a->on)
@@ -155,14 +165,21 @@ void TRIGGER::fire()
     delete tokens;
 }
 
+CLICKABLE::CLICKABLE()
+{   this->callback=NULL;
+    this->trigger=NULL;
+}
+
+CLICKABLE::CLICKABLE(int w1, int h1, int w2, int h2, void (*callback)(int mw, int mh))
+{   this->callback = callback;
+    this->w1=w1;
+    this->h1=h1;
+    this->w2=w2;
+    this->h2=h2;
+}
+
 void mouse_click(int mw, int mh)
 {   debug("Left mouse button "+to_str(mw)+" "+to_str(mh),5);
-
-    if(mh>400)
-    {
-
-        return;
-    }
 
     List<CLICKABLE> * clklist;
     CLICKABLE * clk;
@@ -174,8 +191,9 @@ void mouse_click(int mw, int mh)
         for(int i=0; i<clklist->len(); i++)
         {   clk=(* clklist)[i];
             if(mw>=clk->w1 && mw <=clk->w2 && mh>=clk->h1 && mh<= clk->h2)
-            {   debug(it->first+" ",5);
-                clk->callback->fire();
+            {   debug("Clickable type: "+it->first+" ",5);
+                if(clk->callback!=NULL) clk->callback(mw,mh);
+                if(clk->trigger!=NULL) clk->trigger->fire(mw,mh);
             }
         }
     }
@@ -186,8 +204,8 @@ void fire_triggers(string s)
     CLICKABLE * clk = new CLICKABLE;
     for(int i=0; i<clklist.len(); i++)
     {   clk=clklist[i];
-        debug(s+" trigger "+*clk->callback->action,5);
-        clk->callback->fire();
+        debug(s+" trigger "+*clk->trigger->action,5);
+        clk->trigger->fire();
     }
 }
 
@@ -210,8 +228,8 @@ void apply_local_triggers(int x, int z, int h)
             clk->w1=t->w1;
             clk->h2=t->h2;
             clk->w2=t->w2;
-            clk->callback = t;
-            if(t->type<TRIGGER_WEST) Game->Clickables["place"].add(clk);
+            clk->trigger = t;
+            if(t->type<=TRIGGER_WEST) Game->Clickables["place"].add(clk);
             else if(t->type==TRIGGER_LEAVE || (t->type>=BLOCKER_NORTH && t->type<=BLOCKER_WEST)) Game->Clickables["leave"].add(clk);
             else if(t->type==TRIGGER_ENTER) Game->Clickables["enter"].add(clk);
         }
