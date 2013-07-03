@@ -21,6 +21,7 @@ class PCSLOT;
 
 class GAME
 {   public:
+        List<TEXTURE> Graphics;
         List<TEXTURE> Textures;
         List<TEXTURED_ELEMENT> Elements;
         List<ANIMATOR> Animators;

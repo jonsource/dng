@@ -40,7 +40,7 @@ void draw_pc_slots(BITMAP * game_bmp)
                                 break;
             case PC_SLOT_PORTRAIT:  masked_blit(Game->PcSlots[i].portrait,game_bmp,0,0,0+i*108,344,95,95);
                                     textprintf_ex(game_bmp, font, 0+i*108, 450, col, -1,cr->name.c_str());
-                                    blit(H_BAR,game_bmp,95-cr->HP*95/cr->HP_max,0,0+i*108,466,95,10);
+                                    blit(GRAPHICS->getHealthBar(),game_bmp,95-cr->HP*95/cr->HP_max,0,0+i*108,466,95,10);
                                     //textprintf_ex(game_bmp, font, 0+i*108, 470, col, -1,"%d/%d",cr->HP,cr->HP_max);
                                 break;
 

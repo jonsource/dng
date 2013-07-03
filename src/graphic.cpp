@@ -6,10 +6,11 @@
 #include "mobile.h"
 #include "pc_slot.h"
 
+using namespace std;
+
 BITMAP * sky1[4];
-BITMAP * api=NULL;
-BITMAP * CURSOR;
-BITMAP * H_BAR;
+BITMAP * gui=NULL;
+Graphics * GRAPHICS;
 RGB pal[256];
 extern BITMAP *game_bmp,* first,* second;
 extern int fps, tmsec;
@@ -53,6 +54,7 @@ int init_graphic()
 	debug("screen depth: "+to_str(bitmap_color_depth(game_bmp)));
 	clear(game_bmp);
 	init_camera(&Game->view_settings);
+	GRAPHICS = new Graphics();
 //    show_mouse(screen);
 	return 1;
 }
@@ -97,8 +99,9 @@ int load_graphics()
 {   string s;
     PALETTE pal;
 
-    CURSOR = load_bmp("data/images/api/cursor.bmp",pal);
-    H_BAR = load_bmp("data/images/api/health-bar.bmp",pal);
+    GRAPHICS->load();
+    /*CURSOR = load_bmp("data/images/gui/cursor.bmp",pal);
+    H_BAR = load_bmp("data/images/gui/health-bar.bmp",pal);*/
       //set_mouse_sprite(load_bmp("data/images/api/cursor.bmp",pal));
 
           s="data/images/sky1/skylarge1.bmp";
@@ -114,8 +117,8 @@ int load_graphics()
       sky1[3] = load_bmp(s.c_str(), pal);
       if(!sky1[0]) debug("Missing sky3 texture!\n",4);
       s="data/images/api/api_mask.bmp";
-      api = load_bmp(s.c_str(), pal);
-      if(!api) debug("Missing api_mask texture!\n",4);
+      gui = load_bmp(s.c_str(), pal);
+      if(!gui) debug("Missing api_mask texture!\n",4);
       debug("done load graphics\n",10);
 
     return 1;
@@ -126,6 +129,58 @@ void unload_graphics()
 //  delete [] (void **) floor2;
 //  delete [] (void *) fwall1;
   //delete [] (void **) wall1;
+    delete GRAPHICS;
+}
+
+
+Graphics::Graphics()
+{
+    this->cursor = NULL;
+    this->health_bar = NULL;
+}
+Graphics::~Graphics()
+{
+    destroy_bitmap(this->cursor);
+    destroy_bitmap(this->health_bar);
+}
+BITMAP * Graphics::getCursor()
+{   return cursor;
+}
+
+BITMAP * Graphics::getHealthBar()
+{   return health_bar;
+}
+
+BITMAP * Graphics::getPortrait(string name)
+{   if(portraits.find(name)==portraits.end())
+        return portraits[name];
+    BITMAP * tmp;
+    PALETTE pal;
+
+    string load_str="data/images/gui/"+name+".bmp";
+    tmp = load_bmp(load_str.c_str(),pal);
+    if(tmp==NULL)
+    {   debug("Portrait :"+load_str+" not found!",10);
+        exit(1);
+    }
+    portraits[name]=tmp;
+    return portraits[name];
+}
+
+void Graphics::load()
+{
+    this->health_bar=load_bmp("data/images/gui/health-bar.bmp",pal);
+    this->cursor=load_bmp("data/images/gui/cursor.bmp",pal);
+    if(this->health_bar==NULL)
+    {
+        debug("data/images/gui/health_bar.bmp not found!",10);
+        exit(1);
+    }
+    if(this->cursor==NULL)
+    {
+        debug("data/images/gui/cursor.bmp not found!",10);
+        exit(1);
+    }
 }
 
 /**
@@ -554,7 +609,6 @@ void init_camera(VIEW_SETTINGS * view_settings)
 void draw_view(int xpos, int ypos, int zpos, int heading)
 {  int dz,dx,c;
 
-
    cam->dolly_ypos=ypos+0.5;
    /*cam->dolly_xpos=xpos+0.5;
    cam->dolly_zpos=zpos+0.5;*/
@@ -610,6 +664,7 @@ void draw_view(int xpos, int ypos, int zpos, int heading)
         }
     }
 
+
     draw_pc_slots(game_bmp);
 
    if(Game->INFO>1)
@@ -657,7 +712,8 @@ void draw_view(int xpos, int ypos, int zpos, int heading)
 
     if(Game->INFO==1) text_output(game_bmp);
 
-    masked_blit(CURSOR,game_bmp,0,0,mouse_x,mouse_y,CURSOR->w,CURSOR->h);
+    BITMAP * cursor = GRAPHICS->getCursor();
+    masked_blit(cursor,game_bmp,0,0,mouse_x,mouse_y,cursor->w,cursor->h);
 }
 
 void draw_triggers(int x, int z, int heagind)
