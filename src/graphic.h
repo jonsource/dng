@@ -32,12 +32,14 @@ class Graphics
         BITMAP * cursor;
         BITMAP * health_bar;
         std::map<std::string,BITMAP *> portraits;
+        BITMAP * inventory_bg;
     public:
         Graphics();
         ~Graphics();
         BITMAP * getCursor();
         BITMAP * getHealthBar();
         BITMAP * getPortrait(std::string name);
+        BITMAP * getInventoryBg();
         void load();
 };
 
@@ -47,6 +49,7 @@ int load_graphics();
 void unload_graphics();
 void draw_view(int x, int y,int z, int heading);
 void draw_triggers(int x, int z, int heading);
+void draw_cursor();
 int count_view_x(int x, int i, int j, int h);
 int count_view_y(int y, int i, int j, int h);
 BITMAP * far_texture(TEXTURED_ELEMENT * txt, int dist);

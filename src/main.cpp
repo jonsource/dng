@@ -168,7 +168,7 @@ int main(int argc, char *argv[])
 		}
 
 	//    game_interpret();
-        if(Game->INFO==1)
+        if(Game->info==1)
         {
             if(keypressed()) text_input();
             if(key[KEY_ESC]) keypress(KEY_ESC);

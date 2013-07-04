@@ -6,6 +6,7 @@
 #include "game_map.h"
 #include "pc_slot.h"
 
+List<string> clickable_order;
 //CLICKABLE_MAP Clickables;
 int TRIGGER::type_resolve(string type)
 {	bool type_ok=false;
@@ -171,7 +172,8 @@ CLICKABLE::CLICKABLE()
 }
 
 CLICKABLE::CLICKABLE(int w1, int h1, int w2, int h2, void (*callback)(int mw, int mh))
-{   this->callback = callback;
+{   this->trigger=NULL;
+    this->callback = callback;
     this->w1=w1;
     this->h1=h1;
     this->w2=w2;
@@ -183,7 +185,41 @@ void mouse_click(int mw, int mh)
 
     List<CLICKABLE> * clklist;
     CLICKABLE * clk;
-    CLICKABLE_MAP_ITERATOR it;
+
+    if(Game->clickable_level=="gui")
+    {   for(int it=0;it<clickable_order.len();it++)
+        {   string c=*clickable_order[it];
+            if(Game->Clickables.find(c)!=Game->Clickables.end())
+            {   clklist=&Game->Clickables[c];
+
+                for(int i=0; i<clklist->len(); i++)
+                {   clk=(* clklist)[i];
+                    if(mw>=clk->w1 && mw <=clk->w2 && mh>=clk->h1 && mh<= clk->h2)
+                    {   debug("Clickable type(gui): "+c+" ",5);
+                        if(clk->callback!=NULL) clk->callback(mw,mh);
+                        else if(clk->trigger!=NULL) clk->trigger->fire(mw,mh);
+                    }
+                }
+            }
+        }
+    }
+    else
+    {// current clickable level found in clickables
+        if(Game->Clickables.find(Game->clickable_level)!=Game->Clickables.end())
+        {   clklist=&Game->Clickables[Game->clickable_level];
+
+            debug(" "+to_str(clklist->len()));
+            for(int i=0; i<clklist->len(); i++)
+            {   clk=(* clklist)[i];
+                if(mw>=clk->w1 && mw <=clk->w2 && mh>=clk->h1 && mh<= clk->h2)
+                {   debug("Clickable type: "+Game->clickable_level+" ",5);
+                    if(clk->callback!=NULL) clk->callback(mw,mh);
+                    else if(clk->trigger!=NULL) clk->trigger->fire(mw,mh);
+                }
+            }
+        }
+    }
+    /*CLICKABLE_MAP_ITERATOR it;
     for(it = Game->Clickables.begin(); it!=Game->Clickables.end(); it++)
     {   if(it->first=="leave") continue;
         clklist=&Game->Clickables[it->first];
@@ -196,7 +232,7 @@ void mouse_click(int mw, int mh)
                 if(clk->trigger!=NULL) clk->trigger->fire(mw,mh);
             }
         }
-    }
+    }*/
 }
 
 void fire_triggers(string s)
@@ -238,6 +274,10 @@ void apply_local_triggers(int x, int z, int h)
 
 void init_gui()
 {
+    Game->clickable_level="gui";
     CLICKABLE * clk = new CLICKABLE(0,340,640,480,click_pc_slots);
     Game->Clickables["gui"].add(clk);
+    clickable_order.add(new string("mobile"));
+    clickable_order.add(new string("place"));
+    clickable_order.add(new string("gui"));
 }

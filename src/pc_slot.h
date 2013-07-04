@@ -23,7 +23,10 @@ class PCSLOT
 };
 
 void draw_pc_slots(BITMAP * bmp);
+void draw_inventory(BITMAP * bmp, int slot_no);
 void click_pc_slots(int mw, int mh);
+void open_inventory(int slot_no);
+void close_inventory();
 
 
 #endif // PC_SLOT_H_INCLUDED

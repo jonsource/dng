@@ -31,27 +31,30 @@ class GAME
         List<MOBILE> Mobiles;
         List<MOBILE_TEMPLATE> MobileTemplates;
         CLICKABLE_MAP Clickables;
+        std::string clickable_level;
         VIEW_SETTINGS view_settings;
         RGB * fade_color;
         int * Impassable;
-        int TRANSPARENT;
-        int MAP_SIZE;
+        int transparent;
+        int map_size;
         int **game_map;
         int **linesight;
         int light_power;
-        int INFO;
+        int info;
+        int time;
+        int show_inventory;
         std::string map_name;
         std::string area_name;
+        PCSLOT * PcSlots;
         GAME();
         ~GAME();
-        PCSLOT * PcSlots;
         int GetDebugLvl();
         int GetDebugLvlMain();
         int SetDebugLvl(int dbg_lvl);
         int SetDebugLvlMain(int dbg_lvl);
         int ResetDebugLvl();
         int DestroyMobile(int i);
-        int time;
+
 };
 
 void game_load();

@@ -84,29 +84,29 @@ int load_map_base(string fname)
 		if(str1.find(":")==0) // : at the beginning of new line
 		{				// is new block
 
-		    if(load_variable(f,"mapsize",&Game->MAP_SIZE,load_int, &str1))
+		    if(load_variable(f,"mapsize",&Game->map_size,load_int, &str1))
             {   delete []Game->game_map;
                 delete []Game->linesight;
-                Game->game_map = new int * [Game->MAP_SIZE];
-                Game->linesight = new int * [Game->MAP_SIZE];
-                for(int i=0; i<Game->MAP_SIZE; i++)
-                {	Game->game_map[i]= new int [Game->MAP_SIZE];
-                    Game->linesight[i]= new int [Game->MAP_SIZE];
-                    for(int j=0; j<Game->MAP_SIZE; j++)
+                Game->game_map = new int * [Game->map_size];
+                Game->linesight = new int * [Game->map_size];
+                for(int i=0; i<Game->map_size; i++)
+                {	Game->game_map[i]= new int [Game->map_size];
+                    Game->linesight[i]= new int [Game->map_size];
+                    for(int j=0; j<Game->map_size; j++)
                     { Game->game_map[i][j]=0;
                       Game->linesight[i][j]=0;
                     }
                 }
-                debug("Map size: "+to_str(Game->MAP_SIZE),10);
+                debug("Map size: "+to_str(Game->map_size),10);
             }
 
 			if(str1.compare(":map")==0)
 			{	int i=0,j,found;
-				while(!feof(f) && i<Game->MAP_SIZE)
+				while(!feof(f) && i<Game->map_size)
 				{	str2=get_line(f);
 					j=0;
 					debug("str2 "+str2);
-					while(sscanf(str2.c_str(),"%d,",&tile) && j<Game->MAP_SIZE)
+					while(sscanf(str2.c_str(),"%d,",&tile) && j<Game->map_size)
 					{	Game->game_map[j][i]=tile;
                         j++;
 					 	debug("Read tile ["+to_str(i)+","+to_str(j)+"]="+to_str(tile),1);
@@ -115,7 +115,7 @@ int load_map_base(string fname)
 					}
 					i++;
 				}
-				if(i==Game->MAP_SIZE && j==Game->MAP_SIZE)
+				if(i==Game->map_size && j==Game->map_size)
 				{	debug("Map read successfully");
 
 				}
@@ -150,11 +150,11 @@ int load_map_save(string fname)
 
 		    if(str1.compare(":map")==0)
 			{	int i=0,j,found;
-				while(!feof(f) && i<Game->MAP_SIZE)
+				while(!feof(f) && i<Game->map_size)
 				{	str2=get_line(f);
 					j=0;
 					debug("str2 "+str2);
-					while(sscanf(str2.c_str(),"%d,",&tile) && j<Game->MAP_SIZE)
+					while(sscanf(str2.c_str(),"%d,",&tile) && j<Game->map_size)
 					{	Game->game_map[j][i]=tile;
                         j++;
 					 	debug("Read tile ["+to_str(i)+","+to_str(j)+"]="+to_str(tile),1);
@@ -163,7 +163,7 @@ int load_map_save(string fname)
 					}
 					i++;
 				}
-				if(i==Game->MAP_SIZE && j==Game->MAP_SIZE)
+				if(i==Game->map_size && j==Game->map_size)
 				{	debug("Map read successfully");
 
 				}
@@ -373,10 +373,10 @@ string serialize_map()
 {   char buf[8];
     string ret="";
     ret+="\n:mapsize\n";
-    ret+=to_str(Game->MAP_SIZE)+"\n";
+    ret+=to_str(Game->map_size)+"\n";
     ret+="\n:map\n";
-    for(int i=0; i<Game->MAP_SIZE; i++)
-    {   for(int j=0;j<Game->MAP_SIZE; j++)
+    for(int i=0; i<Game->map_size; i++)
+    {   for(int j=0;j<Game->map_size; j++)
         {   sprintf(buf,"%2d,",Game->game_map[j][i]);
             ret+=buf;
         }

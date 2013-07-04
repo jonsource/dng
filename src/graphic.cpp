@@ -71,7 +71,7 @@ float dist(float x,float z,CAMERA * cam)
  * check whether coordinates are on map and return them
  */
 int check_coords(int x, int y)
-{ if(x<0 || y<0 || x>=Game->MAP_SIZE || y>=Game->MAP_SIZE) return 0;
+{ if(x<0 || y<0 || x>=Game->map_size || y>=Game->map_size) return 0;
   else return Game->game_map[x][y];
 }
 
@@ -79,7 +79,7 @@ int check_coords(int x, int y)
  * check whether coordinates are on game_map
  */
 int check_coords_subr(int x, int y)
-{ if(x<0 || y<0 || x>=Game->MAP_SIZE || y>=Game->MAP_SIZE) return 0;
+{ if(x<0 || y<0 || x>=Game->map_size || y>=Game->map_size) return 0;
   else return 1;
 }
 
@@ -88,7 +88,7 @@ int check_coords_subr(int x, int y)
  * valid only after make_linesight is called for current camera position
  */
 int see_coords(int x, int y)
-{   if(x<0 || y<0 || x>=Game->MAP_SIZE || y>=Game->MAP_SIZE) return 0;
+{   if(x<0 || y<0 || x>=Game->map_size || y>=Game->map_size) return 0;
     return Game->linesight[x][y];
 }
 
@@ -151,6 +151,10 @@ BITMAP * Graphics::getHealthBar()
 {   return health_bar;
 }
 
+BITMAP * Graphics::getInventoryBg()
+{   return inventory_bg;
+}
+
 BITMAP * Graphics::getPortrait(string name)
 {   if(portraits.find(name)==portraits.end())
         return portraits[name];
@@ -171,6 +175,7 @@ void Graphics::load()
 {
     this->health_bar=load_bmp("data/images/gui/health-bar.bmp",pal);
     this->cursor=load_bmp("data/images/gui/cursor.bmp",pal);
+    this->inventory_bg=load_bmp("data/images/gui/inventory-bg.bmp",pal);
     if(this->health_bar==NULL)
     {
         debug("data/images/gui/health_bar.bmp not found!",10);
@@ -234,7 +239,7 @@ void render_element(int type, TEXTURED_ELEMENT * element, BITMAP *bmp, int x, in
    int polytype;
 
    /* set necessary POLYTYPE, affine texture mapping is OK and faster than perspective correct mapping */
-   if(Game->TRANSPARENT && element->transparent)
+   if(Game->transparent && element->transparent)
    {	polytype = POLYTYPE_ATEX_MASK_TRANS;
    		set_alpha_blender();
    		//blender_set=false;
@@ -560,8 +565,8 @@ void see_tile(int x, int z, CAMERA * cam)
 void make_linesight(int x, int z, CAMERA * cam)
 {	//debug(" linesight "+to_str(x)+" "+to_str(z),1);
 
-	for(int i=0; i<Game->MAP_SIZE; i++)
-		for(int j=0; j<Game->MAP_SIZE; j++)
+	for(int i=0; i<Game->map_size; i++)
+		for(int j=0; j<Game->map_size; j++)
 			Game->linesight[i][j]=0;
 
 	//debug(" * after sight reset",1);
@@ -664,10 +669,7 @@ void draw_view(int xpos, int ypos, int zpos, int heading)
         }
     }
 
-
-    draw_pc_slots(game_bmp);
-
-   if(Game->INFO>1)
+   if(Game->info>1)
    {
     /* overlay some text */
        //set_clip_rect(game_bmp, 0, 0, game_bmp->w, game_bmp->h);
@@ -709,8 +711,11 @@ void draw_view(int xpos, int ypos, int zpos, int heading)
              s.c_str(), fps, Game->time);
    }
 
-    if(Game->INFO==1) text_output(game_bmp);
+    if(Game->info==1) text_output(game_bmp);
+}
 
+void draw_cursor()
+{
     BITMAP * cursor = GRAPHICS->getCursor();
     masked_blit(cursor,game_bmp,0,0,mouse_x,mouse_y,cursor->w,cursor->h);
 }

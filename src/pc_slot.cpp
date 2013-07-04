@@ -34,15 +34,21 @@ void draw_pc_slots(BITMAP * game_bmp)
     for(int slot_no=0; slot_no<6; slot_no++)
     {   Character * cr = Game->PcSlots[slot_no].character;
         string s;
-        switch(Game->PcSlots[slot_no].state)
+
+        int state = Game->PcSlots[slot_no].state;
+        if(state == PC_SLOT_PORTRAIT)
+        {   textprintf_ex(game_bmp, font, 0+slot_no*108, 450, col, -1,cr->name.c_str());
+            blit(GRAPHICS->getHealthBar(),game_bmp,95-cr->HP*95/cr->HP_max,0,0+slot_no*108,466,95,10);
+        }
+        switch(state)
         {   case PC_SLOT_EMPTY: textprintf_ex(game_bmp, font, 0+slot_no*108, 340, col, -1,"Empty");
                                 break;
             case PC_SLOT_DEAD:  textprintf_ex(game_bmp, font, 0+slot_no*108, 340, col, -1,"Dead");
                                 break;
             case PC_SLOT_PORTRAIT:  masked_blit(Game->PcSlots[slot_no].portrait,game_bmp,0,0,0+slot_no*108,344,95,95);
-                                    textprintf_ex(game_bmp, font, 0+slot_no*108, 450, col, -1,cr->name.c_str());
-                                    blit(GRAPHICS->getHealthBar(),game_bmp,95-cr->HP*95/cr->HP_max,0,0+slot_no*108,466,95,10);
                                     //textprintf_ex(game_bmp, font, 0+i*108, 470, col, -1,"%d/%d",cr->HP,cr->HP_max);
+                                    //textprintf_ex(game_bmp, font, 0+slot_no*108, 450, col, -1,cr->name.c_str());
+                                    //blit(GRAPHICS->getHealthBar(),game_bmp,95-cr->HP*95/cr->HP_max,0,0+slot_no*108,466,95,10);
                                 break;
             case PC_SLOT_COMBAT: textprintf_ex(game_bmp, font, 0+slot_no*108, 340, col, -1,"Combat");
                                 break;
@@ -64,8 +70,8 @@ void draw_pc_slots(BITMAP * game_bmp)
             case PC_SLOT_MAP:
                                 int see=makecol(128,128,128);
                                 int not_see=makecol(72,72,72);
-                                for(int i=0; i<Game->MAP_SIZE; i++)
-                                {   for(int j=0; j<Game->MAP_SIZE; j++)
+                                for(int i=0; i<Game->map_size; i++)
+                                {   for(int j=0; j<Game->map_size; j++)
                                     {   if(Game->linesight[i][j]==0) putpixel(game_bmp,20+i+slot_no*108,360+j,see);
                                         else putpixel(game_bmp,20+i+slot_no*108,360+j,not_see);
                                     }
@@ -78,9 +84,46 @@ void draw_pc_slots(BITMAP * game_bmp)
 
 void click_pc_slots(int mw, int mh)
 {
-    debug("Callback "+to_str(mw)+" "+to_str(mh),5);
+    debug("click pc slots "+to_str(mw)+" "+to_str(mh),5);
     int slot_no = mw / 108;
-    Game->PcSlots[slot_no].state++;
-    if(Game->PcSlots[slot_no].state>PC_SLOT_MAP) Game->PcSlots[slot_no].state=PC_SLOT_PORTRAIT;
-
+    if(mh<=440)
+    {   Game->PcSlots[slot_no].state++;
+        if(Game->PcSlots[slot_no].state>PC_SLOT_MAP) Game->PcSlots[slot_no].state=PC_SLOT_PORTRAIT;
+    }
+    else
+    {
+        open_inventory(slot_no);
+    }
 }
+
+void click_inventory(int mw, int mh)
+{
+    debug("click inventory "+to_str(mw)+" "+to_str(mh),5);
+    if(mh>440)
+    {   int slot_no = mw / 108;
+        close_inventory();
+        open_inventory(slot_no);
+        return;
+    }
+    close_inventory();
+}
+
+void open_inventory(int slot_no)
+{   if(Game->PcSlots[slot_no].state<=PC_SLOT_EMPTY) return;
+    Game->clickable_level="inventory";
+    Game->show_inventory=slot_no;
+    CLICKABLE * clk = new CLICKABLE(0,20,640,480,click_inventory);
+    Game->Clickables["inventory"].add(clk);
+}
+
+void close_inventory()
+{   Game->clickable_level="gui";
+    Game->show_inventory = -1;
+    Game->Clickables["inventory"].clear_all();
+}
+
+void draw_inventory(BITMAP * game_bmp, int slot_no)
+{   blit(GRAPHICS->getInventoryBg(),game_bmp,0,0,0,20,640,420);
+    textprintf_ex(game_bmp, font, 108, 150, makecol(50,50,50), -1,Game->PcSlots[slot_no].character->name.c_str());
+}
+

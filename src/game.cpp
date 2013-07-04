@@ -20,10 +20,11 @@ GAME::GAME()
 {   game_lib::set_debug_lvl_main(4);
     game_lib::set_debug_lvl(4);
     this->light_power=128;
-    this->INFO=0;
-    this->TRANSPARENT=1;
+    this->info=0;
+    this->transparent=1;
     this->time=0;
     this->PcSlots = new PCSLOT[6];
+    this->show_inventory = -1;
 }
 
 GAME::~GAME()
@@ -166,8 +167,11 @@ void game_draw()
 //  release_bitmap(bmp);
   debug("begin game_draw",2);
 //    scare_mouse();
-  draw_view(gx,gy,gz,gh);
-  if(Game->INFO>0) draw_triggers(gx,gz,gh);
+  draw_pc_slots(game_bmp);
+  if(Game->show_inventory==-1) draw_view(gx,gy,gz,gh);
+  else draw_inventory(game_bmp,Game->show_inventory);
+  if(Game->info>0) draw_triggers(gx,gz,gh);
+  draw_cursor();
 //    unscare_mouse();
 }
 
@@ -330,7 +334,7 @@ void keypress(int i)
      if(i == KEY_R) y=1;
      if(i == KEY_F) y=-1;
 
-    if(Game->INFO==2)
+    if(Game->info==2)
     {   /* development camera controls */
          if(i == KEY_H) { Game->view_settings.fov+=1; init_camera(&Game->view_settings); }
          if(i == KEY_J) { Game->view_settings.fov-=1; init_camera(&Game->view_settings); }
@@ -342,14 +346,14 @@ void keypress(int i)
          if(i == KEY_L) Game->light_power-=1;
     }
 
-    if(i == KEY_ESC) { Game->INFO = 0;}
+    if(i == KEY_ESC) { Game->info = 0;}
 
-    if(i == KEY_F1) {  if(Game->INFO!=2) Game->INFO=2;
-                       else Game->INFO=0;
+    if(i == KEY_F1) {  if(Game->info!=2) Game->info=2;
+                       else Game->info=0;
                     }
 
      if(i == KEY_F2) {  clear_keybuf();
-                        Game->INFO=1;
+                        Game->info=1;
                     }
      if(i == KEY_N)
      { Class *cl=Classes->GetTemplate(Player->classname);
@@ -420,10 +424,10 @@ void text_interpret(string s)
 {   STR_LIST * l=tokenize(s," ");
     if(l->len()<1) return;
     if(*(*l)[0]=="exit")
-    {   Game->INFO=(++Game->INFO)%3;
+    {   Game->info=(++Game->info)%3;
         return;
     }
-    if(*(*l)[0]=="transparent") _interpret_1int(l,"transparent",&Game->TRANSPARENT,0,1);
+    if(*(*l)[0]=="transparent") _interpret_1int(l,"transparent",&Game->transparent,0,1);
     if(*(*l)[0]=="light_power") _interpret_1int(l,"light_power",&Game->light_power,0,255);
     if(*(*l)[0]=="clone")
     {   int temp=-1;
@@ -482,7 +486,7 @@ void text_interpret(string s)
     }
     if(*(*l)[0]=="Teleport")
     {   int destx,destz;
-        _interpret_2int(l,"Teleport",&destx,&destz,0,Game->MAP_SIZE-1,0,Game->MAP_SIZE-1);
+        _interpret_2int(l,"Teleport",&destx,&destz,0,Game->map_size-1,0,Game->map_size-1);
         player_move_subr(destx, gy, destz, gh, true);
     }
     debug("<<< end interpret");
