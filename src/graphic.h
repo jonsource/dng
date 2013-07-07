@@ -32,6 +32,7 @@ class Graphics
         BITMAP * cursor;
         BITMAP * health_bar;
         std::map<std::string,BITMAP *> portraits;
+        std::map<std::string,BITMAP *> items;
         BITMAP * inventory_bg;
     public:
         Graphics();
@@ -40,6 +41,7 @@ class Graphics
         BITMAP * getHealthBar();
         BITMAP * getPortrait(std::string name);
         BITMAP * getInventoryBg();
+        BITMAP * getItem(std::string name);
         void load();
 };
 

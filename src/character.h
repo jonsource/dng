@@ -6,6 +6,7 @@
 #include <string>
 #include "game.h"
 
+class INVENTORY;
 using namespace std;
 
 class Character
@@ -37,6 +38,7 @@ class Character
     int level;
     int experience;
 
+    INVENTORY * Inventory;
   private:
 };
 

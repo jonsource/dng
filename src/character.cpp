@@ -1,8 +1,8 @@
 /*
  *	Player character Class - basic definitions
  */
-
 #include "character.h"
+#include "inventory.h"
 
 Character::Character(int race)
 { courage = rand()%8+6;
@@ -17,11 +17,13 @@ Character::Character(int race)
   classname = "Fighter";
   HP = SP = MP = HP_max = SP_max = MP_max = 10;
   Class = -1;
+  Inventory = new INVENTORY();
+  Inventory->chr = this;
 }
 
 Character::~Character()
-{
-                       
+{   delete Inventory;
+
 }
 
 void Character::IncStat(int i)
@@ -34,5 +36,5 @@ void Character::IncStat(int i)
     case 5: intelligence++; break;
     case 6: wisdom++; break;
     case 7: charisma++; break;
-  }                     
+  }
 }

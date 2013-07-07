@@ -18,6 +18,7 @@
 #define PAUSE    -1
 
 class PCSLOT;
+class ITEM;
 
 class GAME
 {   public:
@@ -30,6 +31,7 @@ class GAME
         List<TRIGGER> Triggers;
         List<MOBILE> Mobiles;
         List<MOBILE_TEMPLATE> MobileTemplates;
+        ITEM * ActiveItem;
         CLICKABLE_MAP Clickables;
         std::string clickable_level;
         VIEW_SETTINGS view_settings;

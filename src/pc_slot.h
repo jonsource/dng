@@ -1,3 +1,5 @@
+#include "inventory.h"
+
 #ifndef PC_SLOT_H_INCLUDED
 #define PC_SLOT_H_INCLUDED
 

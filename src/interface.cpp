@@ -171,13 +171,23 @@ CLICKABLE::CLICKABLE()
     this->trigger=NULL;
 }
 
-CLICKABLE::CLICKABLE(int w1, int h1, int w2, int h2, void (*callback)(int mw, int mh))
+void CLICKABLE::ClickableInit(int w1, int h1, int w2, int h2, int arg1, int arg2, void (*callback)(int mw, int mh))
 {   this->trigger=NULL;
     this->callback = callback;
     this->w1=w1;
     this->h1=h1;
     this->w2=w2;
     this->h2=h2;
+    this->arg1=arg1;
+    this->arg2=arg2;
+}
+
+CLICKABLE::CLICKABLE(int w1, int h1, int w2, int h2, void (*callback)(int mw, int mh))
+{   ClickableInit(w1,h1,w2,h2,-1,-1,callback);
+}
+
+CLICKABLE::CLICKABLE(int w1, int h1, int w2, int h2, int arg1, int arg2, void (*callback)(int mw, int mh))
+{   ClickableInit(w1,h1,w2,h2,arg1,arg2,callback);
 }
 
 void mouse_click(int mw, int mh)
@@ -196,7 +206,10 @@ void mouse_click(int mw, int mh)
                 {   clk=(* clklist)[i];
                     if(mw>=clk->w1 && mw <=clk->w2 && mh>=clk->h1 && mh<= clk->h2)
                     {   debug("Clickable type(gui): "+c+" ",5);
-                        if(clk->callback!=NULL) clk->callback(mw,mh);
+                        if(clk->callback!=NULL)
+                        {   if(clk->arg1!=-1) clk->callback(clk->arg1,clk->arg2);
+                            else clk->callback(mw,mh);
+                        }
                         else if(clk->trigger!=NULL) clk->trigger->fire(mw,mh);
                     }
                 }
@@ -213,7 +226,10 @@ void mouse_click(int mw, int mh)
             {   clk=(* clklist)[i];
                 if(mw>=clk->w1 && mw <=clk->w2 && mh>=clk->h1 && mh<= clk->h2)
                 {   debug("Clickable type: "+Game->clickable_level+" ",5);
-                    if(clk->callback!=NULL) clk->callback(mw,mh);
+                    if(clk->callback!=NULL)
+                    {   if(clk->arg1!=-1) clk->callback(clk->arg1,clk->arg2);
+                        else clk->callback(mw,mh);
+                    }
                     else if(clk->trigger!=NULL) clk->trigger->fire(mw,mh);
                 }
             }

@@ -156,7 +156,7 @@ BITMAP * Graphics::getInventoryBg()
 }
 
 BITMAP * Graphics::getPortrait(string name)
-{   if(portraits.find(name)==portraits.end())
+{   if(portraits.find(name)!=portraits.end())
         return portraits[name];
     BITMAP * tmp;
     PALETTE pal;
@@ -169,6 +169,29 @@ BITMAP * Graphics::getPortrait(string name)
     }
     portraits[name]=tmp;
     return portraits[name];
+}
+
+BITMAP * Graphics::getItem(string name)
+{
+//debug("Graphic->getItem "+name);
+    if(items.find(name)!=items.end())
+    {   //dappend(" .. found");
+        return items[name];
+    }
+    BITMAP * tmp;
+    PALETTE pal;
+
+    string load_str="data/images/items/"+name+".bmp";
+    tmp = load_bmp(load_str.c_str(),pal);
+    if(tmp==NULL)
+    {   debug("Item :"+load_str+" not found!",10);
+        tmp = create_bitmap(50,50);
+        clear_to_color(tmp,makecol(180,30,30));
+        textprintf_ex(tmp, font, 0, 0, makecol(255,50,50), -1,name.c_str());
+        //dappend("... created!",10);
+    }
+    items[name]=tmp;
+    return items[name];
 }
 
 void Graphics::load()
@@ -715,8 +738,9 @@ void draw_view(int xpos, int ypos, int zpos, int heading)
 }
 
 void draw_cursor()
-{
-    BITMAP * cursor = GRAPHICS->getCursor();
+{   BITMAP * cursor;
+    if(Game->ActiveItem==NULL) cursor = GRAPHICS->getCursor();
+    else cursor = GRAPHICS->getItem(Game->ActiveItem->name);
     masked_blit(cursor,game_bmp,0,0,mouse_x,mouse_y,cursor->w,cursor->h);
 }
 

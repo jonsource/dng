@@ -35,7 +35,10 @@ class CLICKABLE
 {   public:
         CLICKABLE();
         CLICKABLE(int w1, int h1, int w2, int h2, void (*callback)(int mw, int mh));
+        CLICKABLE(int w1, int h1, int w2, int h2, int arg1, int arg2, void (*callback)(int mw, int mh));
+        void ClickableInit(int w1, int h1, int w2, int h2, int arg1, int arg2, void (*callback)(int mw, int mh));
         int w1,h1,w2,h2;
+        int arg1, arg2;
         void (*callback)(int mw, int mh);
         TRIGGER * trigger;
 };

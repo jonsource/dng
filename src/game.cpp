@@ -25,6 +25,7 @@ GAME::GAME()
     this->time=0;
     this->PcSlots = new PCSLOT[6];
     this->show_inventory = -1;
+    this->ActiveItem = NULL;
 }
 
 GAME::~GAME()

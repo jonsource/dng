@@ -63,6 +63,8 @@
 		<Unit filename="src/graphic_make_tiles.cpp" />
 		<Unit filename="src/interface.cpp" />
 		<Unit filename="src/interface.h" />
+		<Unit filename="src/inventory.cpp" />
+		<Unit filename="src/inventory.h" />
 		<Unit filename="src/list.h" />
 		<Unit filename="src/load_classes.cpp" />
 		<Unit filename="src/load_classes.h" />
