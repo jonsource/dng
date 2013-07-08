@@ -171,7 +171,7 @@ CLICKABLE::CLICKABLE()
     this->trigger=NULL;
 }
 
-void CLICKABLE::ClickableInit(int w1, int h1, int w2, int h2, int arg1, int arg2, void (*callback)(int mw, int mh))
+void CLICKABLE::clickableInit(int w1, int h1, int w2, int h2, int arg1, int arg2, void (*callback)(int mw, int mh))
 {   this->trigger=NULL;
     this->callback = callback;
     this->w1=w1;
@@ -183,11 +183,11 @@ void CLICKABLE::ClickableInit(int w1, int h1, int w2, int h2, int arg1, int arg2
 }
 
 CLICKABLE::CLICKABLE(int w1, int h1, int w2, int h2, void (*callback)(int mw, int mh))
-{   ClickableInit(w1,h1,w2,h2,-1,-1,callback);
+{   clickableInit(w1,h1,w2,h2,-1,-1,callback);
 }
 
 CLICKABLE::CLICKABLE(int w1, int h1, int w2, int h2, int arg1, int arg2, void (*callback)(int mw, int mh))
-{   ClickableInit(w1,h1,w2,h2,arg1,arg2,callback);
+{   clickableInit(w1,h1,w2,h2,arg1,arg2,callback);
 }
 
 void mouse_click(int mw, int mh)
@@ -291,9 +291,40 @@ void apply_local_triggers(int x, int z, int h)
 void init_gui()
 {
     Game->clickable_level="gui";
-    CLICKABLE * clk = new CLICKABLE(0,340,640,480,click_pc_slots);
-    Game->Clickables["gui"].add(clk);
+    Game->Clickables["gui"].add(new CLICKABLE(0,340,640,480,click_pc_slots));
+    Game->Clickables["gui"].add(new CLICKABLE(130,285,317,335,0,-1,click_inv_heaps));
+    Game->Clickables["gui"].add(new CLICKABLE(318,285,505,335,0,1,click_inv_heaps));
     clickable_order.add(new string("mobile"));
     clickable_order.add(new string("place"));
     clickable_order.add(new string("gui"));
+}
+
+void click_inv_heaps(int relay, int heap)
+{   float hx,hz;
+    int xoff,zoff;
+    //debug("Inv heaps ",7);
+    heading_to_xz(Game->h,&xoff,&zoff);
+
+    hx=Game->x+0.5+xoff*0.25+zoff*0.25*heap*(-1);
+    hz=Game->z+0.5+zoff*0.25+xoff*0.25*heap;
+    //dappend(" ["+to_str(hx)+","+to_str(hz)+"]",7);
+    INV_HEAP * ih = NULL;
+    for(int i=0; i<Game->InvHeaps.len(); i++)
+    {   if(Game->InvHeaps[i]->x==hx && Game->InvHeaps[i]->z==hz)
+        {   ih=Game->InvHeaps[i];
+        }
+    }
+    if(Game->ActiveItem==NULL)
+    {   if(ih==NULL) return;
+        Game->ActiveItem=ih->popItem();
+    }
+    else
+    {   if(ih==NULL)
+        {   ih = new INV_HEAP(hx,hz);
+            Game->InvHeaps.add(ih);
+
+        }
+        ih->addItem(Game->ActiveItem);
+        Game->ActiveItem=NULL;
+    }
 }

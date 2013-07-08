@@ -47,6 +47,23 @@ class INVENTORY
 
 };
 
+class INV_HEAP
+{   private:
+        List<ITEM> Items;;
+    public:
+        float x,y,z;
+        int need_refresh;
+        TEXTURED_ELEMENT * ele;
+        ANIMATOR * ani;
+        int refreshBitmap();
+        void invHeapInit(float x, float y, float z);
+        INV_HEAP();
+        INV_HEAP(float x,float z);
+        ~INV_HEAP();
+        void addItem(ITEM *);
+        ITEM * popItem();
+};
+
 void click_inv_box(int slot_no, int box_no);
 void click_inventory(int mw, int mh);
 void open_inventory(int slot_no);

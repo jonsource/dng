@@ -11,7 +11,7 @@ extern ClassTemplates *Classes;
 extern int fps, tmsec;
 extern BITMAP * game_bmp;
 Character *Player;
-int gy=0,gz=2,gx=3,gh=0;
+//int gy=0,gz=2,gx=3,gh=0;
 
 extern CAMERA * cam;
 GAME * Game;
@@ -26,6 +26,10 @@ GAME::GAME()
     this->PcSlots = new PCSLOT[6];
     this->show_inventory = -1;
     this->ActiveItem = NULL;
+    this->y=0;
+    this->z=2;
+    this->x=3;
+    this->h=0;
 }
 
 GAME::~GAME()
@@ -81,6 +85,19 @@ void game_load()
 	Player->name="shambala";
 	Game->PcSlots[1].setCharacter(Player);
 
+    INV_HEAP * ih = new INV_HEAP(4.25,3.25);
+    ih->addItem(new ITEM("dagger"));
+    ih->addItem(new ITEM("dagger"));
+    ih->addItem(new ITEM("dagger"));
+    Game->InvHeaps.add(ih);
+    ih = new INV_HEAP(3.25,3.25);
+    ih->addItem(new ITEM("dagger"));
+    ih->addItem(new ITEM("dagger"));
+    Game->InvHeaps.add(ih);
+    ih = new INV_HEAP(3.75,3.25);
+    ih->addItem(new ITEM("dagger"));
+    Game->InvHeaps.add(ih);
+
     init_gui();
 
     if(!load_game_save("save/game.sav"))
@@ -90,7 +107,7 @@ void game_load()
     {   //change_area(Game->area_name,Game->map_name,gx,gz);
         load_area(Game->area_name);
         load_map(Game->map_name);
-        player_move_subr(gx,gy,gz,gh,true);
+        player_move_subr(Game->x,Game->y,Game->z,Game->h,true);
     }
     debug("done game_load");
 }
@@ -115,14 +132,14 @@ int game_save()
     fprintf(f,"\n:time\n");
     fprintf(f,to_str(Game->time).c_str());
     fprintf(f,"\n:position_x\n");
-    fprintf(f,to_str(gx).c_str());
+    fprintf(f,to_str(Game->x).c_str());
     fprintf(f,"\n:position_y\n");
-    fprintf(f,to_str(gy).c_str());
+    fprintf(f,to_str(Game->y).c_str());
     fprintf(f,"\n:position_z\n");
-    fprintf(f,to_str(gz).c_str());
+    fprintf(f,to_str(Game->z).c_str());
     fprintf(f,"\n:position_h\n");
-    fprintf(f,to_str(gh).c_str());
-    /*string position=to_str(gx)+" "+to_str(gy)+" "+to_str(gz)+" "+to_str(gh);
+    fprintf(f,to_str(Game->h).c_str());
+    /*string position=to_str(gx)+" "+to_str(gy)+" "+to_str(gz)+" "+to_str(Game->h);
     fprintf(f,position.c_str());*/
     fprintf(f,"\n:end\n");
     fclose(f);
@@ -169,9 +186,9 @@ void game_draw()
   debug("begin game_draw",2);
 //    scare_mouse();
   draw_pc_slots(game_bmp);
-  if(Game->show_inventory==-1) draw_view(gx,gy,gz,gh);
+  if(Game->show_inventory==-1) draw_view(Game->x,Game->y,Game->z,Game->h);
   else draw_inventory(game_bmp,Game->show_inventory);
-  if(Game->info>0) draw_triggers(gx,gz,gh);
+  if(Game->info>0) draw_triggers(Game->x,Game->z,Game->h);
   draw_cursor();
 //    unscare_mouse();
 }
@@ -255,37 +272,37 @@ void player_move_subr(int x, int y, int z, int h, bool force)
 
         /* change heading */
         if(h!=0)
-        {   gh+=h;
-            if(gh<0) gh=3;
-            if(gh>3) gh=0;
-            debug("Change heading to "+to_str(gh),5);
+        {   Game->h+=h;
+            if(Game->h<0) Game->h=3;
+            if(Game->h>3) Game->h=0;
+            debug("Change heading to "+to_str(Game->h),5);
         }
         /* change position */
         else
-        {   switch(gh)
-            {   case HEAD_NORTH: nz=gz+z; nx=gx+x; break;
-                case HEAD_EAST: nz=gz+x; nx=gx-z; break;
-                case HEAD_SOUTH: nz=gz-z; nx=gx-x; break;
-                case HEAD_WEST: nz=gz-x; nx=gx+z; break;
+        {   switch(Game->h)
+            {   case HEAD_NORTH: nz=Game->z+z; nx=Game->x+x; break;
+                case HEAD_EAST: nz=Game->z+x; nx=Game->x-z; break;
+                case HEAD_SOUTH: nz=Game->z-z; nx=Game->x-x; break;
+                case HEAD_WEST: nz=Game->z-x; nx=Game->x+z; break;
             }
-            gy+=y;
+            Game->y+=y;
 
-            if(!can_leave(gx,gz,xz_to_heading(nx-gx,nz-gz))) // new - old: leaving IN direction
+            if(!can_leave(Game->x,Game->z,xz_to_heading(nx-Game->x,nz-Game->z))) // new - old: leaving IN direction
             {   debug("Blocked on leave.",4);
                 can_pass=false;
             }
-            if(!can_enter(nx,nz,xz_to_heading(gx-nx,gz-nz))) // old - new: entering FROM direction
+            if(!can_enter(nx,nz,xz_to_heading(Game->x-nx,Game->z-nz))) // old - new: entering FROM direction
             {   debug("Blocked on entry.",4);
                 can_pass=false;
             }
             if(can_pass)
             {
-                debug("Move to "+heading_to_str(xz_to_heading(nx-gx,nz-gz))+" "+to_str(nx)+" "+to_str(nz)+" = "+to_str(check_coords(nz,nx)),5);
-                gz=nz; gx=nx;
+                debug("Move to "+heading_to_str(xz_to_heading(nx-Game->x,nz-Game->z))+" "+to_str(nx)+" "+to_str(nz)+" = "+to_str(check_coords(nz,nx)),5);
+                Game->z=nz; Game->x=nx;
 
             }
             else
-            {   debug("Bump! tried to move to "+heading_to_str(xz_to_heading(nx-gx,nz-gz))+" "+to_str(nx)+" "+to_str(nz)+" = "+to_str(check_coords(nz,nx)),5);
+            {   debug("Bump! tried to move to "+heading_to_str(xz_to_heading(nx-Game->x,nz-Game->z))+" "+to_str(nx)+" "+to_str(nz)+" = "+to_str(check_coords(nz,nx)),5);
             }
         }
 
@@ -295,7 +312,7 @@ void player_move_subr(int x, int y, int z, int h, bool force)
             clear_triggers("enter");
 
         /* apply local triggers and clickables */
-            apply_local_triggers(gx, gz, gh);
+            apply_local_triggers(Game->x, Game->z, Game->h);
 
         /* moved (not just changed heading), fire enter triggers */
         if(x!=0 || z!=0)
@@ -305,12 +322,12 @@ void player_move_subr(int x, int y, int z, int h, bool force)
     else
     {   /* FORCED MOVEMENT - map change, teleport etc.. */
         if(h!=-1)
-        gh=h;
-        gx=x;
-        gz=z;
-        gy=y;
-        cam->dolly_xpos=gx+0.5;
-        cam->dolly_zpos=gz+0.5;
+        Game->h=h;
+        Game->x=x;
+        Game->z=z;
+        Game->y=y;
+        cam->dolly_xpos=Game->x+0.5;
+        cam->dolly_zpos=Game->z+0.5;
     }
 }
 
@@ -433,7 +450,7 @@ void text_interpret(string s)
     if(*(*l)[0]=="clone")
     {   int temp=-1;
         if(_interpret_1int(l,"clone",&temp,0,Game->MobileTemplates.len()-1) != -1)
-        {   Game->Mobiles.add(Game->MobileTemplates[temp]->CloneAt(gx,gz));
+        {   Game->Mobiles.add(Game->MobileTemplates[temp]->CloneAt(Game->x,Game->z));
         }
     }
     if(*(*l)[0]=="mob_go")
@@ -488,7 +505,7 @@ void text_interpret(string s)
     if(*(*l)[0]=="Teleport")
     {   int destx,destz;
         _interpret_2int(l,"Teleport",&destx,&destz,0,Game->map_size-1,0,Game->map_size-1);
-        player_move_subr(destx, gy, destz, gh, true);
+        player_move_subr(destx, Game->y, destz, Game->h, true);
     }
     debug("<<< end interpret");
 }
@@ -511,10 +528,10 @@ void game_turn()
     //debug("multimove ["+to_str(gx)+","+to_str(gz)+"]",5);
     //debug("multimove ["+to_str(gx)+","+to_str(gz)+"]",5);
 
-    if(cam->dolly_xpos-0.45 < gx) cam->dolly_xpos+=0.1;
-    if(cam->dolly_xpos-0.55 > gx) cam->dolly_xpos-=0.1;
-    if(cam->dolly_zpos-0.45 < gz) cam->dolly_zpos+=0.1;
-    if(cam->dolly_zpos-0.55 > gz) cam->dolly_zpos-=0.1;
+    if(cam->dolly_xpos-0.45 < Game->x) cam->dolly_xpos+=0.1;
+    if(cam->dolly_xpos-0.55 > Game->x) cam->dolly_xpos-=0.1;
+    if(cam->dolly_zpos-0.45 < Game->z) cam->dolly_zpos+=0.1;
+    if(cam->dolly_zpos-0.55 > Game->z) cam->dolly_zpos-=0.1;
 
     Game->time+=1;
     debug("end game turn",1);

@@ -22,8 +22,10 @@ class List
     public:
         List(void);
         int add(T * item);
+        T* pop();
         void clear_all();
         int remove(const int i);
+        int remove(const T * item);
         T* operator[](const int index);
         int len();
         std::string serialize();
@@ -76,6 +78,18 @@ int List<T>::add(T * item)
 }
 
 template <class T>
+T* List<T>::pop()
+{	T* ret;
+    if(length>0)
+    {   ret = items[length-1];
+        items[length-1]=NULL;
+        length--;
+    }
+    else ret = NULL;
+    return ret;
+}
+
+template <class T>
 T* List<T>::operator[](const int index)
 {	//assert(index>=0 && index<=max_item);
 	return items[index];
@@ -108,6 +122,17 @@ int List<T>::remove(int i)
     this->items[length-1]=NULL;
     this->length--;
     return length;
+}
+
+template <class T>
+int List<T>::remove(const T * item)
+{	if(item == NULL) return -1;
+    int i;
+    for(i=0; i<length; i++)
+    {   if(items[i]==item) break;
+    }
+    if(i>=length) return -1;
+    return remove(i);
 }
 
 typedef List<std::string> STR_LIST;

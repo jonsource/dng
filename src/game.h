@@ -19,6 +19,7 @@
 
 class PCSLOT;
 class ITEM;
+class INV_HEAP;
 
 class GAME
 {   public:
@@ -31,6 +32,7 @@ class GAME
         List<TRIGGER> Triggers;
         List<MOBILE> Mobiles;
         List<MOBILE_TEMPLATE> MobileTemplates;
+        List<INV_HEAP> InvHeaps;
         ITEM * ActiveItem;
         CLICKABLE_MAP Clickables;
         std::string clickable_level;
@@ -45,6 +47,7 @@ class GAME
         int info;
         int time;
         int show_inventory;
+        int x,y,z,h;
         std::string map_name;
         std::string area_name;
         PCSLOT * PcSlots;
