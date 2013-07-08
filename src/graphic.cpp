@@ -475,7 +475,8 @@ void render_tile(TILE * tile,BITMAP * bmp, int x, int z, CAMERA * cam)
 	for(int i=0; i<Game->Mobiles.len(); i++)
     {   MOBILE * mob = Game->Mobiles[i];
         if(floor(mob->x) == x && floor(mob->z) == z)
-        {   clear_to_color(mob->ani->frame,makecol(255,0,255));
+        {   /** TODO - move code to mobile */
+            clear_to_color(mob->ani->frame,makecol(255,0,255));
             if(mob->parent->sprite==NULL)
             {
                 debug("Missing sprite - mobile :"+to_str(i));
@@ -515,11 +516,24 @@ void render_tile(TILE * tile,BITMAP * bmp, int x, int z, CAMERA * cam)
         }
     }
 
+    TEXTURED_ELEMENT ** inv_heap = new TEXTURED_ELEMENT* [4];
+    for(int i=0; i<4; i++) inv_heap[i]= NULL;
+    /* prepare inventory heap - if present, max 4 heaps per square allowed */
+    int filled=0;
+	for(int i=0; i<Game->InvHeaps.len(); i++)
+    {   INV_HEAP * ih = Game->InvHeaps[i];
+        if(floor(ih->x) == x && floor(ih->z) == z)
+        {   ih->refreshBitmap();
+            inv_heap[filled] = ih->ele;
+            filled++;
+        }
+    }
+
     /* sorting static elements + mobile if present */
-
-
     int stat_len = tile->statics_len;
-    if(mobile != NULL ) stat_len++;
+    int off=0;
+    if(mobile != NULL ) { stat_len++; off++; }
+    stat_len+=filled; off+=filled;
     IND_VAL * sort_array = new IND_VAL[stat_len]; // allocate enough space for statics and a mobile - if present
     for(int i=0; i<tile->statics_len; i++) // yes, use tile->statics_len, we're filling in the statics only
     {   sort_array[i].ele=tile->statics[i];
@@ -529,12 +543,23 @@ void render_tile(TILE * tile,BITMAP * bmp, int x, int z, CAMERA * cam)
     }
     // add mobile to the end of the list
     if(mobile != NULL )
-    {   sort_array[stat_len-1].ele = mobile;
-        sort_array[stat_len-1].ind = -10; //debuging use only
-        sort_array[stat_len-1].ele_t = mobile->type;
-        sort_array[stat_len-1].value=dist2(cam->dolly_xpos,cam->dolly_zpos,x+mobile->x,z+mobile->x);
+    {   sort_array[stat_len-off].ele = mobile;
+        sort_array[stat_len-off].ind = -10; //debuging use only
+        sort_array[stat_len-off].ele_t = mobile->type;
+        sort_array[stat_len-off].value=dist2(cam->dolly_xpos,cam->dolly_zpos,x+mobile->x,z+mobile->x);
+        off--;
     }
-
+    // add inventory heap to the end of the list
+    for(int i=0; i<4; i++)
+    {   if(inv_heap[i] != NULL )
+        {   sort_array[stat_len-off].ele = inv_heap[i];
+            sort_array[stat_len-off].ind = -10; //debuging use only
+            sort_array[stat_len-off].ele_t = inv_heap[i]->type;
+            sort_array[stat_len-off].value=dist2(cam->dolly_xpos,cam->dolly_zpos,x+inv_heap[i]->x,z+inv_heap[i]->x);
+            off--;
+        }
+        else break;
+    }
 
     qsort(sort_array,stat_len,sizeof(IND_VAL),compare_ind_val);
 
@@ -614,7 +639,7 @@ void make_linesight(int x, int z, CAMERA * cam)
 }
 
 /**
- * init camera, or reset the values afteer changes to FOV, aspoct and stepback
+ * init camera, or reset the values afteer changes to FOV, aspect and stepback
  */
 void init_camera(VIEW_SETTINGS * view_settings)
 {	if(cam==NULL) cam=new CAMERA;

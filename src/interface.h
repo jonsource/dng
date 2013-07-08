@@ -36,7 +36,7 @@ class CLICKABLE
         CLICKABLE();
         CLICKABLE(int w1, int h1, int w2, int h2, void (*callback)(int mw, int mh));
         CLICKABLE(int w1, int h1, int w2, int h2, int arg1, int arg2, void (*callback)(int mw, int mh));
-        void ClickableInit(int w1, int h1, int w2, int h2, int arg1, int arg2, void (*callback)(int mw, int mh));
+        void clickableInit(int w1, int h1, int w2, int h2, int arg1, int arg2, void (*callback)(int mw, int mh));
         int w1,h1,w2,h2;
         int arg1, arg2;
         void (*callback)(int mw, int mh);
@@ -52,5 +52,6 @@ void apply_local_triggers(int x, int z, int h);
 void clear_triggers(string s);
 TRIGGER * load_trigger(std::string s);
 void init_gui();
+void click_inv_heaps(int heap, int noparam);
 
 #endif // __INTERFACE_H_

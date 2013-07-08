@@ -16,7 +16,6 @@
 using namespace std;
 
 extern char chbuf[256];
-extern int gx,gy,gz,gh;
 
 int load_area(string fname)
 {	string str1, str2;
@@ -310,10 +309,10 @@ int load_game_save(string fname)
             load_variable(f, "area", &Game->area_name,load_string, &str1);
             load_variable(f, "map", &Game->map_name,load_string, &str1);
             load_variable(f, "time", &Game->time,load_int, &str1);
-            load_variable(f, "position_x", &gx,load_int, &str1);
-            load_variable(f, "position_y", &gy,load_int, &str1);
-            load_variable(f, "position_z", &gz,load_int, &str1);
-            load_variable(f, "position_h", &gh,load_int, &str1);
+            load_variable(f, "position_x", &Game->x,load_int, &str1);
+            load_variable(f, "position_y", &Game->y,load_int, &str1);
+            load_variable(f, "position_z", &Game->z,load_int, &str1);
+            load_variable(f, "position_h", &Game->h,load_int, &str1);
 
             if(str1.compare(":end")==0)
 			{ 	debug("End of "+fname+"\n"); break; }

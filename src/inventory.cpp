@@ -3,6 +3,7 @@
 #include "inventory.h"
 #include "pc_slot.h"
 #include "character.h"
+#include <math.h>
 
 ITEM::ITEM(string s)
 {   this->name = s;
@@ -19,11 +20,69 @@ INVENTORY::INVENTORY()
     this->chr = NULL;
     this->Items[INV_BACKPACK] = new ITEM("dagger");
     this->Items[INV_BACKPACK+1] = new ITEM("knife");
+
 }
 
 INVENTORY::~INVENTORY()
 {   delete [] this->Items;
 
+}
+
+
+
+INV_HEAP::INV_HEAP()
+{   invHeapInit(0,0,0);
+}
+INV_HEAP::INV_HEAP(float x, float z)
+{   invHeapInit(x,0,z);
+}
+void INV_HEAP::invHeapInit(float x, float y, float z)
+{   this->x=x;
+    this->z=z;
+    this->y=y;
+
+    this->need_refresh=1;
+
+    this->ani = new ANIMATOR(ANIMATOR_MOBILE,0,0,0,128,64);
+    this->ele = new TEXTURED_ELEMENT("TILE_STATIC",x-floor(x),0,z-floor(z),0.25,0.125,"no-trans",-1,-1,"no-clip","NO_FLIP");
+    this->ele->animator = this->ani;
+}
+
+INV_HEAP::~INV_HEAP()
+{
+    delete this->ani;
+    delete this->ele;
+}
+
+int INV_HEAP::refreshBitmap()
+{   if(this->need_refresh==0) return 0;
+    clear_to_color(this->ani->frame,makecol(255,0,255));
+    /** TODO - actual code **/
+    this->need_refresh = 0;
+    int top;
+    for(int i=0;i<this->Items.len();i++)
+    {   top=14-i;
+        if(top<0) top=0;
+        BITMAP * bmp = GRAPHICS->getItem(this->Items[i]->name);
+        blit(bmp,this->ani->frame,0,0,0,top,bmp->w,bmp->h);
+        //rect(this->ani->frame, 0, i, 50, 50, makecol(200,200,200));
+    }
+    return 1;
+}
+
+void INV_HEAP::addItem(ITEM * item)
+{   this->need_refresh=1;
+    this->Items.add(item);
+}
+ITEM * INV_HEAP::popItem()
+{   this->need_refresh=1;
+    ITEM * ret = this->Items.pop();;
+    if(this->Items.len()==0)
+    {
+        Game->InvHeaps.remove(this);
+        delete this;
+    }
+    return ret;
 }
 
 void click_inventory(int mw, int mh)
@@ -118,3 +177,4 @@ void draw_inventory(BITMAP * game_bmp, int slot_no)
 
 
 }
+

@@ -6,8 +6,6 @@
 #include "pc_slot.h"
 #include "character.h"
 
-extern int gz,gx;
-
 SPRITE::SPRITE()
 {
     this->sprite = NULL;
@@ -79,7 +77,7 @@ void MOBILE::finishAction()
 
     /* TODO: finish combat system */
     if(this->action == ACT_FIGHT)
-    {   if(this->x==gx && this->z==gz)
+    {   if(this->x==Game->x && this->z==Game->z)
         {
             Game->PcSlots[0].character->HP--;
 
@@ -152,27 +150,27 @@ void MOBILE::actionDecide(int mode_override)
 
     if(_mode == MODE_HUNT)
     {
-        if(dist2(this->x,this->z,gx,gz) < 1) //gotcha, let's fight
+        if(dist2(this->x,this->z,Game->x,Game->z) < 1) //gotcha, let's fight
         {
             debug("player here - fight!",5);
             this->actionDecide(MODE_FIGHT);
             return;
         }
-        if(dist2(this->x,this->z,gx,gz) > 100) //player too far, wander
+        if(dist2(this->x,this->z,Game->x,Game->z) > 100) //player too far, wander
         {
             debug("player too far - wander",5);
             this->actionDecide(MODE_WANDER);
             return;
         }
-        if(dist2(this->x,0,gx,0) > dist2(0,this->z,0,gz)) // reduce X coordinate
+        if(dist2(this->x,0,Game->x,0) > dist2(0,this->z,0,Game->z)) // reduce X coordinate
         {
-            if(gx>this->x) this->next_action = ACT_GO_EAST;
+            if(Game->x>this->x) this->next_action = ACT_GO_EAST;
             else this->next_action = ACT_GO_WEST;
 
         }
         else // reduce Z coordinate
         {
-            if(gz>this->z) this->next_action = ACT_GO_SOUTH;
+            if(Game->z>this->z) this->next_action = ACT_GO_SOUTH;
             else this->next_action = ACT_GO_NORTH;
         }
         /* check whether can leave and enter, else wander */
@@ -182,7 +180,7 @@ void MOBILE::actionDecide(int mode_override)
             this->actionDecide(MODE_WANDER);
             return;
         }
-        debug("player close - hunt : "+heading_to_str(this->next_action)+"["+to_str(this->x)+","+to_str(this->z)+"]->("+to_str(dist2(this->x,0,gx,0))+","+to_str(dist2(0,this->z,0,gz))+")->["+to_str(gx)+","+to_str(gz)+"]",5);
+        debug("player close - hunt : "+heading_to_str(this->next_action)+"["+to_str(this->x)+","+to_str(this->z)+"]->("+to_str(dist2(this->x,0,Game->x,0))+","+to_str(dist2(0,this->z,0,Game->z))+")->["+to_str(Game->x)+","+to_str(Game->z)+"]",5);
 
     }
     if(_mode == MODE_WANDER)
