@@ -6,17 +6,6 @@
 #include "pc_slot.h"
 #include "character.h"
 
-SPRITE::SPRITE()
-{
-    this->sprite = NULL;
-}
-
-SPRITE::~SPRITE()
-{
-    destroy_bitmap(this->sprite);
-    this->Modes.clear_all();
-}
-
 MOBILE_TEMPLATE::MOBILE_TEMPLATE()
 {   this->sprite = new SPRITE();
     this->fname = "none";

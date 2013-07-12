@@ -10,6 +10,7 @@
 
 #include "allegro.h"
 #include <string>
+#include "list.h"
 
 #define TRIGGER_NORTH 0
 #define TRIGGER_EAST 1
@@ -113,6 +114,22 @@ class LIGHT_SOURCE
         float x,z;
         LIGHT_SOURCE(int power, int dim, float x, float z);
         std::string serialize();
+};
+
+class SPRITE_MODE
+{   public:
+        int start_y;
+        int width;
+        int height;
+        int frames;
+};
+
+class SPRITE
+{   public:
+        BITMAP * sprite;
+        List<SPRITE_MODE> Modes;
+        SPRITE();
+        ~SPRITE();
 };
 
 typedef struct {

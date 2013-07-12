@@ -388,6 +388,17 @@ LIGHT_SOURCE * load_lightsource(string s)
 	return new LIGHT_SOURCE(power,dim,x,z);
 }
 
+SPRITE::SPRITE()
+{
+    this->sprite = NULL;
+}
+
+SPRITE::~SPRITE()
+{
+    destroy_bitmap(this->sprite);
+    this->Modes.clear_all();
+}
+
 string clip_to_str(bool clip)
 {
     if(clip) return "clip";
