@@ -23,21 +23,8 @@
 class TEXTURED_ELEMENT;
 class ANIMATOR;
 class MOBILE;
-
-typedef struct
-{   int start_y;
-    int width;
-    int height;
-    int frames;
-} SPRITE_MODE;
-
-class SPRITE
-{   public:
-        BITMAP * sprite;
-        List<SPRITE_MODE> Modes;
-        SPRITE();
-        ~SPRITE();
-};
+class SPRITE_MODE;
+class SPRITE;
 
 class MOBILE_TEMPLATE
 {   public:
