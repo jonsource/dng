@@ -14,6 +14,7 @@
 #include "mobile.h"
 
 using namespace std;
+using namespace jslib;
 
 extern char chbuf[256];
 

@@ -1,3 +1,4 @@
+#include "../lib/jslib.h"
 #include "graphic.h"
 #include <math.h>
 #include "edittext.h"
@@ -7,6 +8,7 @@
 #include "pc_slot.h"
 
 using namespace std;
+using namespace jslib;
 
 BITMAP * sky1[4];
 BITMAP * gui=NULL;

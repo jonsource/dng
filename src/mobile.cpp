@@ -1,10 +1,13 @@
 #include "allegro.h"
+#include "../lib/jslib.h"
 #include "mobile.h"
 #include "game_lib.h"
 #include "game_lib_load.h"
 #include "game.h"
 #include "pc_slot.h"
 #include "character.h"
+
+using namespace jslib;
 
 MOBILE_TEMPLATE::MOBILE_TEMPLATE()
 {   this->sprite = new SPRITE();

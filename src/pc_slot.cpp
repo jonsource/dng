@@ -1,9 +1,10 @@
 #include "allegro.h"
+#include "../lib/jslib.h"
 #include "game.h"
 #include "pc_slot.h"
 #include "character.h"
 
-
+using namespace jslib;
 
 extern BITMAP * H_BAR;
 

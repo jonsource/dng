@@ -1,8 +1,10 @@
 #include "textured_element.h"
+#include "../lib/jslib.h"
 #include "game_lib.h"
 #include "game.h"
 
 using namespace std;
+using namespace jslib;
 
 TEXTURED_ELEMENT::TEXTURED_ELEMENT(string type, float x, float y, float z, float w, float h, string transparent, int texture, int animator, string clip, string flip)
 {   unsigned short int typ;

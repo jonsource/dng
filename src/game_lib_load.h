@@ -3,17 +3,13 @@
 
 #include <string>
 #include "list.h"
+#include "../lib/jslib.h"
 #include "stdio.h"
 
 struct RGB;
 
 std::string serialize_color(RGB * color);
 RGB * load_color(std::string str);
-float load_float(std::string str);
-double load_double(std::string str);
-bool load_bool(std::string str);
-int load_int(std::string str);
-std::string load_string(std::string str);
 int load_ini(std::string fname);
 
 template<class T>
@@ -21,13 +17,13 @@ int load_block(FILE *f, string block, List<T> * l, T * (*loader)(string), string
 {	string str2;
 	unsigned short int count = 0;
 	if(str1->compare(":"+block)==0)
-	{ 	debug("Loading "+block);
+	{ 	jslib::debug("Loading "+block);
 		while(!feof(f))
-		{ 	str2=get_line(f);
+		{ 	str2=jslib::get_line(f);
             if(str2.length()==0) continue;
             if(str2.find("#")==0) continue;
 			if(str2.find(":")==0)
-			{	debug("Done loading "+block);
+			{	jslib::debug("Done loading "+block);
 				str1[0] = str2; break;
 			} //next part of definitions
 			l->add(loader(str2));
@@ -42,13 +38,13 @@ int load_block_save(FILE *f, string block, List<T> * l, int (*loader)(T *, strin
 {	string str2;
 	int count = 0;
 	if(str1->compare(":"+block)==0)
-	{ 	debug("Loading "+block+" save");
+	{ 	jslib::debug("Loading "+block+" save");
 		while(!feof(f))
-		{ 	str2=get_line(f);
+		{ 	str2=jslib::get_line(f);
             if(str2.length()==0) continue;
             if(str2.find("#")==0) continue;
 			if(str2.find(":")==0)
-			{	debug("Done loading "+block+" save");
+			{	jslib::debug("Done loading "+block+" save");
 				str1[0] = str2; break;
 			} //next part of definitions
 			if(create)
@@ -58,7 +54,7 @@ int load_block_save(FILE *f, string block, List<T> * l, int (*loader)(T *, strin
 			if(loader((*l)[count],str2)) count ++;
 		}
 	}
-	if(count < l->len()-1) debug("Not enough entries for members of "+block+". Save Corrupt!",10);
+	if(count < l->len()-1) jslib::debug("Not enough entries for members of "+block+". Save Corrupt!",10);
 	return count;
 }
 
@@ -67,13 +63,13 @@ int load_multivar(FILE *f, string block, T ** l, T * (*loader)(string), string *
 {	string str2;
 	unsigned short int count = 0;
 	if(str1->compare(":"+block)==0)
-	{ 	debug("Loading "+block);
+	{ 	jslib::debug("Loading "+block);
 		while(!feof(f))
-		{ 	str2=get_line(f);
+		{ 	str2=jslib::get_line(f);
             if(str2.length()==0) continue;
             if(str2.find("#")==0) continue;
 			if(str2.find(":")==0)
-			{	debug("Done loading "+block);
+			{	jslib::debug("Done loading "+block);
 				str1[0] = str2; break;
 			} //next part of definitions
 			*l=loader(str2);
@@ -89,19 +85,19 @@ int load_variable_subr(FILE *f, string block, T * var, T (*loader)(string), stri
 {   string str2;
     unsigned short int count = 0;
     if(str1->compare(":"+block)==0)
-    {   debug("Loading "+block);
+    {   jslib::debug("Loading "+block);
 		while(!feof(f)) // must be a while statement - to skip empty lines and comments
-        {   str2=get_line(f);
+        {   str2=jslib::get_line(f);
             if(str2.length()==0) continue;
             if(str2.find("#")==0) continue;
 			if(str2.find(":")==0)
-			{	debug("Done loading "+block);
+			{	jslib::debug("Done loading "+block);
 				str1[0] = str2; break;
 			} //next part of definitions
 			*var = loader(str2);
 			if(report)
             {
-                debug(block+" loaded: "+to_str(*var),10);
+                jslib::debug(block+" loaded: "+jslib::to_str(*var),10);
             }
             count++;
 			break;

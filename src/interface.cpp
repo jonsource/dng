@@ -1,3 +1,4 @@
+#include "../lib/jslib.h"
 #include "interface.h"
 #include "game.h"
 #include "texture.h"
@@ -5,6 +6,8 @@
 #include "sound.h"
 #include "game_map.h"
 #include "pc_slot.h"
+
+using namespace jslib;
 
 List<string> clickable_order;
 //CLICKABLE_MAP Clickables;
@@ -147,22 +150,22 @@ void TRIGGER::fire(int mw, int mh)
     }
     debug("Trigger at "+to_str(this->xpos)+" "+to_str(this->zpos)+" fired!");
     if(this->action!=NULL) dappend(" action: "+*this->action);
-    STR_LIST * tokens = tokenize(*this->action,"/");
-    debug("tokens("+to_str(tokens->len())+"):");
-    for(int i=0; i<tokens->len(); i++)
+    StringArray * tokens = explode("/",*this->action);
+    debug("tokens("+to_str((int)tokens->size())+"):");
+    for(int i=0; i<tokens->size(); i++)
         dappend(" "+to_str(i)+"("+*(*tokens)[i]);
 
     /* change map within area */
-    if(tokens->len()==2 && *(*tokens)[0]=="change_map")
+    if(tokens->size()==2 && *(*tokens)[0]=="change_map")
     {   change_map(*(*tokens)[1],this->w1,this->h1);
     }
 
     /* change area and map */
-    if(tokens->len()==3 && *(*tokens)[0]=="change_area")
+    if(tokens->size()==3 && *(*tokens)[0]=="change_area")
     {   change_area(*(*tokens)[1],*(*tokens)[2],this->w1,this->h1);
     }
 
-    tokens->clear_all();
+    tokens->clear();
     delete tokens;
 }
 

@@ -1,9 +1,12 @@
+#include "../lib/jslib.h"
 #include "game.h"
 #include "allegro.h"
 #include "inventory.h"
 #include "pc_slot.h"
 #include "character.h"
 #include <math.h>
+
+using namespace jslib;
 
 ITEM::ITEM(string s)
 {   this->name = s;
@@ -13,14 +16,12 @@ ITEM::ITEM(string s)
     this->weight=1;
 }
 
-
 INVENTORY::INVENTORY()
 {   this->Items = new ITEM * [INV_TOTAL_SIZE];
     for(int i=0; i<INV_TOTAL_SIZE; i++)this->Items[i]=NULL;
     this->chr = NULL;
     this->Items[INV_BACKPACK] = new ITEM("dagger");
     this->Items[INV_BACKPACK+1] = new ITEM("knife");
-
 }
 
 INVENTORY::~INVENTORY()

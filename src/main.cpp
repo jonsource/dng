@@ -1,6 +1,7 @@
 //include c headers
 #include <stdlib.h>
 #include "allegro.h"
+#include "../lib/jslib.h"
 #include "game.h"
 #include "game_lib.h"
 #include "game_lib_load.h"
@@ -24,6 +25,7 @@ int status,mode;
 int courage, strength, constitution, intelligence, wisdom, charisma, dexterity, agility;
 int level,XP,maxHP,HP,MP;
 
+using namespace jslib;
 
 /**
  * game timer, called each TIMER ms

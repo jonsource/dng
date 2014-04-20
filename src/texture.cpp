@@ -6,12 +6,14 @@
  */
 
 #include "texture.h"
+#include "../lib/jslib.h"
 #include "game_lib.h"
 #include "game.h"
 #include <string>
 #include "stdio.h"
 
 using namespace std;
+using namespace jslib;
 /**
  * loads texture from file. Separates the string s into filename and extension, and loads filename_close.extension
  * and then _medium and _far. If can't find appropriate texture, falls back to resizing.

@@ -1,4 +1,5 @@
 #include <allegro.h>
+#include "../lib/jslib.h"
 #include "game_lib.h"
 #include "load_classes.h"
 #include "game_map.h"
@@ -11,14 +12,15 @@ extern ClassTemplates *Classes;
 extern int fps, tmsec;
 extern BITMAP * game_bmp;
 Character *Player;
-//int gy=0,gz=2,gx=3,gh=0;
+
+using namespace jslib;
 
 extern CAMERA * cam;
 GAME * Game;
 
 GAME::GAME()
-{   game_lib::set_debug_lvl_main(4);
-    game_lib::set_debug_lvl(4);
+{   jslib::set_debug_lvl_main(4);
+    jslib::set_debug_lvl(4);
     this->light_power=128;
     this->info=0;
     this->transparent=1;
@@ -38,23 +40,23 @@ GAME::~GAME()
 }
 
 int GAME::GetDebugLvlMain()
-{   return game_lib::get_debug_lvl_main();
+{   return jslib::get_debug_lvl_main();
 }
 
 int GAME::SetDebugLvlMain(int dbg_lvl)
-{   return game_lib::set_debug_lvl_main(dbg_lvl);
+{   return jslib::set_debug_lvl_main(dbg_lvl);
 }
 
 int GAME::GetDebugLvl()
-{   return game_lib::get_debug_lvl();
+{   return jslib::get_debug_lvl();
 }
 
 int GAME::SetDebugLvl(int dbg_lvl)
-{   return game_lib::set_debug_lvl(dbg_lvl);
+{   return jslib::set_debug_lvl(dbg_lvl);
 }
 
 int GAME::ResetDebugLvl()
-{   return game_lib::reset_debug_lvl();
+{   return jslib::reset_debug_lvl();
 }
 
 int GAME::DestroyMobile(int i)
@@ -389,9 +391,9 @@ void keypress(int i)
    keyb_ignore = 10;
 }
 
-int _interpret_1int(STR_LIST * l, string command, int * val, int minval, int maxval)
+int _interpret_1int(StringArray * l, string command, int * val, int minval, int maxval)
 {   int v=minval-1;
-    if(l->len()==1)
+    if(l->size()==1)
     {   printf("%s = %d\n",command.c_str(),*val);
         return *val;
     }
@@ -408,13 +410,13 @@ int _interpret_1int(STR_LIST * l, string command, int * val, int minval, int max
     return v;
 }
 
-int _interpret_2int(STR_LIST *l, string command, int * v1, int *v2, int min1, int max1, int min2, int max2  )
+int _interpret_2int(StringArray *l, string command, int * v1, int *v2, int min1, int max1, int min2, int max2  )
 {   int v = (min1 < min2)? min1-1 : min2-1;
-    if(l->len()==1)
+    if(l->size()==1)
     {   printf("%s = %d %d\n",command.c_str(),*v1,*v2);
         return *v1;
     }
-    if(l->len()==2)
+    if(l->size()==2)
     {   printf("Wrong number of arguments to %s. Either 0 to print or 2 to assign.",command.c_str());
         return v;
     }
@@ -439,8 +441,8 @@ int _interpret_2int(STR_LIST *l, string command, int * v1, int *v2, int min1, in
 }
 
 void text_interpret(string s)
-{   STR_LIST * l=tokenize(s," ");
-    if(l->len()<1) return;
+{   StringArray * l=explode(" ",s);
+    if(l->size()<1) return;
     if(*(*l)[0]=="exit")
     {   Game->info=(++Game->info)%3;
         return;
@@ -465,7 +467,7 @@ void text_interpret(string s)
     }
     if(*(*l)[0]=="Trigger")
     {   int v;
-        if(l->len()==1)
+        if(l->size()==1)
         {   printf("Provide a number [0-%d] to print info on that trigger.\n",Game->Triggers.len()-1);
             return;
         }
