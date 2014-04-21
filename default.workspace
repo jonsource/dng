@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_workspace_file>
+	<Workspace title="Workspace">
+		<Project filename="dng.cbp">
+			<Depends filename="lib/libjsjson/libjsjson.cbp" />
+		</Project>
+		<Project filename="lib/jslib/jslib.cbp" />
+		<Project filename="lib/libjsjson/libjsjson.cbp">
+			<Depends filename="lib/jslib/jslib.cbp" />
+		</Project>
+		<Project filename="lib/libjsjson/test/test.cbp">
+			<Depends filename="lib/libjsjson/libjsjson.cbp" />
+		</Project>
+	</Workspace>
+</CodeBlocks_workspace_file>
