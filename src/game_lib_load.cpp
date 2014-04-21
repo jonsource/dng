@@ -30,7 +30,7 @@ int load_ini(string fname)
 	Node * root = jr.read(fname);
 
     if(root == NULL)
-    {   printf("didn't read");
+    {   debug("Coudn't read "+fname,10);
         exit(1);
     }
     Game->SetDebugLvlMain(root->getMember("debuglevel")->getInt());

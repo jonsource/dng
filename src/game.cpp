@@ -1,5 +1,6 @@
 #include <allegro.h>
-#include "../lib/jslib.h"
+#include "jslib.h"
+#include "libjsjson.h"
 #include "game_lib.h"
 #include "load_classes.h"
 #include "game_map.h"
@@ -102,7 +103,7 @@ void game_load()
 
     init_gui();
 
-    if(!load_game_save("save/game.sav"))
+    if(!load_game_save("save/game.json"))
     {   change_area("area1.area","map1.map",3,3);
     }
     else
@@ -120,31 +121,27 @@ void game_load()
 
 int game_save()
 {   FILE *f;
-    string sav="save/game.sav";
+
+    string sav="save/game.json";
     f = fopen(sav.c_str(),"w");
     if(!f)
 	{	debug("Couldn't write game save "+sav+"!\n",10);
 		exit(0);
 	}
 	debug("Saving game "+sav+".",5);
-	fprintf(f,":area\n");
-    fprintf(f,Game->area_name.c_str());
-    fprintf(f,"\n:map\n");
-    fprintf(f,Game->map_name.c_str());
-    fprintf(f,"\n:time\n");
-    fprintf(f,to_str(Game->time).c_str());
-    fprintf(f,"\n:position_x\n");
-    fprintf(f,to_str(Game->x).c_str());
-    fprintf(f,"\n:position_y\n");
-    fprintf(f,to_str(Game->y).c_str());
-    fprintf(f,"\n:position_z\n");
-    fprintf(f,to_str(Game->z).c_str());
-    fprintf(f,"\n:position_h\n");
-    fprintf(f,to_str(Game->h).c_str());
-    /*string position=to_str(gx)+" "+to_str(gy)+" "+to_str(gz)+" "+to_str(Game->h);
-    fprintf(f,position.c_str());*/
-    fprintf(f,"\n:end\n");
+
+	Node * r = new ObjectNode("{'area':'"+Game->area_name+"', 'map_name':'"+Game->map_name+"', 'time':"+to_str(Game->time)+"}");
+    Node * pos = new ObjectNode();
+    pos->add("x",new IntNode(Game->x));
+    pos->add("y",new IntNode(Game->y));
+    pos->add("z",new IntNode(Game->z));
+    pos->add("h",new IntNode(Game->h));
+    r->add("position",pos);
+
+    fprintf(f,"%s",r->serialize().c_str());
     fclose(f);
+    delete r;
+    delete pos;
     return 1;
 }
 

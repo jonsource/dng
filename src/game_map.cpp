@@ -9,6 +9,7 @@
 #include "game.h"
 #include "game_lib.h"
 #include "game_lib_load.h"
+#include "libjsjson.h"
 #include "texture.h"
 #include <string>
 #include "mobile.h"
@@ -293,33 +294,27 @@ void change_area(string aname, string mname, int x, int z)
 }
 
 int load_game_save(string fname)
-{	string str1, str2;
-	FILE *f=fopen(fname.c_str(),"r");
+{	FILE *f=fopen(fname.c_str(),"r");
 	if(!f)
 	{	debug("Game save "+fname+" not found! Beginning from start.\n",10);
 		return 0;
 	}
-	while(!feof(f))
-	{ 	str1=get_line(f);
+	fclose(f); //only testing the existence of save file
 
-        if(str1.length()==0) continue;
-        if(str1.find("#")==0) continue;
-		if(str1.find(":")==0) // : at the beginning of new line
-		{				// is new block
+	JsonReader jr;
 
-            load_variable(f, "area", &Game->area_name,load_string, &str1);
-            load_variable(f, "map", &Game->map_name,load_string, &str1);
-            load_variable(f, "time", &Game->time,load_int, &str1);
-            load_variable(f, "position_x", &Game->x,load_int, &str1);
-            load_variable(f, "position_y", &Game->y,load_int, &str1);
-            load_variable(f, "position_z", &Game->z,load_int, &str1);
-            load_variable(f, "position_h", &Game->h,load_int, &str1);
+	Node * r = jr.read(fname);
 
-            if(str1.compare(":end")==0)
-			{ 	debug("End of "+fname+"\n"); break; }
-		}
-	}
-	return 1;
+    Game->area_name=r->getMember("area")->getString();
+    Game->map_name=r->getMember("map_name")->getString();
+    Game->time=r->getMember("time")->getInt();
+    Node * n = r->getMember("position");
+    Game->x=n->getMember("x")->getInt();
+    Game->y=n->getMember("y")->getInt();
+    Game->z=n->getMember("z")->getInt();
+    Game->h=n->getMember("h")->getInt();
+    delete r;
+    return 1;
 }
 
 TEXTURED_ELEMENT * load_element(string  str)
