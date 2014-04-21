@@ -1,7 +1,7 @@
 //include c headers
 #include <stdlib.h>
 #include "allegro.h"
-#include "../lib/jslib.h"
+#include "jslib.h"
 #include "game.h"
 #include "game_lib.h"
 #include "game_lib_load.h"

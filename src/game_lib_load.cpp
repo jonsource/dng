@@ -3,7 +3,7 @@
 #include "game_lib_load.h"
 #include "game_lib.h"
 #include "stdio.h"
-#include "../lib/libjsjson.h"
+#include "libjsjson.h"
 
 using namespace jslib;
 

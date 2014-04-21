@@ -3,7 +3,7 @@
 
 #include <string>
 #include "list.h"
-#include "../lib/jslib.h"
+#include "jslib.h"
 #include "stdio.h"
 
 struct RGB;

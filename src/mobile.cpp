@@ -1,5 +1,6 @@
 #include "allegro.h"
-#include "../lib/jslib.h"
+#include "jslib.h"
+#include "libjsjson.h"
 #include "mobile.h"
 #include "game_lib.h"
 #include "game_lib_load.h"
@@ -250,52 +251,43 @@ SPRITE_MODE * load_sprite_mode(string s)
 }
 
 MOBILE_TEMPLATE* load_mobile_template(string fname)
-{	string str1, str2;
+{	/*string str1, str2;
 	FILE *f=fopen(fname.c_str(),"r");
 	if(!f)
 	{	debug("Mobile template "+fname+" not found!\n",10);
 		exit(0);
-	}
+	}*/
+    PALETTE pal;
+
 	MOBILE_TEMPLATE * mob = new MOBILE_TEMPLATE();
 	mob->fname = fname;
 
-	while(!feof(f))
-	{ 	str1=get_line(f);
+	JsonReader jr;
 
-        if(str1.length()==0) continue;
-        if(str1.find("#")==0) continue;
-		if(str1.find(":")==0) // : at the beginning of new line
-		{				// is new block
-            if(str1.compare(":sprite_bmp")==0)
-            {   debug("Loading sprite");
-                while(!feof(f)) // must be a while statement - to skip empty lines and comments
-                {   str2=get_line(f);
-                    if(str2.length()==0) continue;
-                    if(str2.find("#")==0) continue;
-                    if(str2.find(":")==0)
-                    {	debug("Done loading sprite");
-                        str1 = str2; break;
-                    } //next part of definitions
-                    PALETTE pal;
-                    mob->sprite->sprite = load_bitmap(str2.c_str(), pal);
-                    debug("load bitmap "+str2);
-                    if(mob->sprite->sprite==NULL)
-                    {
-                        debug("Missing sprite : "+str2,10);
-                        exit(1);
-                    }
-                    break; // we are reading just one value
-                }
-            }
+	Node * root = jr.read(fname);
 
-            load_variable_subr(f,"speed",&mob->speed,load_int, &str1,true);
-            load_block(f,"sprite_modes",&mob->sprite->Modes, load_sprite_mode, &str1);
+    if(root == NULL)
+    {   debug("Mobile template "+fname+" not found!\n",10);
+        exit(1);
+    }
 
-			if(str1.compare(":end")==0)
-			{ 	debug("End of "+fname+"\n"); break; }
-		}
-	}
-	return mob;
+    string str2 = root->getMember("sprite_bmp")->getString();
+    mob->sprite->sprite = load_bitmap(str2.c_str(), pal);
+    debug("load bitmap "+str2);
+    if(mob->sprite->sprite==NULL)
+    {    debug("Missing sprite : "+str2,10);
+         exit(1);
+    }
+    mob->speed = root->getMember("speed")->getInt();
+
+    Node * n = root->getMember("sprite_modes");
+    SPRITE_MODE * sm = new SPRITE_MODE;
+    sm->frames = n->getMember("frames")->getInt();
+    sm->width = n->getMember("width")->getInt();
+    sm->height = n->getMember("height")->getInt();
+    sm->start_y = n->getMember("start_y")->getInt();
+    mob->sprite->Modes.add(sm);
+    return mob;
 }
 
 int load_mobile_save(MOBILE * mob, string s)
