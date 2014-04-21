@@ -67,7 +67,8 @@ class MOBILE
 };
 
 SPRITE_MODE * load_sprite_mode(std::string s);
-int load_mobile_save(MOBILE * mob, std::string s);
+//int load_mobile_save(MOBILE * mob, std::string s);
+int load_mobile_save(MOBILE * mob, Node * n);
 MOBILE_TEMPLATE* load_mobile_template(std::string fname);
 
 #endif // MOBILE_H_INCLUDED

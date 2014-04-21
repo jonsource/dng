@@ -6,7 +6,7 @@
  */
 
 #include "texture.h"
-#include "../lib/jslib.h"
+#include "jslib.h"
 #include "game_lib.h"
 #include "game.h"
 #include <string>
@@ -145,11 +145,13 @@ ANIMATOR::ANIMATOR()
 }
 
 string ANIMATOR::serialize()
-{   return this->type_string()+" "+to_str(speed)+" "+to_str(_offset)+" "+to_str(frames)+" "+to_str(w)+" "+to_str(h)+" "+to_str(on)+" "+to_str(start)+" "+to_str(mode);
+{   return "{ \"type\":"+this->type_string()+", \"speed\":"+to_str(speed)+", \"_offset\":"+to_str(_offset)+
+", \"frames\":"+to_str(frames)+" \"w\":"+to_str(w)+", \"h\":"+to_str(h)+", \"on\":"+to_str(on)+
+", \"start\":"+to_str(start)+", \"mode\":"+to_str(mode)+" }";
 }
 
 string ANIMATOR::save_string()
-{   return to_str(offset)+" "+to_str(on)+" "+to_str(start)+" "+to_str(mode);
+{   return "{ \"offset\":"+to_str(offset)+", \"on\":"+to_str(on)+", \"start\":"+to_str(start)+", \"mode\":"+to_str(mode)+" }";
 }
 
 ANIMATOR * load_animator(string s)
@@ -162,6 +164,7 @@ ANIMATOR * load_animator(string s)
 	return new ANIMATOR(ANIMATOR::type_resolve(buf), speed, offset, frames, w, h);
 }
 
+/*
 int load_animator_save(ANIMATOR * animator, string s)
 {	int offset, on, start, mode;
 	if(sscanf(s.c_str(),"%d %d %d %d",&offset,&on,&start,&mode)<4)
@@ -173,6 +176,14 @@ int load_animator_save(ANIMATOR * animator, string s)
 	animator->on=on;
 	animator->offset=offset;
 	animator->mode=mode;
+	return 1;
+}*/
+
+int load_animator_save(ANIMATOR * animator, Node * n)
+{	animator->start=n->getMember("start")->getInt();
+	animator->on=n->getMember("on")->getInt();
+	animator->offset=n->getMember("offset")->getInt();
+	animator->mode=n->getMember("mode")->getInt();
 	return 1;
 }
 

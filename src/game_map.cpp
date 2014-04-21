@@ -141,7 +141,8 @@ int load_map_save(string fname)
 	{	debug("Map save "+fname+" not found!\n",10);
 		exit(0);
 	}
-	while(!feof(f))
+
+	/*while(!feof(f))
 	{ 	str1=get_line(f);
 
         if(str1.length()==0) continue;
@@ -170,15 +171,30 @@ int load_map_save(string fname)
 				}
 			}
 
-			/*load_block(f,"lightsources", &Game->Lightsources, load_lightsource, &str1);
-			load_block(f,"triggers", &Game->Triggers, load_trigger, &str1);*/
 			load_block_save(f, "animators", &Game->Animators, load_animator_save, &str1, false); // false - don't create the object, only fill in
 			load_block_save(f, "mobiles", &Game->Mobiles, load_mobile_save, &str1, true); // true - create the object from the save
 
 			if(str1.compare(":end")==0)
 			{ 	debug("End of "+fname+"\n"); break; }
 		}
-	}
+	}*/
+
+	JsonReader jr;
+	Node * r = jr.read(fname);
+	NArray * a = r->getMember("animators")->getArray();
+	int i=0;
+	for(NAi it = a->begin(); it!=a->end(); it++)
+    {   load_animator_save(Game->Animators[i],*it);
+        ++i;
+    }
+    NArray * m = r->getMember("mobiles")->getArray();
+    i=0;
+	for(NAi it = m->begin(); it!=m->end(); it++)
+    {
+        Game->Mobiles.add(new MOBILE());
+        load_mobile_save(Game->Mobiles[i],*it);
+        ++i;
+    }
 	return 1;
 }
 
@@ -245,11 +261,16 @@ int save_map()
 		exit(0);
 	}
 	debug("Saving map "+sav+".",5);
-	fprintf(f,":animators\n");
+	/*fprintf(f,":animators\n");
     fprintf(f,Game->Animators.save_string().c_str());
     fprintf(f,":mobiles\n");
     fprintf(f,Game->Mobiles.save_string().c_str());
-    fprintf(f,":end\n");
+    fprintf(f,":end\n");*/
+    fprintf(f,"{ \"animators\":\n");
+    fprintf(f,Game->Animators.save_string().c_str());
+    fprintf(f,",\n \"mobiles\":\n");
+    fprintf(f,Game->Mobiles.save_string().c_str());
+    fprintf(f,"}\n");
     fclose(f);
     return 1;
 }

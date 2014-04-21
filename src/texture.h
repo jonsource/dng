@@ -10,6 +10,7 @@
 
 #include "allegro.h"
 #include <string>
+#include "libjsjson.h"
 #include "list.h"
 
 #define TRIGGER_NORTH 0
@@ -148,7 +149,8 @@ TEXTURE * load_texture(std::string s);
 TEXTURED_ELEMENT * load_element(std::string s);
 //TEXTURED_ELEMENT * create_element(string type, float x, float y, float z, float w, float h, string transparent, int texture, int animator, string clip, string flip);
 ANIMATOR * load_animator(std::string s);
-int load_animator_save(ANIMATOR * animator, std::string s);
+//int load_animator_save(ANIMATOR * animator, std::string s);
+int load_animator_save(ANIMATOR * animator, Node * n);
 //ANIMATOR * create_animator(int speed, int offset, int frames, int w, int h);
 float get_movator_dif(ANIMATOR * a,int t);
 TILE * load_tile(std::string s);

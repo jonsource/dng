@@ -44,12 +44,14 @@ std::string List<T>::serialize()
 
 template <class T>
 std::string List<T>::save_string()
-{   std::string s="";
-    for(int i=0; i<this->len(); i++)
-    {
-        s+=this->items[i]->save_string()+"\n";
+{   std::string s="[ ";
+    int ende = this->len();
+    for(int i=0; i<ende; i++)
+    {   if(i>0) s+="  ";
+        s+=this->items[i]->save_string();
+        if(i!=ende-1) s+=",\n";
     }
-    return s;
+    return s+"\n]";
 }
 
 template <class T>

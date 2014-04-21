@@ -227,11 +227,14 @@ int MOBILE::HeartBeat()
 }
 
 std::string MOBILE::serialize()
-{   std::string ret=to_str(this->x)+" "+to_str(this->y)+" "+to_str(this->z)+" "+to_str(this->heading)+" "+to_str(this->action)+" "+to_str(this->act_progress)+" "+to_str(this->act_target)+" "+to_str(this->flag_pass)+" "+to_str(this->last_action)+" "+to_str(this->next_action);
-    if(this->parent->template_nr==-1)
+{   if(this->parent->template_nr==-1)
     {   debug("ERROR: Unindexed parent template when serializing "+this->parent->fname,10);
     }
-    return to_str(this->parent->template_nr)+" "+ret;
+    std::string ret="{ \"template\":\""+to_str(this->parent->fname)+"\", \"template_nr\":"+to_str(this->parent->template_nr)+", \"x\":"+to_str(this->x)+", \"y\":"+to_str(this->y)+", \"z\":"+to_str(this->z)+
+    ", \"heading\":"+to_str(this->heading)+", \"action\":"+to_str(this->action)+", \"act_progress\":"+to_str(this->act_progress)+
+    ", \"act_target\":"+to_str(this->act_target)+", \"flag_pass\":"+to_str(this->flag_pass)+
+    ", \"last_action\":"+to_str(this->last_action)+", \"next_action\":"+to_str(this->next_action)+" }";
+    return ret;
 }
 
 std::string MOBILE::save_string()
@@ -239,6 +242,7 @@ std::string MOBILE::save_string()
     return this->serialize();
 }
 
+/*
 SPRITE_MODE * load_sprite_mode(string s)
 {
     SPRITE_MODE * ret = new SPRITE_MODE;
@@ -248,7 +252,7 @@ SPRITE_MODE * load_sprite_mode(string s)
         exit(1);
     }
     return ret;
-}
+}*/
 
 MOBILE_TEMPLATE* load_mobile_template(string fname)
 {	/*string str1, str2;
@@ -290,6 +294,7 @@ MOBILE_TEMPLATE* load_mobile_template(string fname)
     return mob;
 }
 
+/*
 int load_mobile_save(MOBILE * mob, string s)
 {	int ind;
     if(sscanf(s.c_str(),"%d %*s",&ind))
@@ -300,5 +305,20 @@ int load_mobile_save(MOBILE * mob, string s)
 	  exit(1);
 	  return 0;
 	}
+	return 1;
+}*/
+
+int load_mobile_save(MOBILE * mob, Node * n)
+{   Game->MobileTemplates[n->getMember("template_nr")->getInt()]->ResetClone(mob);
+	mob->x=n->getMember("x")->getFloat();
+	mob->y=n->getMember("y")->getFloat();
+	mob->z=n->getMember("z")->getFloat();
+	mob->heading=n->getMember("heading")->getInt();
+	mob->action=n->getMember("action")->getInt();
+	mob->act_progress=n->getMember("act_progress")->getInt();
+	mob->act_target=n->getMember("act_target")->getInt();
+	mob->flag_pass=n->getMember("flag_pass")->getInt();
+	mob->last_action=n->getMember("last_action")->getInt();
+	mob->next_action=n->getMember("next_action")->getInt();
 	return 1;
 }
