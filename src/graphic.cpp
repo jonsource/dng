@@ -1,4 +1,4 @@
-#include "../lib/jslib.h"
+#include "jslib.h"
 #include "graphic.h"
 #include <math.h>
 #include "edittext.h"

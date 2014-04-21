@@ -1,4 +1,4 @@
-#include "../lib/jslib.h"
+#include "jslib.h"
 #include "game.h"
 #include "allegro.h"
 #include "inventory.h"

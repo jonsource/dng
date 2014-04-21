@@ -1,5 +1,5 @@
 #include "allegro.h"
-#include "../lib/jslib.h"
+#include "jslib.h"
 #include "game.h"
 #include "pc_slot.h"
 #include "character.h"

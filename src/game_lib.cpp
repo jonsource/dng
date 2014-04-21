@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <time.h>
-#include "../lib/jslib.h"
+#include "jslib.h"
 #include "texture.h"
 #include "game_lib.h"
 

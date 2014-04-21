@@ -1,5 +1,5 @@
 #include "textured_element.h"
-#include "../lib/jslib.h"
+#include "jslib.h"
 #include "game_lib.h"
 #include "game.h"
 

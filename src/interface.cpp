@@ -1,4 +1,4 @@
-#include "../lib/jslib.h"
+#include "jslib.h"
 #include "interface.h"
 #include "game.h"
 #include "texture.h"
